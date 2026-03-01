@@ -1,0 +1,500 @@
+{
+  "knowledge_base": {
+    "version": "1.0",
+    "source": "Clinical Examination Textbook (OCR)",
+    "generated": "2026-02-28",
+    "examinations": [
+      {
+        "examination_id": "CVS_001",
+        "examination_title": "Cardiovascular System Examination",
+        "default_action": "Begin systematic cardiovascular assessment starting with symptom history, then precordium inspection, palpation, and auscultation.",
+        "questions": [
+          {
+            "id": "CVS_Q01",
+            "phase": "history",
+            "text": "What cardiac symptoms does the patient report?",
+            "input_type": "multi_select",
+            "options": [
+              "Chest pain / retrosternal tightness",
+              "Breathlessness on exertion (Dyspnea)",
+              "Orthopnea (breathless lying flat)",
+              "Paroxysmal nocturnal dyspnea (PND)",
+              "Palpitations",
+              "Ankle swelling / edema",
+              "Syncope / pre-syncope",
+              "No symptoms"
+            ],
+            "stores_as": "cvs_symptoms",
+            "injected": false,
+            "weights": {
+              "Chest pain / retrosternal tightness": 2,
+              "Breathlessness on exertion (Dyspnea)": 1,
+              "Orthopnea (breathless lying flat)": 2,
+              "Paroxysmal nocturnal dyspnea (PND)": 3,
+              "Palpitations": 1,
+              "Ankle swelling / edema": 1,
+              "Syncope / pre-syncope": 2,
+              "No symptoms": 0
+            }
+          },
+          {
+            "id": "CVS_Q02",
+            "phase": "history",
+            "text": "Characterize the chest pain (if present):",
+            "input_type": "multi_select",
+            "options": [
+              "Retrosternal location",
+              "Described as tight band or heaviness",
+              "Precipitated by exertion",
+              "Relieved by rest",
+              "Relieved by sublingual nitrates",
+              "Duration less than 30 minutes (Angina pattern)",
+              "Duration more than 30 minutes (MI pattern)",
+              "Not relieved by rest or nitrates",
+              "Radiation to arm / jaw / back"
+            ],
+            "stores_as": "chest_pain_character",
+            "injected": false,
+            "weights": {
+              "Retrosternal location": 1,
+              "Described as tight band or heaviness": 1,
+              "Precipitated by exertion": 1,
+              "Relieved by rest": 0,
+              "Relieved by sublingual nitrates": 0,
+              "Duration less than 30 minutes (Angina pattern)": 1,
+              "Duration more than 30 minutes (MI pattern)": 3,
+              "Not relieved by rest or nitrates": 3,
+              "Radiation to arm / jaw / back": 2
+            }
+          },
+          {
+            "id": "CVS_Q03",
+            "phase": "general_examination",
+            "text": "General physical examination findings:",
+            "input_type": "multi_select",
+            "options": [
+              "Pallor present (nails / conjunctiva / tongue)",
+              "Central cyanosis (lips and tongue blue)",
+              "Peripheral cyanosis (nails / nose / ear lobules only)",
+              "Jaundice (scleral icterus)",
+              "Clubbing of fingers",
+              "Koilonychia (spoon-shaped nails)",
+              "Bilateral ankle / leg edema",
+              "Raised JVP (jugular venous pressure)",
+              "No abnormality detected"
+            ],
+            "stores_as": "cvs_gpe_findings",
+            "injected": false,
+            "weights": {
+              "Pallor present (nails / conjunctiva / tongue)": 1,
+              "Central cyanosis (lips and tongue blue)": 3,
+              "Peripheral cyanosis (nails / nose / ear lobules only)": 1,
+              "Jaundice (scleral icterus)": 1,
+              "Clubbing of fingers": 2,
+              "Koilonychia (spoon-shaped nails)": 1,
+              "Bilateral ankle / leg edema": 2,
+              "Raised JVP (jugular venous pressure)": 2,
+              "No abnormality detected": 0
+            }
+          },
+          {
+            "id": "CVS_Q04",
+            "phase": "pulse_examination",
+            "text": "Pulse characteristics:",
+            "input_type": "multi_select",
+            "options": [
+              "Rate normal (60-100 bpm)",
+              "Tachycardia (>100 bpm)",
+              "Bradycardia (<50 bpm)",
+              "Regular rhythm",
+              "Irregularly irregular rhythm (AF pattern)",
+              "Relative bradycardia (slower than expected for fever)",
+              "Collapsing / water-hammer pulse (high volume, rapid downstroke)",
+              "Pulsus paradoxus (weak / absent on inspiration)",
+              "Pulse deficit present"
+            ],
+            "stores_as": "pulse_findings",
+            "injected": false,
+            "weights": {
+              "Rate normal (60-100 bpm)": 0,
+              "Tachycardia (>100 bpm)": 1,
+              "Bradycardia (<50 bpm)": 2,
+              "Regular rhythm": 0,
+              "Irregularly irregular rhythm (AF pattern)": 2,
+              "Relative bradycardia (slower than expected for fever)": 1,
+              "Collapsing / water-hammer pulse (high volume, rapid downstroke)": 2,
+              "Pulsus paradoxus (weak / absent on inspiration)": 3,
+              "Pulse deficit present": 2
+            }
+          },
+          {
+            "id": "CVS_Q05",
+            "phase": "precordium_inspection",
+            "text": "Precordium inspection findings:",
+            "input_type": "multi_select",
+            "options": [
+              "Visible apex beat",
+              "Abnormal pulsations",
+              "Surgical scars present",
+              "Pectus excavatum (funnel chest)",
+              "Pectus carinatum (pigeon breast)",
+              "Normal precordium appearance"
+            ],
+            "stores_as": "precordium_inspection",
+            "injected": false,
+            "weights": {
+              "Visible apex beat": 1,
+              "Abnormal pulsations": 2,
+              "Surgical scars present": 1,
+              "Pectus excavatum (funnel chest)": 1,
+              "Pectus carinatum (pigeon breast)": 1,
+              "Normal precordium appearance": 0
+            }
+          },
+          {
+            "id": "CVS_Q06",
+            "phase": "precordium_palpation",
+            "text": "Precordium palpation findings:",
+            "input_type": "multi_select",
+            "options": [
+              "Apex beat in normal position (5th ICS, medial to MCL)",
+              "Apex beat displaced laterally",
+              "Apex beat displaced downward",
+              "Thrill palpable (palpable murmur)",
+              "Left ventricular heave",
+              "Right ventricular heave",
+              "No abnormality on palpation"
+            ],
+            "stores_as": "precordium_palpation",
+            "injected": false,
+            "weights": {
+              "Apex beat in normal position (5th ICS, medial to MCL)": 0,
+              "Apex beat displaced laterally": 2,
+              "Apex beat displaced downward": 2,
+              "Thrill palpable (palpable murmur)": 2,
+              "Left ventricular heave": 2,
+              "Right ventricular heave": 2,
+              "No abnormality on palpation": 0
+            }
+          },
+          {
+            "id": "CVS_Q07",
+            "phase": "auscultation",
+            "text": "Auscultation findings at valve areas:",
+            "input_type": "multi_select",
+            "options": [
+              "Normal S1 and S2",
+              "S3 gallop present",
+              "S4 gallop present",
+              "Murmur at Mitral area (5th ICS MCL)",
+              "Murmur at Tricuspid area (lower left sternal border)",
+              "Murmur at Aortic area (2nd ICS right sternal border)",
+              "Murmur at Pulmonary area (2nd ICS left sternal border)",
+              "Pericardial friction rub",
+              "Muffled heart sounds"
+            ],
+            "stores_as": "auscultation_findings",
+            "injected": false,
+            "weights": {
+              "Normal S1 and S2": 0,
+              "S3 gallop present": 2,
+              "S4 gallop present": 2,
+              "Murmur at Mitral area (5th ICS MCL)": 2,
+              "Murmur at Tricuspid area (lower left sternal border)": 2,
+              "Murmur at Aortic area (2nd ICS right sternal border)": 2,
+              "Murmur at Pulmonary area (2nd ICS left sternal border)": 2,
+              "Pericardial friction rub": 3,
+              "Muffled heart sounds": 3
+            }
+          },
+          {
+            "id": "CVS_Q08_FOLLOWUP",
+            "phase": "auscultation_detail",
+            "text": "FOLLOWUP — Characterize the murmur heard:",
+            "input_type": "multi_select",
+            "options": [
+              "Systolic murmur",
+              "Diastolic murmur",
+              "Continuous (machinery) murmur",
+              "Pansystolic",
+              "Mid-systolic (ejection type)",
+              "Radiates to axilla",
+              "Radiates to carotids",
+              "Radiates to back",
+              "Low-pitched (rumbling)",
+              "High-pitched (blowing)"
+            ],
+            "stores_as": "murmur_character",
+            "injected": true,
+            "weights": {
+              "Systolic murmur": 1,
+              "Diastolic murmur": 2,
+              "Continuous (machinery) murmur": 2,
+              "Pansystolic": 2,
+              "Mid-systolic (ejection type)": 1,
+              "Radiates to axilla": 1,
+              "Radiates to carotids": 1,
+              "Radiates to back": 1,
+              "Low-pitched (rumbling)": 1,
+              "High-pitched (blowing)": 1
+            }
+          },
+          {
+            "id": "CVS_Q09_FOLLOWUP",
+            "phase": "tamponade_assessment",
+            "text": "FOLLOWUP — Pulsus paradoxus detected. Assess for cardiac tamponade signs:",
+            "input_type": "multi_select",
+            "options": [
+              "Raised JVP",
+              "Muffled heart sounds",
+              "Hypotension",
+              "Recent pericardial effusion history",
+              "Tachycardia",
+              "Kussmaul's sign (JVP rises on inspiration)"
+            ],
+            "stores_as": "tamponade_signs",
+            "injected": true,
+            "weights": {
+              "Raised JVP": 3,
+              "Muffled heart sounds": 3,
+              "Hypotension": 3,
+              "Recent pericardial effusion history": 2,
+              "Tachycardia": 1,
+              "Kussmaul's sign (JVP rises on inspiration)": 3
+            }
+          },
+          {
+            "id": "CVS_Q10_FOLLOWUP",
+            "phase": "pnd_assessment",
+            "text": "FOLLOWUP — PND reported. Assess for left heart failure features:",
+            "input_type": "multi_select",
+            "options": [
+              "Orthopnea (sleeps on multiple pillows)",
+              "Basal crepitations on chest auscultation",
+              "Displaced apex beat",
+              "S3 gallop",
+              "Raised JVP",
+              "Peripheral edema",
+              "Patient wakes at night relieved by sitting upright"
+            ],
+            "stores_as": "lhf_signs",
+            "injected": true,
+            "weights": {
+              "Orthopnea (sleeps on multiple pillows)": 2,
+              "Basal crepitations on chest auscultation": 2,
+              "Displaced apex beat": 2,
+              "S3 gallop": 2,
+              "Raised JVP": 2,
+              "Peripheral edema": 1,
+              "Patient wakes at night relieved by sitting upright": 3
+            }
+          }
+        ],
+        "rules": [
+          {
+            "id": "CVS_R01",
+            "priority": 1,
+            "conditions": [
+              {
+                "fact": "auscultation_findings",
+                "operator": "contains_any",
+                "value": [
+                  "Murmur at Mitral area (5th ICS MCL)",
+                  "Murmur at Tricuspid area (lower left sternal border)",
+                  "Murmur at Aortic area (2nd ICS right sternal border)",
+                  "Murmur at Pulmonary area (2nd ICS left sternal border)"
+                ]
+              }
+            ],
+            "match": "ANY",
+            "action": {
+              "type": "inject_question",
+              "target": "CVS_Q08_FOLLOWUP",
+              "message": "Murmur detected — characterize further."
+            }
+          },
+          {
+            "id": "CVS_R02",
+            "priority": 1,
+            "conditions": [
+              {
+                "fact": "pulse_findings",
+                "operator": "contains",
+                "value": "Pulsus paradoxus (weak / absent on inspiration)"
+              }
+            ],
+            "match": "ALL",
+            "action": {
+              "type": "inject_question",
+              "target": "CVS_Q09_FOLLOWUP",
+              "message": "Pulsus paradoxus — assess for cardiac tamponade."
+            }
+          },
+          {
+            "id": "CVS_R03",
+            "priority": 1,
+            "conditions": [
+              {
+                "fact": "cvs_symptoms",
+                "operator": "contains",
+                "value": "Paroxysmal nocturnal dyspnea (PND)"
+              }
+            ],
+            "match": "ALL",
+            "action": {
+              "type": "inject_question",
+              "target": "CVS_Q10_FOLLOWUP",
+              "message": "PND reported — assess left heart failure."
+            }
+          },
+          {
+            "id": "CVS_R04",
+            "priority": 2,
+            "conditions": [
+              {
+                "fact": "chest_pain_character",
+                "operator": "contains",
+                "value": "Duration more than 30 minutes (MI pattern)"
+              },
+              {
+                "fact": "chest_pain_character",
+                "operator": "contains",
+                "value": "Not relieved by rest or nitrates"
+              }
+            ],
+            "match": "ALL",
+            "action": {
+              "type": "flag_alert",
+              "target": null,
+              "message": "HIGH PRIORITY: Pattern consistent with Myocardial Infarction. Urgent assessment required."
+            }
+          }
+        ],
+        "diagnoses": [
+          {
+            "id": "CVS_DX01",
+            "name": "Cardiac Tamponade",
+            "min_score_threshold": 10,
+            "max_score": 28,
+            "key_facts_required": [
+              "pulse_findings",
+              "tamponade_signs",
+              "auscultation_findings"
+            ],
+            "description": "Life-threatening compression of the heart by pericardial fluid. Classic Beck triad: muffled heart sounds + raised JVP + hypotension. Pulsus paradoxus is the hallmark sign on pulse examination.",
+            "score_rationale": "Pulsus paradoxus(3)+tachycardia(1) | raised JVP(3)+muffled sounds(3)+hypotension(3) | muffled heart sounds(3) = 16"
+          },
+          {
+            "id": "CVS_DX02",
+            "name": "Myocardial Infarction",
+            "min_score_threshold": 8,
+            "max_score": 22,
+            "key_facts_required": [
+              "cvs_symptoms",
+              "chest_pain_character"
+            ],
+            "description": "Acute coronary occlusion causing myocardial necrosis. Chest pain lasting >30 minutes, not relieved by rest or sublingual nitrates. May radiate to arm/jaw/back. Requires emergency reperfusion.",
+            "score_rationale": "Chest pain(2)+dyspnea(1) | duration>30min(3)+not relieved(3)+radiation(2)+retrosternal(1) = 12"
+          },
+          {
+            "id": "CVS_DX03",
+            "name": "Left Heart Failure",
+            "min_score_threshold": 16,
+            "max_score": 45,
+            "key_facts_required": [
+              "cvs_symptoms",
+              "lhf_signs",
+              "cvs_gpe_findings",
+              "precordium_palpation"
+            ],
+            "description": "Failure of the left ventricle to adequately pump blood. Key features: PND, orthopnea, displaced apex beat, S3 gallop, basal crepitations, raised JVP and peripheral edema in combined failure.",
+            "score_rationale": "Symptoms(7) | LHF signs(16) | GPE edema+JVP(4) | displaced apex+LV heave(4) = 29 — broad multi-system presentation"
+          },
+          {
+            "id": "CVS_DX04",
+            "name": "Atrial Fibrillation",
+            "min_score_threshold": 3,
+            "max_score": 8,
+            "key_facts_required": [
+              "pulse_findings"
+            ],
+            "description": "Chaotic atrial electrical activity producing an irregularly irregular pulse with variable rate. Pulse deficit (radial rate < auscultated rate) is characteristic. Risk of thromboembolic stroke.",
+            "score_rationale": "Irregularly irregular(2)+pulse deficit(2)+tachycardia(1) = 5 — single-fact rhythm diagnosis"
+          },
+          {
+            "id": "CVS_DX05",
+            "name": "Aortic Stenosis",
+            "min_score_threshold": 5,
+            "max_score": 15,
+            "key_facts_required": [
+              "auscultation_findings",
+              "murmur_character",
+              "precordium_palpation"
+            ],
+            "description": "Obstruction of LV outflow across a calcified/bicuspid aortic valve. Ejection systolic murmur in aortic area radiating to carotids, with left ventricular heave and slow-rising pulse. Classic triad: syncope, angina, dyspnea.",
+            "score_rationale": "Aortic area murmur(2) | ejection systolic(1)+carotid radiation(1) | LV heave(2)+thrill(2) = 8"
+          }
+        ],
+        "constraints": [
+          {
+            "id": "CVS_CON01",
+            "fact": "pulse_findings",
+            "conflicting_values": [
+              "Tachycardia (>100 bpm)",
+              "Bradycardia (<50 bpm)"
+            ],
+            "message": "Contradiction: A pulse cannot be both tachycardic (>100 bpm) and bradycardic (<50 bpm) simultaneously."
+          },
+          {
+            "id": "CVS_CON02",
+            "fact": "pulse_findings",
+            "conflicting_values": [
+              "Rate normal (60-100 bpm)",
+              "Tachycardia (>100 bpm)"
+            ],
+            "message": "Contradiction: Pulse rate cannot be both normal (60-100 bpm) and tachycardic (>100 bpm) at the same time."
+          },
+          {
+            "id": "CVS_CON03",
+            "fact": "chest_pain_character",
+            "conflicting_values": [
+              "Duration less than 30 minutes (Angina pattern)",
+              "Duration more than 30 minutes (MI pattern)"
+            ],
+            "message": "Contradiction: Pain duration cannot be both less than 30 minutes (Angina) and more than 30 minutes (MI pattern) simultaneously."
+          },
+          {
+            "id": "CVS_CON04",
+            "fact": "cvs_gpe_findings",
+            "conflicting_values": [
+              "No abnormality detected",
+              "Central cyanosis (lips and tongue blue)"
+            ],
+            "message": "Contradiction: 'No abnormality detected' cannot coexist with central cyanosis — cyanosis is a significant abnormal finding."
+          }
+        ]
+      }
+    ],
+    "scoring_guide": {
+      "per_question_score_interpretation": {
+        "0": "Normal finding — no clinical concern",
+        "1": "Mild abnormality — note and monitor",
+        "2": "Moderate abnormality — warrants investigation",
+        "3": "Severe / high-risk finding — urgent attention required"
+      },
+      "total_score_thresholds": {
+        "0-5": "Low acuity — routine evaluation",
+        "6-12": "Moderate acuity — prioritize workup",
+        "13-20": "High acuity — expedited assessment",
+        "21+": "Critical — emergency evaluation"
+      }
+    },
+    "rule_operators_reference": {
+      "contains": "The stored array includes this exact value",
+      "contains_any": "The stored array includes at least one value from the given list",
+      "contains_all": "The stored array includes all values in the given list",
+      "equals": "The stored scalar equals this value",
+      "greater_than": "The stored numeric value exceeds this threshold"
+    }
+  }
+}
