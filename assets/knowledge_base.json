@@ -434,43 +434,1514 @@
             "description": "Obstruction of LV outflow across a calcified/bicuspid aortic valve. Ejection systolic murmur in aortic area radiating to carotids, with left ventricular heave and slow-rising pulse. Classic triad: syncope, angina, dyspnea.",
             "score_rationale": "Aortic area murmur(2) | ejection systolic(1)+carotid radiation(1) | LV heave(2)+thrill(2) = 8"
           }
+        ]
+      },
+      {
+        "examination_id": "RESP_001",
+        "examination_title": "Respiratory System Examination",
+        "default_action": "Begin respiratory assessment with symptom history, then systematic inspection, palpation, percussion, and auscultation of the chest.",
+        "questions": [
+          {
+            "id": "RESP_Q01",
+            "phase": "history",
+            "text": "What respiratory symptoms does the patient report?",
+            "input_type": "multi_select",
+            "options": [
+              "Cough (dry)",
+              "Cough (productive with sputum)",
+              "Hemoptysis (coughing blood)",
+              "Breathlessness / dyspnea",
+              "Chest pain (pleuritic — sharp, worse on breathing)",
+              "Wheeze",
+              "Stridor (harsh inspiratory sound)",
+              "No symptoms"
+            ],
+            "stores_as": "resp_symptoms",
+            "injected": false,
+            "weights": {
+              "Cough (dry)": 1,
+              "Cough (productive with sputum)": 1,
+              "Hemoptysis (coughing blood)": 3,
+              "Breathlessness / dyspnea": 2,
+              "Chest pain (pleuritic — sharp, worse on breathing)": 2,
+              "Wheeze": 1,
+              "Stridor (harsh inspiratory sound)": 3,
+              "No symptoms": 0
+            }
+          },
+          {
+            "id": "RESP_Q02",
+            "phase": "history",
+            "text": "Sputum characteristics (if productive cough):",
+            "input_type": "multi_select",
+            "options": [
+              "Clear / mucoid",
+              "Yellow / green (purulent — suggests infection)",
+              "Rusty colored (suggests pneumonia)",
+              "Frank blood (hemoptysis)",
+              "Frothy / pink tinged",
+              "Foul smelling",
+              "Large volume"
+            ],
+            "stores_as": "sputum_character",
+            "injected": false,
+            "weights": {
+              "Clear / mucoid": 0,
+              "Yellow / green (purulent — suggests infection)": 1,
+              "Rusty colored (suggests pneumonia)": 2,
+              "Frank blood (hemoptysis)": 3,
+              "Frothy / pink tinged": 2,
+              "Foul smelling": 2,
+              "Large volume": 2
+            }
+          },
+          {
+            "id": "RESP_Q03",
+            "phase": "inspection",
+            "text": "Inspection of the chest:",
+            "input_type": "multi_select",
+            "options": [
+              "Respiratory rate normal (14-16/min)",
+              "Tachypnea (RR > 20/min)",
+              "Bradypnea (RR < 10/min)",
+              "Symmetric chest expansion",
+              "Asymmetric chest expansion",
+              "Accessory muscle use",
+              "Intercostal recession",
+              "Barrel chest (increased AP diameter)",
+              "Trachea central (midline)"
+            ],
+            "stores_as": "resp_inspection",
+            "injected": false,
+            "weights": {
+              "Respiratory rate normal (14-16/min)": 0,
+              "Tachypnea (RR > 20/min)": 2,
+              "Bradypnea (RR < 10/min)": 2,
+              "Symmetric chest expansion": 0,
+              "Asymmetric chest expansion": 2,
+              "Accessory muscle use": 2,
+              "Intercostal recession": 2,
+              "Barrel chest (increased AP diameter)": 1,
+              "Trachea central (midline)": 0
+            }
+          },
+          {
+            "id": "RESP_Q04",
+            "phase": "palpation",
+            "text": "Palpation findings:",
+            "input_type": "multi_select",
+            "options": [
+              "Trachea central",
+              "Trachea deviated to the RIGHT",
+              "Trachea deviated to the LEFT",
+              "Equal chest expansion bilaterally",
+              "Reduced expansion on RIGHT",
+              "Reduced expansion on LEFT",
+              "Vocal fremitus normal",
+              "Vocal fremitus increased",
+              "Vocal fremitus decreased / absent"
+            ],
+            "stores_as": "resp_palpation",
+            "injected": false,
+            "weights": {
+              "Trachea central": 0,
+              "Trachea deviated to the RIGHT": 2,
+              "Trachea deviated to the LEFT": 2,
+              "Equal chest expansion bilaterally": 0,
+              "Reduced expansion on RIGHT": 2,
+              "Reduced expansion on LEFT": 2,
+              "Vocal fremitus normal": 0,
+              "Vocal fremitus increased": 1,
+              "Vocal fremitus decreased / absent": 2
+            }
+          },
+          {
+            "id": "RESP_Q05",
+            "phase": "percussion",
+            "text": "Percussion note findings:",
+            "input_type": "multi_select",
+            "options": [
+              "Resonant bilaterally (normal)",
+              "Dull on RIGHT",
+              "Dull on LEFT",
+              "Stony dull on RIGHT",
+              "Stony dull on LEFT",
+              "Hyper-resonant on RIGHT",
+              "Hyper-resonant on LEFT"
+            ],
+            "stores_as": "resp_percussion",
+            "injected": false,
+            "weights": {
+              "Resonant bilaterally (normal)": 0,
+              "Dull on RIGHT": 2,
+              "Dull on LEFT": 2,
+              "Stony dull on RIGHT": 3,
+              "Stony dull on LEFT": 3,
+              "Hyper-resonant on RIGHT": 2,
+              "Hyper-resonant on LEFT": 2
+            }
+          },
+          {
+            "id": "RESP_Q06",
+            "phase": "auscultation",
+            "text": "Auscultation findings:",
+            "input_type": "multi_select",
+            "options": [
+              "Vesicular breath sounds (normal) bilaterally",
+              "Bronchial breathing present",
+              "Reduced / absent breath sounds on RIGHT",
+              "Reduced / absent breath sounds on LEFT",
+              "Crepitations / crackles",
+              "Rhonchi / wheezes",
+              "Pleural rub",
+              "Increased vocal resonance",
+              "Decreased vocal resonance"
+            ],
+            "stores_as": "resp_auscultation",
+            "injected": false,
+            "weights": {
+              "Vesicular breath sounds (normal) bilaterally": 0,
+              "Bronchial breathing present": 2,
+              "Reduced / absent breath sounds on RIGHT": 2,
+              "Reduced / absent breath sounds on LEFT": 2,
+              "Crepitations / crackles": 2,
+              "Rhonchi / wheezes": 1,
+              "Pleural rub": 2,
+              "Increased vocal resonance": 1,
+              "Decreased vocal resonance": 1
+            }
+          },
+          {
+            "id": "RESP_Q07_FOLLOWUP",
+            "phase": "consolidation_assessment",
+            "text": "FOLLOWUP — Bronchial breathing detected. Assess for consolidation (Pneumonia):",
+            "input_type": "multi_select",
+            "options": [
+              "Reduced chest expansion on affected side",
+              "Dull percussion note",
+              "Bronchial breathing confirmed",
+              "Increased vocal resonance / aegophony",
+              "Fever present",
+              "Rusty sputum",
+              "Trachea central (not deviated)"
+            ],
+            "stores_as": "consolidation_signs",
+            "injected": true,
+            "weights": {
+              "Reduced chest expansion on affected side": 2,
+              "Dull percussion note": 2,
+              "Bronchial breathing confirmed": 2,
+              "Increased vocal resonance / aegophony": 2,
+              "Fever present": 1,
+              "Rusty sputum": 2,
+              "Trachea central (not deviated)": 0
+            }
+          },
+          {
+            "id": "RESP_Q08_FOLLOWUP",
+            "phase": "effusion_assessment",
+            "text": "FOLLOWUP — Stony dull percussion note. Assess for Pleural Effusion:",
+            "input_type": "multi_select",
+            "options": [
+              "Stony dull note confirmed",
+              "Absent / markedly reduced breath sounds",
+              "Trachea deviated AWAY from dullness",
+              "Reduced chest expansion on affected side",
+              "Decreased vocal resonance",
+              "Shifting dullness on percussion (if bilateral)"
+            ],
+            "stores_as": "effusion_signs",
+            "injected": true,
+            "weights": {
+              "Stony dull note confirmed": 3,
+              "Absent / markedly reduced breath sounds": 2,
+              "Trachea deviated AWAY from dullness": 2,
+              "Reduced chest expansion on affected side": 2,
+              "Decreased vocal resonance": 2,
+              "Shifting dullness on percussion (if bilateral)": 2
+            }
+          },
+          {
+            "id": "RESP_Q09_FOLLOWUP",
+            "phase": "pneumothorax_assessment",
+            "text": "FOLLOWUP — Hyper-resonant percussion note. Assess for Pneumothorax:",
+            "input_type": "multi_select",
+            "options": [
+              "Hyper-resonance confirmed",
+              "Absent breath sounds on affected side",
+              "Trachea deviated AWAY from hyper-resonance",
+              "Reduced chest expansion on affected side",
+              "Sudden onset breathlessness / chest pain",
+              "Decreased vocal resonance"
+            ],
+            "stores_as": "pneumothorax_signs",
+            "injected": true,
+            "weights": {
+              "Hyper-resonance confirmed": 3,
+              "Absent breath sounds on affected side": 3,
+              "Trachea deviated AWAY from hyper-resonance": 3,
+              "Reduced chest expansion on affected side": 2,
+              "Sudden onset breathlessness / chest pain": 2,
+              "Decreased vocal resonance": 2
+            }
+          },
+          {
+            "id": "RESP_Q10_FOLLOWUP",
+            "phase": "stridor_assessment",
+            "text": "FOLLOWUP — Stridor reported. Assess for upper airway obstruction:",
+            "input_type": "multi_select",
+            "options": [
+              "Inspiratory stridor confirmed",
+              "Expiratory stridor",
+              "Biphasic stridor",
+              "Foreign body inhalation history",
+              "Visible neck mass / swelling",
+              "Hoarseness of voice",
+              "Drooling / difficulty swallowing",
+              "Accessory muscle use"
+            ],
+            "stores_as": "stridor_assessment",
+            "injected": true,
+            "weights": {
+              "Inspiratory stridor confirmed": 3,
+              "Expiratory stridor": 2,
+              "Biphasic stridor": 3,
+              "Foreign body inhalation history": 3,
+              "Visible neck mass / swelling": 2,
+              "Hoarseness of voice": 1,
+              "Drooling / difficulty swallowing": 2,
+              "Accessory muscle use": 2
+            }
+          }
         ],
-        "constraints": [
+        "rules": [
           {
-            "id": "CVS_CON01",
-            "fact": "pulse_findings",
-            "conflicting_values": [
-              "Tachycardia (>100 bpm)",
-              "Bradycardia (<50 bpm)"
+            "id": "RESP_R01",
+            "priority": 1,
+            "conditions": [
+              {
+                "fact": "resp_auscultation",
+                "operator": "contains",
+                "value": "Bronchial breathing present"
+              }
             ],
-            "message": "Contradiction: A pulse cannot be both tachycardic (>100 bpm) and bradycardic (<50 bpm) simultaneously."
+            "match": "ALL",
+            "action": {
+              "type": "inject_question",
+              "target": "RESP_Q07_FOLLOWUP",
+              "message": "Bronchial breathing detected — assess for consolidation/pneumonia."
+            }
           },
           {
-            "id": "CVS_CON02",
-            "fact": "pulse_findings",
-            "conflicting_values": [
-              "Rate normal (60-100 bpm)",
-              "Tachycardia (>100 bpm)"
+            "id": "RESP_R02",
+            "priority": 1,
+            "conditions": [
+              {
+                "fact": "resp_percussion",
+                "operator": "contains_any",
+                "value": [
+                  "Stony dull on RIGHT",
+                  "Stony dull on LEFT"
+                ]
+              }
             ],
-            "message": "Contradiction: Pulse rate cannot be both normal (60-100 bpm) and tachycardic (>100 bpm) at the same time."
+            "match": "ANY",
+            "action": {
+              "type": "inject_question",
+              "target": "RESP_Q08_FOLLOWUP",
+              "message": "Stony dullness — assess for pleural effusion."
+            }
           },
           {
-            "id": "CVS_CON03",
-            "fact": "chest_pain_character",
-            "conflicting_values": [
-              "Duration less than 30 minutes (Angina pattern)",
-              "Duration more than 30 minutes (MI pattern)"
+            "id": "RESP_R03",
+            "priority": 1,
+            "conditions": [
+              {
+                "fact": "resp_percussion",
+                "operator": "contains_any",
+                "value": [
+                  "Hyper-resonant on RIGHT",
+                  "Hyper-resonant on LEFT"
+                ]
+              }
             ],
-            "message": "Contradiction: Pain duration cannot be both less than 30 minutes (Angina) and more than 30 minutes (MI pattern) simultaneously."
+            "match": "ANY",
+            "action": {
+              "type": "inject_question",
+              "target": "RESP_Q09_FOLLOWUP",
+              "message": "Hyper-resonance — assess for pneumothorax."
+            }
           },
           {
-            "id": "CVS_CON04",
-            "fact": "cvs_gpe_findings",
-            "conflicting_values": [
-              "No abnormality detected",
-              "Central cyanosis (lips and tongue blue)"
+            "id": "RESP_R04",
+            "priority": 1,
+            "conditions": [
+              {
+                "fact": "resp_symptoms",
+                "operator": "contains",
+                "value": "Stridor (harsh inspiratory sound)"
+              }
             ],
-            "message": "Contradiction: 'No abnormality detected' cannot coexist with central cyanosis — cyanosis is a significant abnormal finding."
+            "match": "ALL",
+            "action": {
+              "type": "inject_question",
+              "target": "RESP_Q10_FOLLOWUP",
+              "message": "Stridor present — assess upper airway urgently."
+            }
+          },
+          {
+            "id": "RESP_R05",
+            "priority": 3,
+            "conditions": [
+              {
+                "fact": "resp_palpation",
+                "operator": "contains_any",
+                "value": [
+                  "Trachea deviated to the RIGHT",
+                  "Trachea deviated to the LEFT"
+                ]
+              },
+              {
+                "fact": "resp_percussion",
+                "operator": "contains_any",
+                "value": [
+                  "Hyper-resonant on RIGHT",
+                  "Hyper-resonant on LEFT"
+                ]
+              },
+              {
+                "fact": "resp_auscultation",
+                "operator": "contains_any",
+                "value": [
+                  "Reduced / absent breath sounds on RIGHT",
+                  "Reduced / absent breath sounds on LEFT"
+                ]
+              }
+            ],
+            "match": "ALL",
+            "action": {
+              "type": "flag_alert",
+              "target": "RESP_Q09_FOLLOWUP",
+              "message": "HIGH PRIORITY: Triad of tracheal deviation + hyper-resonance + absent breath sounds — TENSION PNEUMOTHORAX. Emergency intervention required."
+            }
+          }
+        ],
+        "diagnoses": [
+          {
+            "id": "RESP_DX01",
+            "name": "Tension Pneumothorax",
+            "min_score_threshold": 13,
+            "max_score": 32,
+            "key_facts_required": [
+              "resp_palpation",
+              "resp_percussion",
+              "resp_auscultation",
+              "pneumothorax_signs"
+            ],
+            "description": "Air under pressure in the pleural space causing mediastinal shift. Life-threatening emergency. Triad: tracheal deviation AWAY from affected side + hyper-resonance + absent breath sounds. Immediate needle decompression required.",
+            "score_rationale": "Trachea deviation+reduced expansion(4) | hyper-resonance(2) | absent sounds(2) | full pneumothorax followup(11) = 19"
+          },
+          {
+            "id": "RESP_DX02",
+            "name": "Upper Airway Obstruction",
+            "min_score_threshold": 10,
+            "max_score": 28,
+            "key_facts_required": [
+              "resp_symptoms",
+              "stridor_assessment",
+              "resp_inspection"
+            ],
+            "description": "Obstruction above the carina causing inspiratory stridor. Causes include foreign body, epiglottitis, anaphylaxis, or extrinsic compression. Biphasic stridor and drooling indicate severe obstruction requiring urgent airway management.",
+            "score_rationale": "Stridor symptom(3) | inspiratory+biphasic+drooling+accessory(10) | tachypnea+accessory muscles(4) = 17"
+          },
+          {
+            "id": "RESP_DX03",
+            "name": "Pleural Effusion",
+            "min_score_threshold": 11,
+            "max_score": 30,
+            "key_facts_required": [
+              "resp_percussion",
+              "resp_auscultation",
+              "resp_palpation",
+              "effusion_signs"
+            ],
+            "description": "Fluid accumulation in the pleural space. Classic signs: stony dull percussion, absent/reduced breath sounds, tracheal deviation AWAY from effusion (large), and decreased vocal resonance. Underlying cause must be sought.",
+            "score_rationale": "Stony dull(3) | absent sounds+decreased VR(3) | trachea+expansion(4) | effusion followup(9) = 19"
+          },
+          {
+            "id": "RESP_DX04",
+            "name": "Pneumonia / Consolidation",
+            "min_score_threshold": 13,
+            "max_score": 36,
+            "key_facts_required": [
+              "resp_auscultation",
+              "consolidation_signs",
+              "sputum_character",
+              "resp_percussion"
+            ],
+            "description": "Infection causing alveolar consolidation. Classic signs: dull percussion, bronchial breathing, increased vocal resonance/aegophony, and crepitations over affected lobe. Rusty sputum is characteristic of pneumococcal pneumonia.",
+            "score_rationale": "Symptoms(5) | rusty sputum(2) | dull percussion(2) | bronchial+creps(4) | consolidation followup(11) = 22 (typical confirmed pneumonia)"
+          },
+          {
+            "id": "RESP_DX05",
+            "name": "Asthma / COPD",
+            "min_score_threshold": 4,
+            "max_score": 16,
+            "key_facts_required": [
+              "resp_symptoms",
+              "resp_inspection",
+              "resp_auscultation"
+            ],
+            "description": "Obstructive airway disease causing expiratory wheeze, dyspnea, and cough. Asthma is reversible; COPD features barrel chest from air trapping, accessory muscle use, and pursed-lip breathing. Both show bilateral rhonchi on auscultation.",
+            "score_rationale": "Wheeze+dyspnea(3) | tachypnea+accessory+barrel(5) | rhonchi(1) = 9 — obstructive pattern is relatively low-weight"
+          }
+        ]
+      },
+      {
+        "examination_id": "ABD_001",
+        "examination_title": "Abdominal (Alimentary & Genito-Urinary) System Examination",
+        "default_action": "Begin abdominal assessment with symptom history, then systematic inspection, light palpation, deep palpation, percussion, and auscultation.",
+        "questions": [
+          {
+            "id": "ABD_Q01",
+            "phase": "history",
+            "text": "What abdominal symptoms does the patient report?",
+            "input_type": "multi_select",
+            "options": [
+              "Nausea",
+              "Vomiting",
+              "Abdominal pain",
+              "Hematemesis (blood in vomit)",
+              "Melena (black tarry stools)",
+              "Fresh rectal bleeding (hematochezia)",
+              "Diarrhea",
+              "Constipation",
+              "Abdominal distension",
+              "Jaundice",
+              "No symptoms"
+            ],
+            "stores_as": "abd_symptoms",
+            "injected": false,
+            "weights": {
+              "Nausea": 1,
+              "Vomiting": 1,
+              "Abdominal pain": 1,
+              "Hematemesis (blood in vomit)": 3,
+              "Melena (black tarry stools)": 3,
+              "Fresh rectal bleeding (hematochezia)": 2,
+              "Diarrhea": 1,
+              "Constipation": 1,
+              "Abdominal distension": 1,
+              "Jaundice": 2,
+              "No symptoms": 0
+            }
+          },
+          {
+            "id": "ABD_Q02",
+            "phase": "history",
+            "text": "Abdominal pain characteristics (if present):",
+            "input_type": "multi_select",
+            "options": [
+              "Epigastric location",
+              "Right iliac fossa",
+              "Left iliac fossa",
+              "Right hypochondrium",
+              "Periumbilical",
+              "Diffuse / generalized",
+              "Burning / gnawing character",
+              "Colicky / intermittent",
+              "Relieved by food intake",
+              "Worsened by food intake",
+              "Relieved by antacids",
+              "Nocturnal pain waking patient"
+            ],
+            "stores_as": "pain_character",
+            "injected": false,
+            "weights": {
+              "Epigastric location": 1,
+              "Right iliac fossa": 1,
+              "Left iliac fossa": 1,
+              "Right hypochondrium": 1,
+              "Periumbilical": 1,
+              "Diffuse / generalized": 2,
+              "Burning / gnawing character": 1,
+              "Colicky / intermittent": 1,
+              "Relieved by food intake": 1,
+              "Worsened by food intake": 1,
+              "Relieved by antacids": 0,
+              "Nocturnal pain waking patient": 2
+            }
+          },
+          {
+            "id": "ABD_Q03",
+            "phase": "inspection",
+            "text": "Inspection of the abdomen:",
+            "input_type": "multi_select",
+            "options": [
+              "Flat / scaphoid (normal or malnourished)",
+              "Uniformly distended",
+              "Asymmetric distension",
+              "Umbilicus central and inverted (normal)",
+              "Umbilicus everted (suggests ascites / mass)",
+              "Visible peristalsis",
+              "Visible pulsation (aortic)",
+              "Distended superficial veins (caput medusae)",
+              "Surgical scars",
+              "Moves normally with respiration"
+            ],
+            "stores_as": "abd_inspection",
+            "injected": false,
+            "weights": {
+              "Flat / scaphoid (normal or malnourished)": 0,
+              "Uniformly distended": 1,
+              "Asymmetric distension": 2,
+              "Umbilicus central and inverted (normal)": 0,
+              "Umbilicus everted (suggests ascites / mass)": 2,
+              "Visible peristalsis": 2,
+              "Visible pulsation (aortic)": 2,
+              "Distended superficial veins (caput medusae)": 3,
+              "Surgical scars": 1,
+              "Moves normally with respiration": 0
+            }
+          },
+          {
+            "id": "ABD_Q04",
+            "phase": "palpation_light",
+            "text": "Light palpation findings (start in right iliac fossa, move systematically):",
+            "input_type": "multi_select",
+            "options": [
+              "No tenderness",
+              "Tenderness in epigastric region",
+              "Tenderness in right hypochondrium",
+              "Tenderness in right iliac fossa",
+              "Tenderness in left iliac fossa",
+              "Generalized tenderness",
+              "Muscle guarding / rigidity (involuntary)",
+              "Rebound tenderness (peritoneal irritation)",
+              "Superficial mass palpated"
+            ],
+            "stores_as": "light_palpation",
+            "injected": false,
+            "weights": {
+              "No tenderness": 0,
+              "Tenderness in epigastric region": 1,
+              "Tenderness in right hypochondrium": 1,
+              "Tenderness in right iliac fossa": 2,
+              "Tenderness in left iliac fossa": 1,
+              "Generalized tenderness": 3,
+              "Muscle guarding / rigidity (involuntary)": 3,
+              "Rebound tenderness (peritoneal irritation)": 3,
+              "Superficial mass palpated": 2
+            }
+          },
+          {
+            "id": "ABD_Q05",
+            "phase": "palpation_deep",
+            "text": "Deep palpation — organomegaly assessment:",
+            "input_type": "multi_select",
+            "options": [
+              "Liver not palpable (normal)",
+              "Liver palpable (hepatomegaly)",
+              "Spleen not palpable (normal)",
+              "Spleen palpable (splenomegaly — must be 2-3x normal size to feel)",
+              "Kidneys not palpable (normal)",
+              "Kidney palpable (renomegaly)",
+              "Aorta pulsatile and expansile (aneurysm)",
+              "Deep mass palpated"
+            ],
+            "stores_as": "deep_palpation",
+            "injected": false,
+            "weights": {
+              "Liver not palpable (normal)": 0,
+              "Liver palpable (hepatomegaly)": 2,
+              "Spleen not palpable (normal)": 0,
+              "Spleen palpable (splenomegaly — must be 2-3x normal size to feel)": 2,
+              "Kidneys not palpable (normal)": 0,
+              "Kidney palpable (renomegaly)": 2,
+              "Aorta pulsatile and expansile (aneurysm)": 3,
+              "Deep mass palpated": 2
+            }
+          },
+          {
+            "id": "ABD_Q06",
+            "phase": "percussion",
+            "text": "Percussion findings:",
+            "input_type": "multi_select",
+            "options": [
+              "Tympanic (normal gas-filled bowel)",
+              "Liver dullness in right hypochondrium (normal)",
+              "Liver dullness area enlarged (hepatomegaly)",
+              "Shifting dullness present (ascites)",
+              "Fluid thrill positive (massive ascites)",
+              "Resonant over left hypochondrium (normal)",
+              "Splenic dullness extended"
+            ],
+            "stores_as": "abd_percussion",
+            "injected": false,
+            "weights": {
+              "Tympanic (normal gas-filled bowel)": 0,
+              "Liver dullness in right hypochondrium (normal)": 0,
+              "Liver dullness area enlarged (hepatomegaly)": 2,
+              "Shifting dullness present (ascites)": 2,
+              "Fluid thrill positive (massive ascites)": 3,
+              "Resonant over left hypochondrium (normal)": 0,
+              "Splenic dullness extended": 2
+            }
+          },
+          {
+            "id": "ABD_Q07_FOLLOWUP",
+            "phase": "ascites_assessment",
+            "text": "FOLLOWUP — Ascites suspected. Full assessment:",
+            "input_type": "multi_select",
+            "options": [
+              "Shifting dullness confirmed",
+              "Fluid thrill positive",
+              "Everted umbilicus",
+              "Distended superficial abdominal veins",
+              "Ankle / pedal edema",
+              "Jaundice",
+              "Splenomegaly",
+              "History of liver disease / alcohol use",
+              "Hypoalbuminemia history"
+            ],
+            "stores_as": "ascites_signs",
+            "injected": true,
+            "weights": {
+              "Shifting dullness confirmed": 3,
+              "Fluid thrill positive": 3,
+              "Everted umbilicus": 2,
+              "Distended superficial abdominal veins": 2,
+              "Ankle / pedal edema": 1,
+              "Jaundice": 2,
+              "Splenomegaly": 2,
+              "History of liver disease / alcohol use": 2,
+              "Hypoalbuminemia history": 2
+            }
+          },
+          {
+            "id": "ABD_Q08_FOLLOWUP",
+            "phase": "peritonitis_assessment",
+            "text": "FOLLOWUP — Signs of peritoneal irritation. Assess for peritonitis:",
+            "input_type": "multi_select",
+            "options": [
+              "Rigid board-like abdomen",
+              "Generalized rebound tenderness",
+              "Patient lying still (movement worsens pain)",
+              "High fever",
+              "Tachycardia",
+              "Absent bowel sounds",
+              "Previous GI perforation history",
+              "Hypotension (shock signs)"
+            ],
+            "stores_as": "peritonitis_signs",
+            "injected": true,
+            "weights": {
+              "Rigid board-like abdomen": 3,
+              "Generalized rebound tenderness": 3,
+              "Patient lying still (movement worsens pain)": 2,
+              "High fever": 2,
+              "Tachycardia": 2,
+              "Absent bowel sounds": 2,
+              "Previous GI perforation history": 2,
+              "Hypotension (shock signs)": 3
+            }
+          },
+          {
+            "id": "ABD_Q09_FOLLOWUP",
+            "phase": "upper_gi_bleed",
+            "text": "FOLLOWUP — Hematemesis / Melena reported. Assess upper GI bleed:",
+            "input_type": "multi_select",
+            "options": [
+              "Hematemesis confirmed (bright red or coffee ground)",
+              "Melena confirmed (black tarry stools)",
+              "Epigastric tenderness",
+              "History of NSAID or aspirin use",
+              "History of alcohol use",
+              "History of peptic ulcer disease",
+              "Pallor / signs of anemia",
+              "Tachycardia / hypotension (hemodynamic compromise)",
+              "Periodic burning epigastric pain relieved by food (duodenal ulcer pattern)"
+            ],
+            "stores_as": "ugi_bleed_signs",
+            "injected": true,
+            "weights": {
+              "Hematemesis confirmed (bright red or coffee ground)": 3,
+              "Melena confirmed (black tarry stools)": 3,
+              "Epigastric tenderness": 1,
+              "History of NSAID or aspirin use": 1,
+              "History of alcohol use": 1,
+              "History of peptic ulcer disease": 2,
+              "Pallor / signs of anemia": 2,
+              "Tachycardia / hypotension (hemodynamic compromise)": 3,
+              "Periodic burning epigastric pain relieved by food (duodenal ulcer pattern)": 2
+            }
+          }
+        ],
+        "rules": [
+          {
+            "id": "ABD_R01",
+            "priority": 1,
+            "conditions": [
+              {
+                "fact": "abd_percussion",
+                "operator": "contains_any",
+                "value": [
+                  "Shifting dullness present (ascites)",
+                  "Fluid thrill positive (massive ascites)"
+                ]
+              }
+            ],
+            "match": "ANY",
+            "action": {
+              "type": "inject_question",
+              "target": "ABD_Q07_FOLLOWUP",
+              "message": "Ascites detected — full assessment."
+            }
+          },
+          {
+            "id": "ABD_R02",
+            "priority": 2,
+            "conditions": [
+              {
+                "fact": "light_palpation",
+                "operator": "contains_any",
+                "value": [
+                  "Muscle guarding / rigidity (involuntary)",
+                  "Rebound tenderness (peritoneal irritation)"
+                ]
+              }
+            ],
+            "match": "ANY",
+            "action": {
+              "type": "inject_question",
+              "target": "ABD_Q08_FOLLOWUP",
+              "message": "Peritoneal signs present — urgent peritonitis assessment."
+            }
+          },
+          {
+            "id": "ABD_R03",
+            "priority": 1,
+            "conditions": [
+              {
+                "fact": "abd_symptoms",
+                "operator": "contains_any",
+                "value": [
+                  "Hematemesis (blood in vomit)",
+                  "Melena (black tarry stools)"
+                ]
+              }
+            ],
+            "match": "ANY",
+            "action": {
+              "type": "inject_question",
+              "target": "ABD_Q09_FOLLOWUP",
+              "message": "Upper GI bleed suspected — detailed assessment."
+            }
+          },
+          {
+            "id": "ABD_R04",
+            "priority": 3,
+            "conditions": [
+              {
+                "fact": "light_palpation",
+                "operator": "contains",
+                "value": "Generalized tenderness"
+              },
+              {
+                "fact": "light_palpation",
+                "operator": "contains",
+                "value": "Muscle guarding / rigidity (involuntary)"
+              },
+              {
+                "fact": "light_palpation",
+                "operator": "contains",
+                "value": "Rebound tenderness (peritoneal irritation)"
+              }
+            ],
+            "match": "ALL",
+            "action": {
+              "type": "flag_alert",
+              "target": null,
+              "message": "HIGH PRIORITY: Classical peritonitis triad. Emergency surgical assessment required."
+            }
+          }
+        ],
+        "diagnoses": [
+          {
+            "id": "ABD_DX01",
+            "name": "Peritonitis",
+            "min_score_threshold": 16,
+            "max_score": 40,
+            "key_facts_required": [
+              "light_palpation",
+              "peritonitis_signs",
+              "abd_symptoms"
+            ],
+            "description": "Inflammation of the peritoneum, usually from bowel perforation or ruptured viscus. Classic signs: board-like rigid abdomen, generalized rebound tenderness, absent bowel sounds, and patient lying completely still. Surgical emergency.",
+            "score_rationale": "Pain+vomiting(2) | guarding triad(9) | peritonitis signs fully positive(17) = ~25 for confirmed peritonitis with shock"
+          },
+          {
+            "id": "ABD_DX02",
+            "name": "Upper GI Bleed",
+            "min_score_threshold": 10,
+            "max_score": 26,
+            "key_facts_required": [
+              "abd_symptoms",
+              "ugi_bleed_signs"
+            ],
+            "description": "Bleeding proximal to the ligament of Treitz. Presents as hematemesis (bright red or coffee-ground) and/or melena. Hemodynamic compromise (tachycardia + hypotension) indicates massive bleed. Most common cause: peptic ulcer disease.",
+            "score_rationale": "Hematemesis+melena(6) | confirmed bleed+haemodynamic compromise+PUD+pallor(13) = ~16 typical massive UGI bleed"
+          },
+          {
+            "id": "ABD_DX03",
+            "name": "Liver Cirrhosis with Ascites",
+            "min_score_threshold": 17,
+            "max_score": 48,
+            "key_facts_required": [
+              "abd_percussion",
+              "ascites_signs",
+              "deep_palpation",
+              "abd_inspection"
+            ],
+            "description": "End-stage liver disease with portal hypertension leading to ascites. Features: shifting dullness/fluid thrill, splenomegaly, caput medusae (dilated abdominal veins), jaundice, and everted umbilicus. Hepatomegaly or shrunken liver may be found.",
+            "score_rationale": "Symptoms(3)+inspection(5)+percussion(7)+organomegaly(4)+ascites followup(10 typical) = ~29 advanced cirrhosis"
+          },
+          {
+            "id": "ABD_DX04",
+            "name": "Appendicitis",
+            "min_score_threshold": 8,
+            "max_score": 22,
+            "key_facts_required": [
+              "light_palpation",
+              "abd_symptoms",
+              "pain_character"
+            ],
+            "description": "Inflammation of the appendix. Classic migration of pain from periumbilical to right iliac fossa (McBurney's point). Tenderness + guarding in RIF, low-grade fever, and anorexia. Rebound tenderness at McBurney's point is highly suggestive.",
+            "score_rationale": "Nausea+vomiting+pain(3) | RIF tenderness+guarding+rebound(8) | RIF+periumbilical pain character(2) = 13"
+          },
+          {
+            "id": "ABD_DX05",
+            "name": "Bowel Obstruction",
+            "min_score_threshold": 5,
+            "max_score": 16,
+            "key_facts_required": [
+              "abd_symptoms",
+              "abd_inspection",
+              "light_palpation"
+            ],
+            "description": "Mechanical or functional obstruction of small or large bowel. Features: colicky abdominal pain, vomiting, abdominal distension, absolute constipation (no flatus), and visible peristalsis on inspection. High-pitched tinkling bowel sounds on auscultation.",
+            "score_rationale": "Vomiting+constipation+distension(3) | distension+visible peristalsis(3) | colicky pain(1) | mild tenderness(2) = 9"
+          }
+        ]
+      },
+      {
+        "examination_id": "NEURO_001",
+        "examination_title": "Neurological System Examination",
+        "default_action": "Begin neurological assessment with higher mental functions and consciousness, then systematically assess cranial nerves, motor system, sensory system, reflexes, and coordination.",
+        "questions": [
+          {
+            "id": "NEURO_Q01",
+            "phase": "consciousness",
+            "text": "Level of consciousness — Glasgow Coma Scale assessment:",
+            "input_type": "multi_select",
+            "options": [
+              "Alert and oriented (GCS 15)",
+              "Confused / disoriented",
+              "Drowsy but rousable",
+              "Responds to pain only",
+              "Deeply unconscious (GCS 3)",
+              "Eye opening spontaneous",
+              "Eye opening to voice",
+              "Eye opening to pain",
+              "No eye opening"
+            ],
+            "stores_as": "consciousness_level",
+            "injected": false,
+            "weights": {
+              "Alert and oriented (GCS 15)": 0,
+              "Confused / disoriented": 2,
+              "Drowsy but rousable": 2,
+              "Responds to pain only": 3,
+              "Deeply unconscious (GCS 3)": 3,
+              "Eye opening spontaneous": 0,
+              "Eye opening to voice": 1,
+              "Eye opening to pain": 2,
+              "No eye opening": 3
+            }
+          },
+          {
+            "id": "NEURO_Q02",
+            "phase": "higher_functions",
+            "text": "Higher mental function assessment:",
+            "input_type": "multi_select",
+            "options": [
+              "Immediate memory intact (digit span normal)",
+              "Immediate memory impaired",
+              "Recent memory intact (last 24hr events recalled)",
+              "Recent memory impaired",
+              "Remote memory intact",
+              "Remote memory impaired",
+              "Speech fluent and coherent",
+              "Aphasia present (cannot understand or produce speech)",
+              "Dysarthria present (mechanical difficulty in speaking)",
+              "No higher function deficits"
+            ],
+            "stores_as": "higher_functions",
+            "injected": false,
+            "weights": {
+              "Immediate memory intact (digit span normal)": 0,
+              "Immediate memory impaired": 2,
+              "Recent memory intact (last 24hr events recalled)": 0,
+              "Recent memory impaired": 2,
+              "Remote memory intact": 0,
+              "Remote memory impaired": 2,
+              "Speech fluent and coherent": 0,
+              "Aphasia present (cannot understand or produce speech)": 3,
+              "Dysarthria present (mechanical difficulty in speaking)": 2,
+              "No higher function deficits": 0
+            }
+          },
+          {
+            "id": "NEURO_Q03",
+            "phase": "cranial_nerves",
+            "text": "Cranial nerve examination findings:",
+            "input_type": "multi_select",
+            "options": [
+              "CN I (Olfactory) — smell normal bilaterally",
+              "CN I — anosmia (loss of smell)",
+              "CN II (Optic) — visual acuity normal",
+              "CN II — visual acuity reduced",
+              "CN II — visual field defect",
+              "CN III/IV/VI — eye movements full (H-test normal)",
+              "CN III/IV/VI — restricted eye movements / diplopia",
+              "CN III — ptosis (drooping eyelid)",
+              "CN V (Trigeminal) — facial sensation normal",
+              "CN V — facial sensation impaired",
+              "CN VII (Facial) — face moves symmetrically",
+              "CN VII — facial weakness (upper / lower motor neuron)",
+              "CN VIII (Vestibulocochlear) — hearing normal (Rinne / Weber tests)",
+              "CN VIII — hearing loss",
+              "CN IX/X — palate moves symmetrically on saying Ah",
+              "CN IX/X — palatal palsy / absent gag reflex",
+              "CN XI — shoulder shrug and head turn normal",
+              "CN XI — weakness of trapezius / sternomastoid",
+              "CN XII — tongue central, no wasting or fasciculations",
+              "CN XII — tongue deviation / wasting / fasciculations"
+            ],
+            "stores_as": "cranial_nerve_findings",
+            "injected": false,
+            "weights": {
+              "CN I (Olfactory) — smell normal bilaterally": 0,
+              "CN I — anosmia (loss of smell)": 1,
+              "CN II (Optic) — visual acuity normal": 0,
+              "CN II — visual acuity reduced": 2,
+              "CN II — visual field defect": 2,
+              "CN III/IV/VI — eye movements full (H-test normal)": 0,
+              "CN III/IV/VI — restricted eye movements / diplopia": 2,
+              "CN III — ptosis (drooping eyelid)": 2,
+              "CN V (Trigeminal) — facial sensation normal": 0,
+              "CN V — facial sensation impaired": 2,
+              "CN VII (Facial) — face moves symmetrically": 0,
+              "CN VII — facial weakness (upper / lower motor neuron)": 2,
+              "CN VIII (Vestibulocochlear) — hearing normal (Rinne / Weber tests)": 0,
+              "CN VIII — hearing loss": 1,
+              "CN IX/X — palate moves symmetrically on saying Ah": 0,
+              "CN IX/X — palatal palsy / absent gag reflex": 3,
+              "CN XI — shoulder shrug and head turn normal": 0,
+              "CN XI — weakness of trapezius / sternomastoid": 1,
+              "CN XII — tongue central, no wasting or fasciculations": 0,
+              "CN XII — tongue deviation / wasting / fasciculations": 2
+            }
+          },
+          {
+            "id": "NEURO_Q04",
+            "phase": "motor_system",
+            "text": "Motor system examination:",
+            "input_type": "multi_select",
+            "options": [
+              "Muscle bulk normal",
+              "Muscle wasting (atrophy) present",
+              "Muscle hypertrophy",
+              "Fasciculations (fine muscle twitching)",
+              "Tone normal",
+              "Spasticity (clasp-knife resistance — UMN pattern)",
+              "Rigidity — lead pipe (Extrapyramidal)",
+              "Rigidity — cog-wheel (Parkinsonian)",
+              "Flaccidity / hypotonia (LMN pattern)",
+              "Power MRC grade 5/5 (normal) all limbs",
+              "Power reduced (specify grade 0-4/5)",
+              "Hemiplegia (one side affected)",
+              "Paraplegia (both legs affected)",
+              "Monoplegia (one limb affected)"
+            ],
+            "stores_as": "motor_findings",
+            "injected": false,
+            "weights": {
+              "Muscle bulk normal": 0,
+              "Muscle wasting (atrophy) present": 2,
+              "Muscle hypertrophy": 1,
+              "Fasciculations (fine muscle twitching)": 2,
+              "Tone normal": 0,
+              "Spasticity (clasp-knife resistance — UMN pattern)": 2,
+              "Rigidity — lead pipe (Extrapyramidal)": 2,
+              "Rigidity — cog-wheel (Parkinsonian)": 2,
+              "Flaccidity / hypotonia (LMN pattern)": 2,
+              "Power MRC grade 5/5 (normal) all limbs": 0,
+              "Power reduced (specify grade 0-4/5)": 2,
+              "Hemiplegia (one side affected)": 3,
+              "Paraplegia (both legs affected)": 3,
+              "Monoplegia (one limb affected)": 2
+            }
+          },
+          {
+            "id": "NEURO_Q05",
+            "phase": "reflexes",
+            "text": "Deep tendon reflex findings:",
+            "input_type": "multi_select",
+            "options": [
+              "Reflexes normal and symmetric",
+              "Biceps jerk brisk / exaggerated (UMN)",
+              "Biceps jerk absent / reduced (LMN)",
+              "Knee jerk brisk / exaggerated (UMN)",
+              "Knee jerk absent / reduced (LMN)",
+              "Ankle jerk brisk / exaggerated (UMN)",
+              "Ankle jerk absent / reduced (LMN)",
+              "Plantar response flexor (normal)",
+              "Plantar response extensor — Babinski Sign POSITIVE (UMN lesion)",
+              "Clonus present"
+            ],
+            "stores_as": "reflex_findings",
+            "injected": false,
+            "weights": {
+              "Reflexes normal and symmetric": 0,
+              "Biceps jerk brisk / exaggerated (UMN)": 2,
+              "Biceps jerk absent / reduced (LMN)": 2,
+              "Knee jerk brisk / exaggerated (UMN)": 2,
+              "Knee jerk absent / reduced (LMN)": 2,
+              "Ankle jerk brisk / exaggerated (UMN)": 2,
+              "Ankle jerk absent / reduced (LMN)": 2,
+              "Plantar response flexor (normal)": 0,
+              "Plantar response extensor — Babinski Sign POSITIVE (UMN lesion)": 3,
+              "Clonus present": 2
+            }
+          },
+          {
+            "id": "NEURO_Q06",
+            "phase": "sensory_system",
+            "text": "Sensory system examination:",
+            "input_type": "multi_select",
+            "options": [
+              "Light touch sensation normal",
+              "Light touch sensation impaired",
+              "Pain sensation (pinprick) normal",
+              "Pain sensation impaired",
+              "Temperature sensation normal",
+              "Temperature sensation impaired",
+              "Joint position sense (proprioception) normal",
+              "Joint position sense impaired",
+              "Vibration sense normal (128 Hz tuning fork)",
+              "Vibration sense impaired",
+              "Stereognosis normal (object identification by touch)",
+              "Stereognosis impaired",
+              "Sensory level present (spinal cord lesion)"
+            ],
+            "stores_as": "sensory_findings",
+            "injected": false,
+            "weights": {
+              "Light touch sensation normal": 0,
+              "Light touch sensation impaired": 1,
+              "Pain sensation (pinprick) normal": 0,
+              "Pain sensation impaired": 1,
+              "Temperature sensation normal": 0,
+              "Temperature sensation impaired": 1,
+              "Joint position sense (proprioception) normal": 0,
+              "Joint position sense impaired": 2,
+              "Vibration sense normal (128 Hz tuning fork)": 0,
+              "Vibration sense impaired": 2,
+              "Stereognosis normal (object identification by touch)": 0,
+              "Stereognosis impaired": 2,
+              "Sensory level present (spinal cord lesion)": 3
+            }
+          },
+          {
+            "id": "NEURO_Q07",
+            "phase": "coordination",
+            "text": "Coordination and gait assessment:",
+            "input_type": "multi_select",
+            "options": [
+              "Finger-nose test normal (upper limb coordination)",
+              "Finger-nose test abnormal — dysmetria / ataxia",
+              "Heel-shin test normal (lower limb coordination)",
+              "Heel-shin test abnormal — ataxia",
+              "Gait normal",
+              "Ataxic / broad-based gait",
+              "Hemiplegic gait (circumduction)",
+              "High-stepping gait",
+              "Romberg's test negative (normal)",
+              "Romberg's test positive (sensory / cerebellar ataxia)"
+            ],
+            "stores_as": "coordination_findings",
+            "injected": false,
+            "weights": {
+              "Finger-nose test normal (upper limb coordination)": 0,
+              "Finger-nose test abnormal — dysmetria / ataxia": 2,
+              "Heel-shin test normal (lower limb coordination)": 0,
+              "Heel-shin test abnormal — ataxia": 2,
+              "Gait normal": 0,
+              "Ataxic / broad-based gait": 2,
+              "Hemiplegic gait (circumduction)": 2,
+              "High-stepping gait": 2,
+              "Romberg's test negative (normal)": 0,
+              "Romberg's test positive (sensory / cerebellar ataxia)": 2
+            }
+          },
+          {
+            "id": "NEURO_Q08",
+            "phase": "meningeal_signs",
+            "text": "Signs of meningeal irritation:",
+            "input_type": "multi_select",
+            "options": [
+              "Neck rigidity absent (normal)",
+              "Neck rigidity PRESENT (resistance to passive flexion)",
+              "Kernig's Sign NEGATIVE (normal)",
+              "Kernig's Sign POSITIVE (cannot extend knee with hip flexed 90°)",
+              "Brudzinski's Sign NEGATIVE (normal)",
+              "Brudzinski's Sign POSITIVE (neck flexion causes hip/knee flexion)",
+              "Photophobia",
+              "Phonophobia",
+              "Severe headache",
+              "High fever"
+            ],
+            "stores_as": "meningeal_signs",
+            "injected": false,
+            "weights": {
+              "Neck rigidity absent (normal)": 0,
+              "Neck rigidity PRESENT (resistance to passive flexion)": 3,
+              "Kernig's Sign NEGATIVE (normal)": 0,
+              "Kernig's Sign POSITIVE (cannot extend knee with hip flexed 90°)": 3,
+              "Brudzinski's Sign NEGATIVE (normal)": 0,
+              "Brudzinski's Sign POSITIVE (neck flexion causes hip/knee flexion)": 3,
+              "Photophobia": 2,
+              "Phonophobia": 1,
+              "Severe headache": 2,
+              "High fever": 2
+            }
+          },
+          {
+            "id": "NEURO_Q09_FOLLOWUP",
+            "phase": "UMN_localization",
+            "text": "FOLLOWUP — UMN pattern detected. Localize the lesion:",
+            "input_type": "multi_select",
+            "options": [
+              "Unilateral upper and lower limb involvement (same side) — Cortical / Capsular",
+              "Both lower limbs involved — Spinal cord lesion (Paraplegia)",
+              "All four limbs involved — High cervical cord or brainstem",
+              "Crossed signs (ipsilateral face + contralateral body) — Brainstem",
+              "Sensory level on trunk — Spinal cord level lesion",
+              "Seizures / cognitive changes — Cortical involvement",
+              "Cranial nerve involvement — Brainstem"
+            ],
+            "stores_as": "umn_localization",
+            "injected": true,
+            "weights": {
+              "Unilateral upper and lower limb involvement (same side) — Cortical / Capsular": 2,
+              "Both lower limbs involved — Spinal cord lesion (Paraplegia)": 3,
+              "All four limbs involved — High cervical cord or brainstem": 3,
+              "Crossed signs (ipsilateral face + contralateral body) — Brainstem": 3,
+              "Sensory level on trunk — Spinal cord level lesion": 3,
+              "Seizures / cognitive changes — Cortical involvement": 2,
+              "Cranial nerve involvement — Brainstem": 2
+            }
+          },
+          {
+            "id": "NEURO_Q10_FOLLOWUP",
+            "phase": "LMN_localization",
+            "text": "FOLLOWUP — LMN pattern detected. Characterize further:",
+            "input_type": "multi_select",
+            "options": [
+              "Muscle wasting prominent",
+              "Fasciculations present",
+              "Flaccidity confirmed",
+              "Reflexes absent in affected territory",
+              "Distribution — single nerve (mononeuropathy)",
+              "Distribution — multiple peripheral nerves (polyneuropathy)",
+              "Distribution — single root (radiculopathy)",
+              "Distribution — plexus",
+              "Distal limbs predominantly affected"
+            ],
+            "stores_as": "lmn_localization",
+            "injected": true,
+            "weights": {
+              "Muscle wasting prominent": 2,
+              "Fasciculations present": 2,
+              "Flaccidity confirmed": 2,
+              "Reflexes absent in affected territory": 2,
+              "Distribution — single nerve (mononeuropathy)": 1,
+              "Distribution — multiple peripheral nerves (polyneuropathy)": 2,
+              "Distribution — single root (radiculopathy)": 1,
+              "Distribution — plexus": 2,
+              "Distal limbs predominantly affected": 2
+            }
+          },
+          {
+            "id": "NEURO_Q11_FOLLOWUP",
+            "phase": "meningitis_confirmation",
+            "text": "FOLLOWUP — Meningeal irritation signs present. Full meningitis assessment:",
+            "input_type": "multi_select",
+            "options": [
+              "Classic triad: fever + headache + neck stiffness",
+              "Altered consciousness",
+              "Petechial / purpuric rash",
+              "Recent URTI history",
+              "Immunocompromised state",
+              "CSF examination / lumbar puncture indicated (L3-L4 or L4-L5)",
+              "Papilledema absent (LP safe to proceed)",
+              "Papilledema PRESENT (raised ICP — LP contraindicated)"
+            ],
+            "stores_as": "meningitis_assessment",
+            "injected": true,
+            "weights": {
+              "Classic triad: fever + headache + neck stiffness": 3,
+              "Altered consciousness": 3,
+              "Petechial / purpuric rash": 3,
+              "Recent URTI history": 1,
+              "Immunocompromised state": 2,
+              "CSF examination / lumbar puncture indicated (L3-L4 or L4-L5)": 0,
+              "Papilledema absent (LP safe to proceed)": 0,
+              "Papilledema PRESENT (raised ICP — LP contraindicated)": 3
+            }
+          }
+        ],
+        "rules": [
+          {
+            "id": "NEURO_R01",
+            "priority": 2,
+            "conditions": [
+              {
+                "fact": "reflex_findings",
+                "operator": "contains",
+                "value": "Plantar response extensor — Babinski Sign POSITIVE (UMN lesion)"
+              },
+              {
+                "fact": "motor_findings",
+                "operator": "contains_any",
+                "value": [
+                  "Spasticity (clasp-knife resistance — UMN pattern)",
+                  "Hemiplegia (one side affected)",
+                  "Paraplegia (both legs affected)"
+                ]
+              }
+            ],
+            "match": "ANY",
+            "action": {
+              "type": "inject_question",
+              "target": "NEURO_Q09_FOLLOWUP",
+              "message": "UMN pattern identified — localize the lesion."
+            }
+          },
+          {
+            "id": "NEURO_R02",
+            "priority": 2,
+            "conditions": [
+              {
+                "fact": "motor_findings",
+                "operator": "contains_any",
+                "value": [
+                  "Muscle wasting (atrophy) present",
+                  "Flaccidity / hypotonia (LMN pattern)",
+                  "Fasciculations (fine muscle twitching)"
+                ]
+              },
+              {
+                "fact": "reflex_findings",
+                "operator": "contains_any",
+                "value": [
+                  "Biceps jerk absent / reduced (LMN)",
+                  "Knee jerk absent / reduced (LMN)",
+                  "Ankle jerk absent / reduced (LMN)"
+                ]
+              }
+            ],
+            "match": "ALL",
+            "action": {
+              "type": "inject_question",
+              "target": "NEURO_Q10_FOLLOWUP",
+              "message": "LMN pattern identified — characterize and localize."
+            }
+          },
+          {
+            "id": "NEURO_R03",
+            "priority": 1,
+            "conditions": [
+              {
+                "fact": "meningeal_signs",
+                "operator": "contains_any",
+                "value": [
+                  "Neck rigidity PRESENT (resistance to passive flexion)",
+                  "Kernig's Sign POSITIVE (cannot extend knee with hip flexed 90°)",
+                  "Brudzinski's Sign POSITIVE (neck flexion causes hip/knee flexion)"
+                ]
+              }
+            ],
+            "match": "ANY",
+            "action": {
+              "type": "inject_question",
+              "target": "NEURO_Q11_FOLLOWUP",
+              "message": "Meningeal irritation — assess for meningitis."
+            }
+          },
+          {
+            "id": "NEURO_R04",
+            "priority": 3,
+            "conditions": [
+              {
+                "fact": "meningeal_signs",
+                "operator": "contains",
+                "value": "Neck rigidity PRESENT (resistance to passive flexion)"
+              },
+              {
+                "fact": "meningeal_signs",
+                "operator": "contains",
+                "value": "Kernig's Sign POSITIVE (cannot extend knee with hip flexed 90°)"
+              },
+              {
+                "fact": "meningeal_signs",
+                "operator": "contains",
+                "value": "High fever"
+              }
+            ],
+            "match": "ALL",
+            "action": {
+              "type": "flag_alert",
+              "target": null,
+              "message": "HIGH PRIORITY: Meningitis triad confirmed (fever + neck rigidity + Kernig's positive). Urgent CSF analysis required. Check for papilledema before LP."
+            }
+          },
+          {
+            "id": "NEURO_R05",
+            "priority": 1,
+            "conditions": [
+              {
+                "fact": "consciousness_level",
+                "operator": "contains_any",
+                "value": [
+                  "Responds to pain only",
+                  "Deeply unconscious (GCS 3)",
+                  "No eye opening"
+                ]
+              }
+            ],
+            "match": "ANY",
+            "action": {
+              "type": "flag_alert",
+              "target": null,
+              "message": "HIGH PRIORITY: Severely depressed level of consciousness. GCS scoring required. Airway, breathing, circulation — immediate assessment."
+            }
+          },
+          {
+            "id": "NEURO_R06",
+            "priority": 1,
+            "conditions": [
+              {
+                "fact": "higher_functions",
+                "operator": "contains",
+                "value": "Aphasia present (cannot understand or produce speech)"
+              }
+            ],
+            "match": "ALL",
+            "action": {
+              "type": "flag_alert",
+              "target": null,
+              "message": "Aphasia detected — differentiate Broca (expressive) vs Wernicke (receptive) vs Global aphasia. Consider stroke / mass lesion."
+            }
+          },
+          {
+            "id": "NEURO_R07",
+            "priority": 1,
+            "conditions": [
+              {
+                "fact": "sensory_findings",
+                "operator": "contains",
+                "value": "Sensory level present (spinal cord lesion)"
+              }
+            ],
+            "match": "ALL",
+            "action": {
+              "type": "inject_question",
+              "target": "NEURO_Q09_FOLLOWUP",
+              "message": "Sensory level detected — spinal cord lesion. Map dermatomes to determine level."
+            }
+          }
+        ],
+        "diagnoses": [
+          {
+            "id": "NEURO_DX01",
+            "name": "Meningitis",
+            "min_score_threshold": 15,
+            "max_score": 40,
+            "key_facts_required": [
+              "meningeal_signs",
+              "meningitis_assessment",
+              "consciousness_level"
+            ],
+            "description": "Infection/inflammation of the meninges. Classic triad: fever + severe headache + neck rigidity. Kernig's and Brudzinski's signs positive. Petechial rash suggests meningococcal disease. Lumbar puncture (L3-L4) is diagnostic; check for papilledema first to exclude raised ICP.",
+            "score_rationale": "Full meningeal triad(13)+photophobia+fever(4) | classic triad+altered consciousness+petechiae(9) | confusion(2) = 24"
+          },
+          {
+            "id": "NEURO_DX02",
+            "name": "Raised Intracranial Pressure",
+            "min_score_threshold": 7,
+            "max_score": 20,
+            "key_facts_required": [
+              "consciousness_level",
+              "cranial_nerve_findings",
+              "meningitis_assessment"
+            ],
+            "description": "Elevated pressure within the cranial vault from mass, edema, or hydrocephalus. Features: progressively deteriorating consciousness, CN III palsy (ptosis + dilated pupil), papilledema on fundoscopy, bradycardia with hypertension (Cushing's reflex). LP is contraindicated.",
+            "score_rationale": "Drowsy(2) | CN II+III visual/eye signs(6) | papilledema on followup(3) = 11 — focal signs without meningeal triad"
+          },
+          {
+            "id": "NEURO_DX03",
+            "name": "Stroke / CVA",
+            "min_score_threshold": 11,
+            "max_score": 30,
+            "key_facts_required": [
+              "motor_findings",
+              "higher_functions",
+              "cranial_nerve_findings",
+              "reflex_findings",
+              "umn_localization"
+            ],
+            "description": "Acute focal neurological deficit from cerebral ischemia or hemorrhage. UMN pattern: contralateral hemiplegia, facial weakness, Babinski positive, brisk reflexes. Aphasia if dominant hemisphere affected. Sudden onset is characteristic. Requires urgent imaging.",
+            "score_rationale": "Hemiplegia+spasticity(5) | aphasia(3) | CN VII(2) | Babinski+brisk reflexes(5) | UMN localization(2) = 17"
+          },
+          {
+            "id": "NEURO_DX04",
+            "name": "Spinal Cord Compression",
+            "min_score_threshold": 17,
+            "max_score": 45,
+            "key_facts_required": [
+              "motor_findings",
+              "sensory_findings",
+              "reflex_findings",
+              "umn_localization"
+            ],
+            "description": "Compression of the spinal cord by disc prolapse, tumor, or abscess. Bilateral UMN signs below level of lesion: paraplegia/tetraplegia, spasticity, brisk reflexes, Babinski positive, and a clear sensory level on the trunk. Bladder and bowel dysfunction common. Neurosurgical emergency.",
+            "score_rationale": "Paraplegia+spasticity+reduced power(7) | sensory level+JPS+vibration(7) | Babinski+brisk reflexes(7) | spinal localisation(6) = 27"
+          },
+          {
+            "id": "NEURO_DX05",
+            "name": "Peripheral Neuropathy",
+            "min_score_threshold": 13,
+            "max_score": 40,
+            "key_facts_required": [
+              "motor_findings",
+              "sensory_findings",
+              "reflex_findings",
+              "lmn_localization"
+            ],
+            "description": "Damage to peripheral nerves producing LMN pattern: distal muscle wasting, fasciculations, flaccidity, absent/reduced deep tendon reflexes (especially ankle jerks), and glove-and-stocking sensory loss. Vibration and joint position sense impaired. Common causes: diabetes, alcohol, B12 deficiency.",
+            "score_rationale": "Wasting+fasciculations+flaccidity(6) | vibration+JPS(4) | absent ankle+knee jerks(4) | LMN localization typical(10) = ~24"
           }
         ]
       }
