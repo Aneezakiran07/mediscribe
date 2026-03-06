@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'vitals_screen.dart'; // next screen after this one
 import '../core/app_colors.dart';
 
-// DATA MODELS
-// Hive wiring:
-//   @HiveType(typeId: 3) on SystemicHistoryData
-//   @HiveField(n) on each field
-//   run: flutter pub run build_runner build
-//   save: Hive.box<SystemicHistoryData>('systemic').put(patientId, data)
+
+// Hive integration steps when ready:
+// @HiveType(typeId: 3) on SystemicHistoryData
+// @HiveField(n) on each field
+// run: flutter pub run build_runner build
+// save: Hive.box<SystemicHistoryData>('systemic').put(patientId, data)
 
 // null = not answered, true = YES, false = NO
 typedef SymptomMap = Map<String, bool?>;
 
 class SystemicHistoryData {
-  // One map per system — key = symptom name, value = YES/NO/null
+  // One map per system - key = symptom name, value = YES/NO/null
   final SymptomMap cardiovascular   = {};
   final SymptomMap respiratory      = {};
   final SymptomMap cns              = {};
@@ -30,7 +31,7 @@ class SystemicHistoryData {
   // Custom free-text entries from the "Add it yourself" section
   final List<CustomSystemEntry> customEntries = [];
 
-  // Helper — returns all symptoms answered YES across all systems
+  // Helper - returns all symptoms answered YES across all systems
   List<String> get positiveSymptoms {
     final result = <String>[];
     for (final map in _allMaps.values) {
@@ -42,7 +43,7 @@ class SystemicHistoryData {
     return result;
   }
 
-  // Helper — returns all symptoms answered NO
+  // Helper - returns all symptoms answered NO
   List<String> get negativeSymptoms {
     final result = <String>[];
     for (final map in _allMaps.values) {
@@ -75,8 +76,8 @@ class CustomSystemEntry {
     this.answer,
   });
 }
-// SYSTEM DEF all content lives here, UI auto-builds from this
 
+// All body systems are defined here. The UI builds from this list automatically.
 class SystemDef {
   final String id;
   final String title;
@@ -201,7 +202,7 @@ const List<SystemDef> kSystems = [
   ),
 ];
 
-// STANDALONE ENTRY — remove when integrating
+// Remove main() when integrating into the app
 void main() => runApp(const _PreviewApp());
 
 class _PreviewApp extends StatelessWidget {
@@ -220,7 +221,7 @@ class _PreviewApp extends StatelessWidget {
         ),
       ),
       home: SystemicHistoryScreen(
-        // Pass patient gender — controls whether Gynaecological shows
+        // Pass patient gender - controls whether Gynaecological shows
         patientGender: 'Female',
         // Pass chief complaints from Page 1 to show info banner
         chiefComplaints: ['Chest pain', 'Shortness of breath'],
@@ -228,7 +229,7 @@ class _PreviewApp extends StatelessWidget {
     );
   }
 }
-// SYSTEMIC HISTORY SCREEN
+
 class SystemicHistoryScreen extends StatefulWidget {
   final String patientGender;         // 'Male' | 'Female' | 'Other'
   final List<String> chiefComplaints; // from HistoryTakingScreen Page 1
@@ -284,11 +285,13 @@ class _SystemicHistoryScreenState extends State<SystemicHistoryScreen> {
       backgroundColor: AppColors.background,
       body: Column(
         children: [
+          
           _SystemicAppBar(onBack: () => Navigator.of(context).maybePop()),
 
+          
           _InfoBanner(complaints: widget.chiefComplaints),
 
-          // Scrollable content
+          
           Expanded(
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
@@ -297,7 +300,7 @@ class _SystemicHistoryScreenState extends State<SystemicHistoryScreen> {
                 children: [
                   const SizedBox(height: 12),
 
-                  // System sections (auto-built from kSystems) 
+                  // Build one card per visible system
                   ..._visibleSystems.map((system) {
                     final map = _mapForSystem(system.id);
                     final customs = _data.customSymptoms[system.id] ?? [];
@@ -331,6 +334,7 @@ class _SystemicHistoryScreenState extends State<SystemicHistoryScreen> {
 
                   const SizedBox(height: 8),
 
+                  
                   _AddYourselfSection(
                     entries: _data.customEntries,
                     onAdd: (entry) => setState(() {
@@ -346,7 +350,7 @@ class _SystemicHistoryScreenState extends State<SystemicHistoryScreen> {
 
                   const SizedBox(height: 16),
 
-                  // Negative History summary
+                  
                   if (negativeAll.isNotEmpty)
                     _NegativeHistorySummary(negativeSymptoms: negativeAll),
 
@@ -356,18 +360,14 @@ class _SystemicHistoryScreenState extends State<SystemicHistoryScreen> {
             ),
           ),
 
-          // Next button 
+          // Pushes to VitalsScreen
+          // To pass data forward, add params to VitalsScreen constructor first
           _NextButton(
             onNext: () {
-              // TODO: Navigator.push → next screen (Examination)
-              // Pass _data forward
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    '✓ ${_data.positiveSymptoms.length} positive, '
-                    '${_data.negativeSymptoms.length} negative symptoms recorded.',
-                  ),
-                  backgroundColor: AppColors.sectionHeader,
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const VitalsScreen(),
                 ),
               );
             },
@@ -378,7 +378,6 @@ class _SystemicHistoryScreenState extends State<SystemicHistoryScreen> {
   }
 }
 
-// APP BAR
 class _SystemicAppBar extends StatelessWidget {
   final VoidCallback onBack;
   const _SystemicAppBar({required this.onBack});
@@ -394,7 +393,6 @@ class _SystemicAppBar extends StatelessWidget {
           child: Row(
             children: [
               IconButton(
-                // arrow_back: left arrow — standard Material
                 icon: const Icon(Icons.arrow_back,
                     color: AppColors.headerText, size: 22),
                 onPressed: onBack,
@@ -429,7 +427,7 @@ class _SystemicAppBar extends StatelessWidget {
   }
 }
 
-// INFO BANNER — "Showing relevant systems based on your complaint"
+// Small banner that shows the chief complaints below the app bar
 class _InfoBanner extends StatelessWidget {
   final List<String> complaints;
   const _InfoBanner({required this.complaints});
@@ -444,7 +442,6 @@ class _InfoBanner extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Icon(
-            // info_outline: circle-i info — standard Material
             Icons.info_outline,
             size: 16,
             color: AppColors.sectionHeader,
@@ -483,7 +480,7 @@ class _InfoBanner extends StatelessWidget {
   }
 }
 
-// SYSTEM SECTION — one collapsible card per body system
+// One collapsible card for each body system
 class _SystemSection extends StatefulWidget {
   final SystemDef system;
   final SymptomMap map;
@@ -538,7 +535,7 @@ class _SystemSectionState extends State<_SystemSection> {
       ),
       child: Column(
         children: [
-          // ── Section header ──
+          
           GestureDetector(
             onTap: widget.onToggleCollapse,
             child: Container(
@@ -613,9 +610,7 @@ class _SystemSectionState extends State<_SystemSection> {
                   ),
                   Icon(
                     widget.collapsed
-                        // expand_more: down chevron — standard Material
                         ? Icons.expand_more
-                        // expand_less: up chevron — standard Material
                         : Icons.expand_less,
                     color: AppColors.headerText,
                     size: 22,
@@ -625,7 +620,7 @@ class _SystemSectionState extends State<_SystemSection> {
             ),
           ),
 
-          // ── Symptom rows ──
+          
           if (!widget.collapsed) ...[
             ...allSymptoms.asMap().entries.map((entry) {
               final i = entry.key;
@@ -654,7 +649,7 @@ class _SystemSectionState extends State<_SystemSection> {
               );
             }),
 
-            // ── Add symptom to this system ──
+            
             const Divider(height: 1, color: AppColors.divider),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
@@ -670,7 +665,7 @@ class _SystemSectionState extends State<_SystemSection> {
   }
 }
 
-// SYMPTOM ROW — one symptom + YES/NO 
+// One row showing a symptom name with YES and NO pills
 class _SymptomRow extends StatelessWidget {
   final String symptom;
   final bool? answer;
@@ -729,27 +724,26 @@ class _SymptomRow extends StatelessWidget {
               ],
             ),
           ),
-          // YES pill
+          
           _AnswerPill(
             label: 'YES',
             selected: answer == true,
             onTap: onYes,
           ),
           const SizedBox(width: 8),
-          // NO pill
+          
           _AnswerPill(
             label: 'NO',
             selected: answer == false,
             onTap: onNo,
             isNo: true,
           ),
-          // Remove button for custom symptoms
+          
           if (isCustom && onRemoveCustom != null) ...[
             const SizedBox(width: 6),
             GestureDetector(
               onTap: onRemoveCustom,
               child: const Icon(
-                // close: X dismiss — standard Material
                 Icons.close,
                 size: 16,
                 color: AppColors.subtleGrey,
@@ -762,7 +756,7 @@ class _SymptomRow extends StatelessWidget {
   }
 }
 
-// Individual YES or NO pill button
+// YES or NO pill button
 class _AnswerPill extends StatelessWidget {
   final String label;
   final bool selected;
@@ -778,9 +772,9 @@ class _AnswerPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // YES selected: teal filled
-    // NO selected: outline only (matches mockup — circle outline, no fill)
-    // Unselected: greyed out
+    
+    
+    
     Color bg;
     Color textColor;
     Color border;
@@ -824,7 +818,7 @@ class _AnswerPill extends StatelessWidget {
   }
 }
 
-// ADD SYMPTOM ROW — inside each system section
+// Inline button to add a custom symptom inside a system section
 class _AddSymptomRow extends StatefulWidget {
   final String systemTitle;
   final ValueChanged<String> onAdd;
@@ -875,7 +869,6 @@ class _AddSymptomRowState extends State<_AddSymptomRow> {
                 mainAxisSize: MainAxisSize.min,
                 children: const [
                   Icon(
-                    // add_circle_outline: circle with + — standard Material
                     Icons.add_circle_outline,
                     size: 14,
                     color: AppColors.sectionHeader,
@@ -964,7 +957,7 @@ class _AddSymptomRowState extends State<_AddSymptomRow> {
   }
 }
 
-// custom system
+// Section where the doctor can add a custom system and symptom not in the list
 class _AddYourselfSection extends StatefulWidget {
   final List<CustomSystemEntry> entries;
   final ValueChanged<CustomSystemEntry> onAdd;
@@ -1015,14 +1008,14 @@ class _AddYourselfSectionState extends State<_AddYourselfSection> {
         border: Border.all(
           color: AppColors.sectionHeader,
           width: 1.5,
-          // Dashed look via BoxDecoration isn't native in Flutter,
-          // so using a solid slightly-transparent border instead
+          
+          
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Header ──
+          
           Container(
             decoration: BoxDecoration(
               color: AppColors.constitutional,
@@ -1065,7 +1058,7 @@ class _AddYourselfSectionState extends State<_AddYourselfSection> {
             ),
           ),
 
-          // ── Existing custom entries ──
+          
           if (widget.entries.isNotEmpty) ...[
             ...widget.entries.asMap().entries.map((entry) {
               final i = entry.key;
@@ -1134,7 +1127,7 @@ class _AddYourselfSectionState extends State<_AddYourselfSection> {
             const Divider(height: 1, color: AppColors.divider),
           ],
 
-          // ── Add form ──
+          
           if (_showForm) ...[
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
@@ -1226,7 +1219,7 @@ class _AddYourselfSectionState extends State<_AddYourselfSection> {
               ),
             ),
           ] else ...[
-            // Add button
+            
             Padding(
               padding: const EdgeInsets.all(14),
               child: GestureDetector(
@@ -1243,7 +1236,6 @@ class _AddYourselfSectionState extends State<_AddYourselfSection> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
                       Icon(
-                        // add: simple plus — standard Material
                         Icons.add,
                         color: AppColors.sectionHeader,
                         size: 18,
@@ -1312,7 +1304,6 @@ class _MiniTextField extends StatelessWidget {
   }
 }
 
-// negative history summary
 class _NegativeHistorySummary extends StatelessWidget {
   final List<String> negativeSymptoms;
   const _NegativeHistorySummary({required this.negativeSymptoms});
@@ -1333,7 +1324,6 @@ class _NegativeHistorySummary extends StatelessWidget {
           Row(
             children: const [
               Icon(
-                // remove_circle_outline: circle with minus — standard Material
                 Icons.remove_circle_outline,
                 size: 16,
                 color: AppColors.sectionHeader,
@@ -1418,4 +1408,3 @@ class _NextButton extends StatelessWidget {
     );
   }
 }
-
