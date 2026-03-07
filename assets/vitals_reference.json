@@ -1,0 +1,352 @@
+{
+  "vitals_reference": {
+    "blood_pressure": {
+      "guideline": "JNC 8 / ACC AHA 2017",
+      "unit": "mmHg",
+      "categories": [
+        {
+          "label": "Hypotension",
+          "systolic_max": 89,
+          "diastolic_max": 59,
+          "severity": "warning",
+          "advice": "Evaluate for causes of hypoperfusion or shock."
+        },
+        {
+          "label": "Normal",
+          "systolic_min": 90,
+          "systolic_max": 119,
+          "diastolic_min": 60,
+          "diastolic_max": 79,
+          "severity": "normal",
+          "advice": ""
+        },
+        {
+          "label": "Elevated",
+          "systolic_min": 120,
+          "systolic_max": 129,
+          "diastolic_max": 79,
+          "severity": "warning",
+          "advice": "Recommend lifestyle modifications and monitor."
+        },
+        {
+          "label": "Stage 1 HT",
+          "systolic_min": 130,
+          "systolic_max": 139,
+          "diastolic_min": 80,
+          "diastolic_max": 89,
+          "severity": "warning",
+          "advice": "Consider initiating antihypertensive therapy if indicated."
+        },
+        {
+          "label": "Stage 2 HT",
+          "systolic_min": 140,
+          "systolic_max": 179,
+          "diastolic_min": 90,
+          "diastolic_max": 109,
+          "severity": "danger",
+          "advice": "Initiate antihypertensive therapy and monitor closely."
+        },
+        {
+          "label": "Hypertensive Crisis",
+          "systolic_min": 180,
+          "diastolic_min": 110,
+          "severity": "critical",
+          "advice": "Immediate medical intervention required to prevent organ damage."
+        }
+      ]
+    },
+    "pulse": {
+      "guideline": "Standard clinical reference",
+      "unit": "beats/min",
+      "categories": [
+        {
+          "label": "Severe Bradycardia",
+          "max": 39,
+          "severity": "critical",
+          "advice": "Urgent evaluation for heart block or severe ischemia."
+        },
+        {
+          "label": "Bradycardia",
+          "min": 40,
+          "max": 59,
+          "severity": "warning",
+          "advice": "Evaluate for medication effects, hypothyroidism, or athletic conditioning."
+        },
+        {
+          "label": "Normal",
+          "min": 60,
+          "max": 100,
+          "severity": "normal",
+          "advice": ""
+        },
+        {
+          "label": "Tachycardia",
+          "min": 101,
+          "max": 150,
+          "severity": "warning",
+          "advice": "Assess for fever, pain, anxiety, or underlying disease."
+        },
+        {
+          "label": "Severe Tachycardia",
+          "min": 151,
+          "severity": "critical",
+          "advice": "Obtain immediate ECG to evaluate for tachyarrhythmias."
+        }
+      ]
+    },
+    "temperature": {
+      "guideline": "Standard clinical reference",
+      "unit_f": "°F",
+      "unit_c": "°C",
+      "normal_oral_f": 98.4,
+      "normal_oral_c": 37.0,
+      "categories": [
+        {
+          "label": "Hypothermia",
+          "max_f": 96.9,
+          "max_c": 36.0,
+          "severity": "danger",
+          "advice": "Initiate active rewarming and investigate underlying cause."
+        },
+        {
+          "label": "Normal",
+          "min_f": 97.0,
+          "max_f": 99.0,
+          "min_c": 36.1,
+          "max_c": 37.2,
+          "severity": "normal",
+          "advice": ""
+        },
+        {
+          "label": "Low-grade fever",
+          "min_f": 99.1,
+          "max_f": 101.0,
+          "min_c": 37.3,
+          "max_c": 38.3,
+          "severity": "warning",
+          "advice": "Monitor and evaluate for potential infection or inflammation."
+        },
+        {
+          "label": "High-grade fever",
+          "min_f": 101.1,
+          "max_f": 106.9,
+          "min_c": 38.4,
+          "max_c": 41.6,
+          "severity": "danger",
+          "advice": "Administer antipyretics and evaluate for severe infection."
+        },
+        {
+          "label": "Hyperpyrexia",
+          "min_f": 107.0,
+          "min_c": 41.7,
+          "severity": "critical",
+          "advice": "Immediate cooling measures required to prevent brain damage."
+        }
+      ]
+    },
+    "respiratory_rate": {
+      "guideline": "Standard clinical reference",
+      "unit": "breaths/min",
+      "categories": [
+        {
+          "label": "Bradypnoea",
+          "max": 11,
+          "severity": "danger",
+          "advice": "Assess for respiratory depression, neurological event, or drug overdose."
+        },
+        {
+          "label": "Normal",
+          "min": 12,
+          "max": 20,
+          "severity": "normal",
+          "advice": ""
+        },
+        {
+          "label": "Mild Tachypnoea",
+          "min": 21,
+          "max": 24,
+          "severity": "warning",
+          "advice": "Evaluate for mild respiratory distress, pain, or fever."
+        },
+        {
+          "label": "Moderate Tachypnoea",
+          "min": 25,
+          "max": 29,
+          "severity": "danger",
+          "advice": "Monitor closely for impending respiratory compromise."
+        },
+        {
+          "label": "Severe Tachypnoea",
+          "min": 30,
+          "severity": "critical",
+          "advice": "High risk of respiratory failure requiring immediate intervention."
+        }
+      ]
+    },
+    "spo2": {
+      "guideline": "BTS / WHO oxygen therapy guidelines",
+      "unit": "%",
+      "target_general": 95,
+      "target_copd": 88,
+      "categories": [
+        {
+          "label": "Severe Hypoxia",
+          "max": 84,
+          "severity": "critical",
+          "advice": "Immediate high-flow oxygen and airway management."
+        },
+        {
+          "label": "Moderate Hypoxia",
+          "min": 85,
+          "max": 89,
+          "severity": "danger",
+          "advice": "Administer supplemental oxygen and investigate cause."
+        },
+        {
+          "label": "Acceptable COPD target",
+          "min": 88,
+          "max": 92,
+          "severity": "warning",
+          "advice": "Target range for patients with known type II respiratory failure risk."
+        },
+        {
+          "label": "Mild Hypoxia",
+          "min": 90,
+          "max": 94,
+          "severity": "warning",
+          "advice": "Consider low-flow oxygen depending on clinical assessment."
+        },
+        {
+          "label": "Normal",
+          "min": 95,
+          "severity": "normal",
+          "advice": ""
+        }
+      ]
+    },
+    "bmi": {
+      "guideline": "WHO Asian-Pacific adjusted cutoffs",
+      "unit": "kg/m²",
+      "categories": [
+        {
+          "label": "Underweight",
+          "max": 18.4,
+          "severity": "warning",
+          "advice": "Evaluate for malnutrition, chronic disease, or eating disorder."
+        },
+        {
+          "label": "Normal",
+          "min": 18.5,
+          "max": 22.9,
+          "severity": "normal",
+          "advice": ""
+        },
+        {
+          "label": "Overweight",
+          "min": 23.0,
+          "max": 24.9,
+          "severity": "warning",
+          "advice": "Recommend dietary modification and increased physical activity."
+        },
+        {
+          "label": "Obese Class I",
+          "min": 25.0,
+          "max": 29.9,
+          "severity": "danger",
+          "advice": "Initiate structured weight management plan."
+        },
+        {
+          "label": "Obese Class II",
+          "min": 30.0,
+          "max": 34.9,
+          "severity": "danger",
+          "advice": "Aggressive weight management and assess for metabolic complications."
+        },
+        {
+          "label": "Obese Class III",
+          "min": 35.0,
+          "severity": "critical",
+          "advice": "High risk of severe metabolic complications, consider bariatric options."
+        }
+      ]
+    },
+    "glucose_fasting": {
+      "guideline": "ADA 2023",
+      "unit_mmol": "mmol/L",
+      "unit_mgdl": "mg/dL",
+      "categories": [
+        {
+          "label": "Hypoglycaemia",
+          "max_mmol": 3.8,
+          "max_mgdl": 69,
+          "severity": "critical",
+          "advice": "Administer fast-acting carbohydrates immediately."
+        },
+        {
+          "label": "Normal",
+          "min_mmol": 3.9,
+          "max_mmol": 5.5,
+          "min_mgdl": 70,
+          "max_mgdl": 99,
+          "severity": "normal",
+          "advice": ""
+        },
+        {
+          "label": "Prediabetes IFG",
+          "min_mmol": 5.6,
+          "max_mmol": 6.9,
+          "min_mgdl": 100,
+          "max_mgdl": 125,
+          "severity": "warning",
+          "advice": "Lifestyle changes recommended; recheck periodically."
+        },
+        {
+          "label": "Diabetes Mellitus",
+          "min_mmol": 7.0,
+          "min_mgdl": 126,
+          "severity": "danger",
+          "advice": "Confirm diagnosis and initiate antidiabetic management."
+        }
+      ]
+    },
+    "glucose_random": {
+      "guideline": "ADA 2023",
+      "unit_mmol": "mmol/L",
+      "unit_mgdl": "mg/dL",
+      "categories": [
+        {
+          "label": "Hypoglycaemia",
+          "max_mmol": 3.8,
+          "max_mgdl": 69,
+          "severity": "critical",
+          "advice": "Administer fast-acting carbohydrates immediately."
+        },
+        {
+          "label": "Normal",
+          "min_mmol": 3.9,
+          "max_mmol": 7.7,
+          "min_mgdl": 70,
+          "max_mgdl": 139,
+          "severity": "normal",
+          "advice": ""
+        },
+        {
+          "label": "Impaired",
+          "min_mmol": 7.8,
+          "max_mmol": 11.0,
+          "min_mgdl": 140,
+          "max_mgdl": 198,
+          "severity": "warning",
+          "advice": "Recommend fasting blood glucose or HbA1c test to evaluate."
+        },
+        {
+          "label": "Diabetes Mellitus",
+          "min_mmol": 11.1,
+          "min_mgdl": 199,
+          "severity": "danger",
+          "advice": "Evaluate for diabetes management."
+        }
+      ]
+    }
+  }
+}

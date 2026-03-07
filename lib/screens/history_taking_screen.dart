@@ -1,164 +1,186 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:mediscribe/models/patient_session.dart';
-import 'systemic_history_screen.dart'; 
+import 'package:flutter/services.dart';
+import 'systemic_history_screen.dart'; // ← uncomment when integrating
+
 import '../core/app_colors.dart';
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// KNOWLEDGE BASE SEARCH ENGINE
+// Searches symptoms, diagnoses, conditions, options from knowledge_base.json.
+// All "Add custom" fields across every section funnel through KBSearchService.
+// KBSearchService.init() loads and parses knowledge_base.json at startup.
+// To activate:
+//   1. Add to pubspec.yaml:  flutter: assets: - assets/knowledge_base.json
+//   2. Place knowledge_base.json in assets/ folder
+//   3. Call await KBSearchService.init() in main() before runApp — already done below
+// ═══════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════════
+// CLINICAL TERMS SERVICE
+// Loads clinical_terms.json — provides conditions, drugs, chips, relationships.
+// Call await ClinicalTermsService.init() in main() before runApp.
+// Add to pubspec.yaml: flutter: assets: - assets/clinical_terms.json
+// ═══════════════════════════════════════════════════════════════════════════════
+class ClinicalTermsService {
+  ClinicalTermsService._();
+  static Map<String, dynamic> _data = {};
+  static bool _loaded = false;
 
+  static Future<void> init() async {
+    if (_loaded) return;
+    try {
+      final raw = await rootBundle.loadString('assets/clinical_terms.json');
+      _data = (jsonDecode(raw) as Map<String, dynamic>)['clinical_terms'] as Map<String, dynamic>;
+      _loaded = true;
+    } catch (_) {
+      _loaded = true; // use fallbacks
+    }
+  }
+
+  static List<String> get commonConditions =>
+      List<String>.from(_data['common_conditions'] ?? _fallbackConditions);
+
+  static List<String> get commonDrugs =>
+      List<String>.from(_data['common_drugs'] ?? _fallbackDrugs);
+
+  static List<String> get conditionChips =>
+      List<String>.from(_data['condition_chips'] ?? _fallbackConditionChips);
+
+  static List<String> get drugChips =>
+      List<String>.from(_data['drug_chips'] ?? _fallbackDrugChips);
+
+  static List<String> get familyConditionChips =>
+      List<String>.from(_data['family_condition_chips'] ?? _fallbackFamilyChips);
+
+  static List<String> get familyRelationships =>
+      List<String>.from(_data['family_relationships'] ?? _fallbackRelationships);
+
+  // ── Fallbacks (used if JSON not yet in assets) ────────────────────────────
+  static const _fallbackConditionChips = [
+    'Diabetes', 'Hypertension', 'Asthma', 'Heart Disease', 'Tuberculosis', 'None',
+  ];
+  static const _fallbackDrugChips = [
+    'Aspirin', 'Metformin', 'Atorvastatin', 'Amlodipine', 'Lisinopril', 'Omeprazole',
+  ];
+  static const _fallbackFamilyChips = [
+    'Diabetes', 'Hypertension', 'Heart Disease', 'Cancer',
+    'Tuberculosis', 'Asthma', 'Mental Illness', 'Stroke',
+    'Kidney Disease', 'Liver Disease', 'Epilepsy', 'None',
+  ];
+  static const _fallbackRelationships = [
+    'Father', 'Mother', 'Brother', 'Sister', 'Son', 'Daughter',
+    'Paternal Uncle', 'Paternal Aunt', 'Maternal Uncle', 'Maternal Aunt',
+    'Paternal Grandfather', 'Paternal Grandmother', 'Maternal Grandfather', 'Maternal Grandmother',
+  ];
+  static const _fallbackConditions = [
+    'Diabetes mellitus', 'Hypertension', 'Asthma',
+    'Tuberculosis', 'Chronic Kidney Disease', 'Ischemic Heart Disease',
+  ];
+  static const _fallbackDrugs = [
+    'Aspirin', 'Metformin', 'Amlodipine', 'Lisinopril',
+    'Omeprazole', 'Salbutamol', 'Prednisolone',
+  ];
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// KNOWLEDGE BASE SEARCH ENGINE
+// Searches symptoms, diagnoses, conditions, options from knowledge_base.json
+// + conditions/drugs from clinical_terms.json via ClinicalTermsService.
+// ═══════════════════════════════════════════════════════════════════════════════
 class KBSearchResult {
   final String term;
-  final String source; // where it came from, e.g. "CVS · Symptoms", "Diagnosis"
-
+  final String source;
   const KBSearchResult({required this.term, required this.source});
 }
 
 class KBSearchService {
   KBSearchService._();
+  static List<KBSearchResult> _allTerms = [];
+  static bool _loaded = false;
 
-  // All terms from knowledge_base.json
-  // Symptoms from question options + diagnosis names + condition names
-  // Replace/extend this list from your real JSON parsing
-  static const List<KBSearchResult> _allTerms = [
-    // CVS symptoms 
-    KBSearchResult(term: 'Chest pain / retrosternal tightness',    source: 'CVS · Symptoms'),
-    KBSearchResult(term: 'Breathlessness on exertion (Dyspnea)',   source: 'CVS · Symptoms'),
-    KBSearchResult(term: 'Orthopnea (breathless lying flat)',       source: 'CVS · Symptoms'),
-    KBSearchResult(term: 'Paroxysmal nocturnal dyspnea (PND)',     source: 'CVS · Symptoms'),
-    KBSearchResult(term: 'Palpitations',                           source: 'CVS · Symptoms'),
-    KBSearchResult(term: 'Ankle swelling / edema',                 source: 'CVS · Symptoms'),
-    KBSearchResult(term: 'Syncope / pre-syncope',                  source: 'CVS · Symptoms'),
-    KBSearchResult(term: 'Retrosternal location',                  source: 'CVS · Chest Pain'),
-    KBSearchResult(term: 'Radiation to arm / jaw / back',          source: 'CVS · Chest Pain'),
-    KBSearchResult(term: 'Tachycardia (>100 bpm)',                 source: 'CVS · Pulse'),
-    KBSearchResult(term: 'Bradycardia (<50 bpm)',                  source: 'CVS · Pulse'),
-    KBSearchResult(term: 'Irregularly irregular rhythm (AF)',      source: 'CVS · Pulse'),
-    KBSearchResult(term: 'Collapsing / water-hammer pulse',        source: 'CVS · Pulse'),
-    KBSearchResult(term: 'Pulsus paradoxus',                       source: 'CVS · Pulse'),
-    KBSearchResult(term: 'Central cyanosis',                       source: 'CVS · GPE'),
-    KBSearchResult(term: 'Peripheral cyanosis',                    source: 'CVS · GPE'),
-    KBSearchResult(term: 'Clubbing of fingers',                    source: 'CVS · GPE'),
-    KBSearchResult(term: 'Raised JVP',                             source: 'CVS · GPE'),
-    KBSearchResult(term: 'Bilateral ankle / leg edema',            source: 'CVS · GPE'),
-    KBSearchResult(term: 'Apex beat displaced laterally',          source: 'CVS · Palpation'),
-    KBSearchResult(term: 'Thrill palpable (palpable murmur)',      source: 'CVS · Palpation'),
-    KBSearchResult(term: 'Left ventricular heave',                 source: 'CVS · Palpation'),
-    KBSearchResult(term: 'S3 gallop present',                      source: 'CVS · Auscultation'),
-    KBSearchResult(term: 'S4 gallop present',                      source: 'CVS · Auscultation'),
-    KBSearchResult(term: 'Murmur at Mitral area',                  source: 'CVS · Auscultation'),
-    KBSearchResult(term: 'Murmur at Aortic area',                  source: 'CVS · Auscultation'),
-    KBSearchResult(term: 'Pericardial friction rub',               source: 'CVS · Auscultation'),
-    KBSearchResult(term: 'Muffled heart sounds',                   source: 'CVS · Auscultation'),
-    // ── CVS diagnoses ──
-    KBSearchResult(term: 'Cardiac Tamponade',                      source: 'CVS · Diagnosis'),
-    KBSearchResult(term: 'Myocardial Infarction',                  source: 'CVS · Diagnosis'),
-    KBSearchResult(term: 'Left Heart Failure',                     source: 'CVS · Diagnosis'),
-    KBSearchResult(term: 'Atrial Fibrillation',                    source: 'CVS · Diagnosis'),
-    KBSearchResult(term: 'Aortic Stenosis',                        source: 'CVS · Diagnosis'),
-    // ── Respiratory symptoms ──
-    KBSearchResult(term: 'Cough (dry)',                            source: 'RESP · Symptoms'),
-    KBSearchResult(term: 'Cough (productive with sputum)',         source: 'RESP · Symptoms'),
-    KBSearchResult(term: 'Hemoptysis (coughing blood)',            source: 'RESP · Symptoms'),
-    KBSearchResult(term: 'Breathlessness / dyspnea',               source: 'RESP · Symptoms'),
-    KBSearchResult(term: 'Chest pain (pleuritic)',                 source: 'RESP · Symptoms'),
-    KBSearchResult(term: 'Wheeze',                                 source: 'RESP · Symptoms'),
-    KBSearchResult(term: 'Stridor (harsh inspiratory sound)',      source: 'RESP · Symptoms'),
-    KBSearchResult(term: 'Rusty colored sputum (pneumonia)',       source: 'RESP · Sputum'),
-    KBSearchResult(term: 'Frothy / pink tinged sputum',           source: 'RESP · Sputum'),
-    KBSearchResult(term: 'Tachypnea (RR > 20/min)',               source: 'RESP · Inspection'),
-    KBSearchResult(term: 'Accessory muscle use',                   source: 'RESP · Inspection'),
-    KBSearchResult(term: 'Barrel chest (increased AP diameter)',   source: 'RESP · Inspection'),
-    KBSearchResult(term: 'Stony dull percussion',                  source: 'RESP · Percussion'),
-    KBSearchResult(term: 'Hyper-resonant percussion',              source: 'RESP · Percussion'),
-    KBSearchResult(term: 'Bronchial breathing',                    source: 'RESP · Auscultation'),
-    KBSearchResult(term: 'Crepitations / crackles',               source: 'RESP · Auscultation'),
-    KBSearchResult(term: 'Pleural rub',                            source: 'RESP · Auscultation'),
-    // ── Respiratory diagnoses ──
-    KBSearchResult(term: 'Tension Pneumothorax',                   source: 'RESP · Diagnosis'),
-    KBSearchResult(term: 'Upper Airway Obstruction',               source: 'RESP · Diagnosis'),
-    KBSearchResult(term: 'Pleural Effusion',                       source: 'RESP · Diagnosis'),
-    KBSearchResult(term: 'Pneumonia / Consolidation',              source: 'RESP · Diagnosis'),
-    KBSearchResult(term: 'Asthma / COPD',                         source: 'RESP · Diagnosis'),
-    // ── Abdominal symptoms ──
-    KBSearchResult(term: 'Abdominal pain',                         source: 'ABD · Symptoms'),
-    KBSearchResult(term: 'Hematemesis (blood in vomit)',           source: 'ABD · Symptoms'),
-    KBSearchResult(term: 'Melena (black tarry stools)',            source: 'ABD · Symptoms'),
-    KBSearchResult(term: 'Fresh rectal bleeding (hematochezia)',   source: 'ABD · Symptoms'),
-    KBSearchResult(term: 'Abdominal distension',                   source: 'ABD · Symptoms'),
-    KBSearchResult(term: 'Jaundice',                               source: 'ABD · Symptoms'),
-    KBSearchResult(term: 'Caput medusae (dilated abdominal veins)',source: 'ABD · Inspection'),
-    KBSearchResult(term: 'Rebound tenderness (peritoneal)',        source: 'ABD · Palpation'),
-    KBSearchResult(term: 'Muscle guarding / rigidity',            source: 'ABD · Palpation'),
-    KBSearchResult(term: 'Hepatomegaly',                           source: 'ABD · Palpation'),
-    KBSearchResult(term: 'Splenomegaly',                           source: 'ABD · Palpation'),
-    KBSearchResult(term: 'Shifting dullness (ascites)',            source: 'ABD · Percussion'),
-    KBSearchResult(term: 'Fluid thrill positive (ascites)',        source: 'ABD · Percussion'),
-    // ── Abdominal diagnoses ──
-    KBSearchResult(term: 'Peritonitis',                            source: 'ABD · Diagnosis'),
-    KBSearchResult(term: 'Upper GI Bleed',                        source: 'ABD · Diagnosis'),
-    KBSearchResult(term: 'Liver Cirrhosis with Ascites',          source: 'ABD · Diagnosis'),
-    KBSearchResult(term: 'Appendicitis',                           source: 'ABD · Diagnosis'),
-    KBSearchResult(term: 'Bowel Obstruction',                      source: 'ABD · Diagnosis'),
-    // ── Neurological symptoms ──
-    KBSearchResult(term: 'Aphasia (cannot understand or produce speech)', source: 'NEURO · Symptoms'),
-    KBSearchResult(term: 'Dysarthria (mechanical difficulty speaking)',   source: 'NEURO · Symptoms'),
-    KBSearchResult(term: 'Hemiplegia (one side affected)',               source: 'NEURO · Motor'),
-    KBSearchResult(term: 'Paraplegia (both legs affected)',              source: 'NEURO · Motor'),
-    KBSearchResult(term: 'Spasticity (clasp-knife — UMN)',              source: 'NEURO · Tone'),
-    KBSearchResult(term: 'Rigidity — cog-wheel (Parkinsonian)',         source: 'NEURO · Tone'),
-    KBSearchResult(term: 'Babinski Sign POSITIVE (UMN lesion)',         source: 'NEURO · Reflexes'),
-    KBSearchResult(term: 'Neck rigidity PRESENT',                        source: 'NEURO · Meningeal'),
-    KBSearchResult(term: 'Kernig\'s Sign POSITIVE',                     source: 'NEURO · Meningeal'),
-    KBSearchResult(term: 'Brudzinski\'s Sign POSITIVE',                 source: 'NEURO · Meningeal'),
-    KBSearchResult(term: 'Sensory level present (spinal cord lesion)',   source: 'NEURO · Sensory'),
-    KBSearchResult(term: 'Romberg\'s test positive',                    source: 'NEURO · Coordination'),
-    // ── Neurological diagnoses ──
-    KBSearchResult(term: 'Meningitis',                                   source: 'NEURO · Diagnosis'),
-    KBSearchResult(term: 'Raised Intracranial Pressure',                 source: 'NEURO · Diagnosis'),
-    KBSearchResult(term: 'Stroke / CVA',                                 source: 'NEURO · Diagnosis'),
-    KBSearchResult(term: 'Spinal Cord Compression',                      source: 'NEURO · Diagnosis'),
-    KBSearchResult(term: 'Peripheral Neuropathy',                        source: 'NEURO · Diagnosis'),
-    // ── Common conditions (for known conditions / family history) ──
-    KBSearchResult(term: 'Diabetes mellitus',                            source: 'Conditions'),
-    KBSearchResult(term: 'Hypertension',                                 source: 'Conditions'),
-    KBSearchResult(term: 'Asthma',                                       source: 'Conditions'),
-    KBSearchResult(term: 'Heart Disease',                                source: 'Conditions'),
-    KBSearchResult(term: 'Tuberculosis',                                 source: 'Conditions'),
-    KBSearchResult(term: 'Chronic Kidney Disease',                       source: 'Conditions'),
-    KBSearchResult(term: 'Hypothyroidism',                               source: 'Conditions'),
-    KBSearchResult(term: 'Hyperthyroidism',                              source: 'Conditions'),
-    KBSearchResult(term: 'Chronic Obstructive Pulmonary Disease (COPD)', source: 'Conditions'),
-    KBSearchResult(term: 'Ischemic Heart Disease',                       source: 'Conditions'),
-    KBSearchResult(term: 'Rheumatoid Arthritis',                        source: 'Conditions'),
-    KBSearchResult(term: 'Systemic Lupus Erythematosus (SLE)',          source: 'Conditions'),
-    KBSearchResult(term: 'Peptic Ulcer Disease',                        source: 'Conditions'),
-    KBSearchResult(term: 'Cancer',                                       source: 'Conditions'),
-    KBSearchResult(term: 'Stroke',                                       source: 'Conditions'),
-    KBSearchResult(term: 'Mental Illness',                               source: 'Conditions'),
-    // ── Common drugs ──
-    KBSearchResult(term: 'Aspirin',                                      source: 'Drugs'),
-    KBSearchResult(term: 'Metformin',                                    source: 'Drugs'),
-    KBSearchResult(term: 'Atorvastatin',                                 source: 'Drugs'),
-    KBSearchResult(term: 'Amlodipine',                                   source: 'Drugs'),
-    KBSearchResult(term: 'Lisinopril',                                   source: 'Drugs'),
-    KBSearchResult(term: 'Omeprazole',                                   source: 'Drugs'),
-    KBSearchResult(term: 'Metoprolol',                                   source: 'Drugs'),
-    KBSearchResult(term: 'Warfarin',                                     source: 'Drugs'),
-    KBSearchResult(term: 'Insulin',                                      source: 'Drugs'),
-    KBSearchResult(term: 'Salbutamol',                                   source: 'Drugs'),
-    KBSearchResult(term: 'Prednisolone',                                 source: 'Drugs'),
-    KBSearchResult(term: 'Amoxicillin',                                  source: 'Drugs'),
-    KBSearchResult(term: 'Ciprofloxacin',                               source: 'Drugs'),
-    KBSearchResult(term: 'Paracetamol',                                  source: 'Drugs'),
-    KBSearchResult(term: 'Ibuprofen',                                    source: 'Drugs'),
-    KBSearchResult(term: 'Furosemide',                                   source: 'Drugs'),
-    KBSearchResult(term: 'Digoxin',                                      source: 'Drugs'),
-    KBSearchResult(term: 'Clopidogrel',                                  source: 'Drugs'),
-    KBSearchResult(term: 'Enoxaparin',                                   source: 'Drugs'),
+  static Future<void> init() async {
+    if (_loaded) return;
+    // Init ClinicalTermsService first so conditions/drugs come from JSON
+    await ClinicalTermsService.init();
+    try {
+      final raw = await rootBundle.loadString('assets/knowledge_base.json');
+      final json = jsonDecode(raw) as Map<String, dynamic>;
+      _allTerms = _parseFromJson(json);
+      _loaded = true;
+    } catch (_) {
+      _allTerms = _builtInConditionsAndDrugs();
+      _loaded = true;
+    }
+  }
+
+  static List<KBSearchResult> _parseFromJson(Map<String, dynamic> json) {
+    final List<KBSearchResult> results = [];
+    final examinations = json['knowledge_base']['examinations'] as List;
+
+    const prefixMap = {
+      'CVS_001':   'CVS',
+      'RESP_001':  'RESP',
+      'ABD_001':   'ABD',
+      'NEURO_001': 'NEURO',
+    };
+
+    String phaseLabel(String phase) {
+      const map = {
+        'history': 'Symptoms', 'general_examination': 'GPE',
+        'pulse_examination': 'Pulse', 'precordium_inspection': 'Inspection',
+        'precordium_palpation': 'Palpation', 'auscultation': 'Auscultation',
+        'auscultation_detail': 'Auscultation', 'tamponade_assessment': 'Assessment',
+        'pnd_assessment': 'Assessment', 'inspection': 'Inspection',
+        'palpation': 'Palpation', 'palpation_light': 'Palpation',
+        'palpation_deep': 'Palpation', 'percussion': 'Percussion',
+        'consolidation_assessment': 'Assessment', 'effusion_assessment': 'Assessment',
+        'pneumothorax_assessment': 'Assessment', 'stridor_assessment': 'Assessment',
+        'ascites_assessment': 'Assessment', 'peritonitis_assessment': 'Assessment',
+        'upper_gi_bleed': 'Assessment', 'consciousness': 'Consciousness',
+        'higher_functions': 'Higher Functions', 'cranial_nerves': 'Cranial Nerves',
+        'motor_system': 'Motor', 'reflexes': 'Reflexes', 'sensory_system': 'Sensory',
+        'coordination': 'Coordination', 'meningeal_signs': 'Meningeal',
+        'UMN_localization': 'Localisation', 'LMN_localization': 'Localisation',
+        'meningitis_confirmation': 'Assessment',
+      };
+      return map[phase] ?? phase.replaceAll('_', ' ');
+    }
+
+    for (final exam in examinations) {
+      final examId    = exam['examination_id'] as String;
+      final prefix    = prefixMap[examId] ?? examId;
+      final questions = exam['questions'] as List;
+      final diagnoses = exam['diagnoses'] as List;
+      for (final q in questions) {
+        final phase   = q['phase'] as String;
+        final options = q['options'] as List;
+        final source  = '$prefix · ${phaseLabel(phase)}';
+        for (final opt in options) {
+          final term = opt as String;
+          if (term.toLowerCase().startsWith('no ') ||
+              term.toLowerCase().startsWith('normal') ||
+              term.toLowerCase().startsWith('absent (') ||
+              term.toLowerCase() == 'none') continue;
+          results.add(KBSearchResult(term: term, source: source));
+        }
+      }
+      for (final dx in diagnoses) {
+        results.add(KBSearchResult(term: dx['name'] as String, source: '$prefix · Diagnosis'));
+      }
+    }
+    // Conditions and drugs now come from clinical_terms.json via ClinicalTermsService
+    results.addAll(_builtInConditionsAndDrugs());
+    return results;
+  }
+
+  // Now reads from ClinicalTermsService (which loaded clinical_terms.json)
+  static List<KBSearchResult> _builtInConditionsAndDrugs() => [
+    ...ClinicalTermsService.commonConditions
+        .map((c) => KBSearchResult(term: c, source: 'Conditions')),
+    ...ClinicalTermsService.commonDrugs
+        .map((d) => KBSearchResult(term: d, source: 'Drugs')),
   ];
 
-  /// Single universal search function — used by every "Add custom" field.
-  /// [query] — what the user typed
-  /// [filter] — optional source filter e.g. 'Drugs', 'Conditions', 'CVS'
-  /// [alreadySelected] — items already chosen, excluded from results
   static List<KBSearchResult> search(
     String query, {
     String? filter,
@@ -175,7 +197,9 @@ class KBSearchService {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
 // DATA MODELS
+// ═══════════════════════════════════════════════════════════════════════════════
 class ComplaintDetail {
   String complaint;
   int durationValue;
@@ -240,7 +264,15 @@ class HistoryFormData {
   String patientGender = 'Male'; // 'Male' | 'Female' | 'Other'
 }
 
-void main() => runApp(const _PreviewApp());
+// ═══════════════════════════════════════════════════════════════════════════════
+// STANDALONE ENTRY
+// ═══════════════════════════════════════════════════════════════════════════════
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await ClinicalTermsService.init(); // loads clinical_terms.json (conditions, drugs, chips)
+  await KBSearchService.init(); // parses knowledge_base.json into search index
+  runApp(const _PreviewApp());
+}
 
 class _PreviewApp extends StatelessWidget {
   const _PreviewApp();
@@ -262,7 +294,9 @@ class _PreviewApp extends StatelessWidget {
   }
 }
 
-// history taking , 3 pages
+// ═══════════════════════════════════════════════════════════════════════════════
+// HISTORY TAKING SCREEN — 3-page flow
+// ═══════════════════════════════════════════════════════════════════════════════
 class HistoryTakingScreen extends StatefulWidget {
   const HistoryTakingScreen({super.key});
 
@@ -288,17 +322,28 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen> {
         curve: Curves.easeInOut,
       );
     } else {
+      // ══════════════════════════════════════════════════════════════════════
       // NAVIGATION TO SYSTEMIC HISTORY SCREEN
-      Navigator.push(
+      // Uncomment the import at top of file and the push below:
+       Navigator.push(
         context,
        MaterialPageRoute(
-         builder: (_) => SystemicHistoryScreen(
-           patientGender: _formData.patientGender,
-          chiefComplaints: _formData.complaints,
-         ),
+          builder: (_) => SystemicHistoryScreen(
+            patientGender: _formData.patientGender,
+             chiefComplaints: _formData.complaints,
+     ),
+     ),
+     );
+      // ══════════════════════════════════════════════════════════════════════
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Uncomment Navigator.push in _nextPage() to go to SystemicHistoryScreen',
+          ),
+          backgroundColor: AppColors.sectionHeader,
+          duration: Duration(seconds: 4),
         ),
-    );
-      // mueehhehehe
+      );
     }
   }
 
@@ -358,7 +403,10 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen> {
   }
 }
 
-//shared widget
+// ═══════════════════════════════════════════════════════════════════════════════
+// SHARED WIDGETS
+// ═══════════════════════════════════════════════════════════════════════════════
+
 class _HistoryAppBar extends StatelessWidget {
   final String title;
   final VoidCallback onBack;
@@ -574,9 +622,11 @@ class _TagChip extends StatelessWidget {
   }
 }
 
+// ───────────────────────────────────────────────────────────────────────────────
 // KB SEARCH FIELD — the universal "Add custom" widget used across all sections.
 // Shows a search pill → expands to a TextField that queries KBSearchService
 // → shows a dropdown of matched results + "Add as custom" option at bottom.
+// ───────────────────────────────────────────────────────────────────────────────
 class _KBSearchField extends StatefulWidget {
   final String hint;              // placeholder when typing
   final String buttonLabel;       // text on the collapsed pill e.g. "Add symptom"
@@ -903,7 +953,9 @@ class _SmallDropdown extends StatelessWidget {
   }
 }
 
-// page 1 of presenting complaint+History of patient(age etc )
+// ═══════════════════════════════════════════════════════════════════════════════
+// PAGE 1 — PRESENTING COMPLAINTS + HOPI
+// ═══════════════════════════════════════════════════════════════════════════════
 class _Page1ComplaintsHOPI extends StatefulWidget {
   final HistoryFormData formData;
   final VoidCallback onChanged;
@@ -943,6 +995,7 @@ class _Page1State extends State<_Page1ComplaintsHOPI> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
+          // ── Presenting Complaints ──────────────────────────────────────────
           const _SectionBar(title: 'Presenting Complaints'),
           Padding(
             padding: const EdgeInsets.all(16),
@@ -971,6 +1024,7 @@ class _Page1State extends State<_Page1ComplaintsHOPI> {
             ),
           ),
 
+          // ── History of Present Illness ─────────────────────────────────────
           const _SectionBar(title: 'History of Present Illness'),
           const SizedBox(height: 8),
 
@@ -1109,7 +1163,9 @@ class _HOPICardState extends State<_HOPICard> {
   }
 }
 
-//  PAST TREATMENT + SOCIO-ECONOMIC + PERSONAL + DRUG HISTORY
+// ═══════════════════════════════════════════════════════════════════════════════
+// PAGE 2 — PAST TREATMENT + SOCIO-ECONOMIC + PERSONAL + DRUG HISTORY
+// ═══════════════════════════════════════════════════════════════════════════════
 class _Page2PastPersonalHistory extends StatefulWidget {
   final HistoryFormData formData;
   final VoidCallback onChanged;
@@ -1120,14 +1176,9 @@ class _Page2PastPersonalHistory extends StatefulWidget {
 }
 
 class _Page2State extends State<_Page2PastPersonalHistory> {
-  // Preset chips — user can add more via KB search
-  static const List<String> _knownConditionChips = [
-    'Diabetes', 'Hypertension', 'Asthma', 'Heart Disease', 'Tuberculosis', 'None',
-  ];
-  static const List<String> _drugChips = [
-    'Aspirin', 'Metformin', 'Atorvastatin', 'Amlodipine', 'Lisinopril',
-    'Omeprazole', 'Metoprolol', 'Warfarin', 'Insulin', 'Salbutamol',
-  ];
+  // Chips come from clinical_terms.json via ClinicalTermsService
+  List<String> get _knownConditionChips => ClinicalTermsService.conditionChips;
+  List<String> get _drugChips => ClinicalTermsService.drugChips;
 
   @override
   Widget build(BuildContext context) {
@@ -1139,7 +1190,7 @@ class _Page2State extends State<_Page2PastPersonalHistory> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
-          // Past treatment history 
+          // ── Past Treatment History ─────────────────────────────────────────
           const _SectionBar(title: 'Past Treatment History'),
           Container(
             margin: const EdgeInsets.all(16),
@@ -1221,6 +1272,7 @@ class _Page2State extends State<_Page2PastPersonalHistory> {
             ]),
           ),
 
+          // ── Socio-economic History ─────────────────────────────────────────
           const _SectionBar(title: 'Socio-economic History'),
           Container(
             margin: const EdgeInsets.all(16),
@@ -1265,6 +1317,7 @@ class _Page2State extends State<_Page2PastPersonalHistory> {
             ]),
           ),
 
+          // ── Personal History ───────────────────────────────────────────────
           const _SectionBar(title: 'Personal History'),
           Container(
             margin: const EdgeInsets.all(16),
@@ -1290,6 +1343,7 @@ class _Page2State extends State<_Page2PastPersonalHistory> {
             ]),
           ),
 
+          // ── Drug History ───────────────────────────────────────────────────
           const _SectionBar(title: 'Drug History'),
           Container(
             margin: const EdgeInsets.all(16),
@@ -1373,7 +1427,9 @@ class _Page2State extends State<_Page2PastPersonalHistory> {
   }
 }
 
-//family history : PAGE 3
+// ═══════════════════════════════════════════════════════════════════════════════
+// PAGE 3 — FAMILY HISTORY
+// ═══════════════════════════════════════════════════════════════════════════════
 class _Page3FamilyHistory extends StatefulWidget {
   final HistoryFormData formData;
   final VoidCallback onChanged;
@@ -1493,7 +1549,7 @@ class _Page3State extends State<_Page3FamilyHistory> {
   }
 }
 
-// family member card
+// ── Family Member Card ────────────────────────────────────────────────────────
 class _FamilyMemberCard extends StatefulWidget {
   final FamilyMember member;
   final int index;
@@ -1510,19 +1566,9 @@ class _FamilyMemberCard extends StatefulWidget {
 class _FamilyMemberCardState extends State<_FamilyMemberCard> {
   bool _expanded = true;
 
-  static const List<String> _relationships = [
-    'Father', 'Mother', 'Brother', 'Sister',
-    'Paternal Grandfather', 'Paternal Grandmother',
-    'Maternal Grandfather', 'Maternal Grandmother',
-    'Uncle', 'Aunt', 'Son', 'Daughter', 'Other',
-  ];
-
-  // Preset condition chips per card
-  static const List<String> _conditionChips = [
-    'Diabetes', 'Hypertension', 'Heart Disease',
-    'Cancer', 'Tuberculosis', 'Asthma', 'Mental Illness', 'Stroke',
-    'Kidney Disease', 'Liver Disease', 'None',
-  ];
+  // Relationships and condition chips come from clinical_terms.json via ClinicalTermsService
+  List<String> get _relationships => ClinicalTermsService.familyRelationships;
+  List<String> get _conditionChips => ClinicalTermsService.familyConditionChips;
 
   String get _cardTitle => widget.member.relationship.isNotEmpty
       ? widget.member.relationship
@@ -1667,8 +1713,5 @@ class _FamilyMemberCardState extends State<_FamilyMemberCard> {
         ],
       ]),
     );
-
   }
 }
-
-

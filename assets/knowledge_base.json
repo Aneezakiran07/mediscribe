@@ -12,6 +12,9 @@
           {
             "id": "CVS_Q01",
             "phase": "history",
+            "phase_title": "History — Cardiac Symptoms",
+            "instruction": "Ask about exertional dyspnea, orthopnea, paroxysmal nocturnal dyspnea waking the patient at night, chest pain, and palpitations.",
+            "tip": "Tip: Paroxysmal nocturnal dyspnea is precipitated by increased venous return to the heart in the recumbent position, a classic feature of left heart failure.",
             "text": "What cardiac symptoms does the patient report?",
             "input_type": "multi_select",
             "options": [
@@ -40,6 +43,9 @@
           {
             "id": "CVS_Q02",
             "phase": "history",
+            "phase_title": "History — Chest Pain Characterization",
+            "instruction": "Ask the patient to indicate the site of pain, its radiation, and relation to exertion. Inquire if pain is relieved by rest or sublingual nitroglycerin.",
+            "tip": "Tip: Pain of myocardial infarction usually lasts for more than 30 minutes and is not relieved by sublingual nitrates or rest.",
             "text": "Characterize the chest pain (if present):",
             "input_type": "multi_select",
             "options": [
@@ -70,6 +76,9 @@
           {
             "id": "CVS_Q03",
             "phase": "general_examination",
+            "phase_title": "General Physical Examination",
+            "instruction": "Inspect nails for clubbing and splinter hemorrhages, conjunctiva for pallor, and lips/tongue for central cyanosis. Check lower body for pitting edema.",
+            "tip": "Tip: Central cyanosis is due to inability of lungs to oxygenate blood or a right-to-left cardiac shunt, affecting both lips and tongue, whereas peripheral cyanosis spares the tongue.",
             "text": "General physical examination findings:",
             "input_type": "multi_select",
             "options": [
@@ -100,6 +109,9 @@
           {
             "id": "CVS_Q04",
             "phase": "pulse_examination",
+            "phase_title": "Pulse Characteristics",
+            "instruction": "Palpate radial pulse for rate and rhythm. Palpate carotid for character and volume. Compare radial to femoral to detect radio-femoral delay.",
+            "tip": "Tip: A collapsing (water-hammer) pulse is best felt by lifting the patient's arm suddenly while grasping their wrist; it reflects a wide pulse pressure.",
             "text": "Pulse characteristics:",
             "input_type": "multi_select",
             "options": [
@@ -130,6 +142,9 @@
           {
             "id": "CVS_Q05",
             "phase": "precordium_inspection",
+            "phase_title": "Precordium Inspection",
+            "instruction": "Expose the precordium fully. Inspect for chest deformities, surgical scars, and abnormal pulsations.",
+            "tip": "Tip: Normal apex beat is in the 4th or 5th intercostal space, about 1 cm medial to the midclavicular line.",
             "text": "Precordium inspection findings:",
             "input_type": "multi_select",
             "options": [
@@ -154,6 +169,9 @@
           {
             "id": "CVS_Q06",
             "phase": "precordium_palpation",
+            "phase_title": "Precordium Palpation",
+            "instruction": "Locate the apex beat with the flat of your hand, then pinpoint with one finger. Assess character (tapping vs heaving). Feel for parasternal heaves and thrills.",
+            "tip": "Tip: A tapping apex beat represents a palpable first heart sound, highly characteristic of Mitral Stenosis.",
             "text": "Precordium palpation findings:",
             "input_type": "multi_select",
             "options": [
@@ -180,6 +198,9 @@
           {
             "id": "CVS_Q07",
             "phase": "auscultation",
+            "phase_title": "Auscultation Findings",
+            "instruction": "Auscultate using the diaphragm, and the apex with the bell. Palpate the carotid artery simultaneously to time the sounds (systole vs diastole).",
+            "tip": "Tip: Fixed splitting of S2 (interval remains constant during inspiration and expiration) is the most important clinical sign of an Atrial Septal Defect.",
             "text": "Auscultation findings at valve areas:",
             "input_type": "multi_select",
             "options": [
@@ -210,6 +231,9 @@
           {
             "id": "CVS_Q08_FOLLOWUP",
             "phase": "auscultation_detail",
+            "phase_title": "Auscultation — Murmur Detail",
+            "instruction": "Determine timing (systolic/diastolic), pitch, and radiation. Assess effect of respiration.",
+            "tip": "Tip: Right-sided murmurs typically increase on inspiration, left-sided on expiration.",
             "text": "FOLLOWUP — Characterize the murmur heard:",
             "input_type": "multi_select",
             "options": [
@@ -242,6 +266,9 @@
           {
             "id": "CVS_Q09_FOLLOWUP",
             "phase": "tamponade_assessment",
+            "phase_title": "Cardiac Tamponade Assessment",
+            "instruction": "Check for pulsus paradoxus by noting if the pulse volume decreases significantly during inspiration, and confirm >10mmHg drop with a sphygmomanometer.",
+            "tip": "Tip: Beck's Triad (Hypotension, Raised JVP, Muffled heart sounds) combined with Pulsus Paradoxus is a critical emergency signaling Cardiac Tamponade.",
             "text": "FOLLOWUP — Pulsus paradoxus detected. Assess for cardiac tamponade signs:",
             "input_type": "multi_select",
             "options": [
@@ -266,6 +293,9 @@
           {
             "id": "CVS_Q10_FOLLOWUP",
             "phase": "pnd_assessment",
+            "phase_title": "Left Heart Failure Assessment",
+            "instruction": "Auscultate lung bases for fine crepitations and the heart for an S3 gallop. Check pulse for alternans.",
+            "tip": "Tip: Pulsus alternans is an important sign of severe left ventricular failure.",
             "text": "FOLLOWUP — PND reported. Assess for left heart failure features:",
             "input_type": "multi_select",
             "options": [
@@ -374,7 +404,7 @@
           {
             "id": "CVS_DX01",
             "name": "Cardiac Tamponade",
-            "min_score_threshold": 10,
+            "min_score_threshold": 6,
             "max_score": 28,
             "key_facts_required": [
               "pulse_findings",
@@ -382,24 +412,36 @@
               "auscultation_findings"
             ],
             "description": "Life-threatening compression of the heart by pericardial fluid. Classic Beck triad: muffled heart sounds + raised JVP + hypotension. Pulsus paradoxus is the hallmark sign on pulse examination.",
+            "key_findings": [
+              "Pulsus paradoxus (weak / absent on inspiration)",
+              "Raised JVP",
+              "Muffled heart sounds",
+              "Kussmaul's sign (JVP rises on inspiration)"
+            ],
             "score_rationale": "Pulsus paradoxus(3)+tachycardia(1) | raised JVP(3)+muffled sounds(3)+hypotension(3) | muffled heart sounds(3) = 16"
           },
           {
             "id": "CVS_DX02",
             "name": "Myocardial Infarction",
-            "min_score_threshold": 8,
+            "min_score_threshold": 5,
             "max_score": 22,
             "key_facts_required": [
               "cvs_symptoms",
               "chest_pain_character"
             ],
             "description": "Acute coronary occlusion causing myocardial necrosis. Chest pain lasting >30 minutes, not relieved by rest or sublingual nitrates. May radiate to arm/jaw/back. Requires emergency reperfusion.",
+            "key_findings": [
+              "Duration more than 30 minutes (MI pattern)",
+              "Not relieved by rest or nitrates",
+              "Chest pain / retrosternal tightness",
+              "Radiation to arm / jaw / back"
+            ],
             "score_rationale": "Chest pain(2)+dyspnea(1) | duration>30min(3)+not relieved(3)+radiation(2)+retrosternal(1) = 12"
           },
           {
             "id": "CVS_DX03",
             "name": "Left Heart Failure",
-            "min_score_threshold": 16,
+            "min_score_threshold": 5,
             "max_score": 45,
             "key_facts_required": [
               "cvs_symptoms",
@@ -408,23 +450,36 @@
               "precordium_palpation"
             ],
             "description": "Failure of the left ventricle to adequately pump blood. Key features: PND, orthopnea, displaced apex beat, S3 gallop, basal crepitations, raised JVP and peripheral edema in combined failure.",
+            "key_findings": [
+              "Paroxysmal nocturnal dyspnea (PND)",
+              "Orthopnea (sleeps on multiple pillows)",
+              "Basal crepitations on chest auscultation",
+              "Patient wakes at night relieved by sitting upright",
+              "Displaced apex beat",
+              "S3 gallop",
+              "Raised JVP"
+            ],
             "score_rationale": "Symptoms(7) | LHF signs(16) | GPE edema+JVP(4) | displaced apex+LV heave(4) = 29 — broad multi-system presentation"
           },
           {
             "id": "CVS_DX04",
             "name": "Atrial Fibrillation",
-            "min_score_threshold": 3,
+            "min_score_threshold": 1,
             "max_score": 8,
             "key_facts_required": [
               "pulse_findings"
             ],
             "description": "Chaotic atrial electrical activity producing an irregularly irregular pulse with variable rate. Pulse deficit (radial rate < auscultated rate) is characteristic. Risk of thromboembolic stroke.",
+            "key_findings": [
+              "Irregularly irregular rhythm (AF pattern)",
+              "Pulse deficit present"
+            ],
             "score_rationale": "Irregularly irregular(2)+pulse deficit(2)+tachycardia(1) = 5 — single-fact rhythm diagnosis"
           },
           {
             "id": "CVS_DX05",
             "name": "Aortic Stenosis",
-            "min_score_threshold": 5,
+            "min_score_threshold": 3,
             "max_score": 15,
             "key_facts_required": [
               "auscultation_findings",
@@ -432,6 +487,12 @@
               "precordium_palpation"
             ],
             "description": "Obstruction of LV outflow across a calcified/bicuspid aortic valve. Ejection systolic murmur in aortic area radiating to carotids, with left ventricular heave and slow-rising pulse. Classic triad: syncope, angina, dyspnea.",
+            "key_findings": [
+              "Murmur at Aortic area (2nd ICS right sternal border)",
+              "Mid-systolic (ejection type)",
+              "Radiates to carotids",
+              "Left ventricular heave"
+            ],
             "score_rationale": "Aortic area murmur(2) | ejection systolic(1)+carotid radiation(1) | LV heave(2)+thrill(2) = 8"
           }
         ]
@@ -444,6 +505,9 @@
           {
             "id": "RESP_Q01",
             "phase": "history",
+            "phase_title": "History — Respiratory Symptoms",
+            "instruction": "Ask about cough, sputum production, blood in sputum, and breathlessness. Determine if chest pain is pleuritic.",
+            "tip": "Tip: Pleuritic pain indicates inflammation of the parietal pleura, as visceral pleura has no pain fibers.",
             "text": "What respiratory symptoms does the patient report?",
             "input_type": "multi_select",
             "options": [
@@ -472,6 +536,9 @@
           {
             "id": "RESP_Q02",
             "phase": "history",
+            "phase_title": "History — Sputum Characterization",
+            "instruction": "Ask the patient about the quantity, color, smell, and presence of blood in the sputum.",
+            "tip": "Tip: Rusty sputum is highly characteristic of pneumococcal pneumonia. Frothy pink sputum indicates severe acute left heart failure.",
             "text": "Sputum characteristics (if productive cough):",
             "input_type": "multi_select",
             "options": [
@@ -498,6 +565,9 @@
           {
             "id": "RESP_Q03",
             "phase": "inspection",
+            "phase_title": "Chest Inspection",
+            "instruction": "Count respiratory rate for a full minute by observing chest movements without the patient's knowledge. Observe chest shape and symmetry.",
+            "tip": "Tip: Cheyne-Stokes breathing is due to decreased sensitivity of the respiratory center to CO2.",
             "text": "Inspection of the chest:",
             "input_type": "multi_select",
             "options": [
@@ -528,6 +598,9 @@
           {
             "id": "RESP_Q04",
             "phase": "palpation",
+            "phase_title": "Chest Palpation",
+            "instruction": "Palpate the trachea in the suprasternal notch. Measure chest expansion with tape. Test vocal fremitus.",
+            "tip": "Tip: Tracheal deviation TOWARDS the lesion = Collapse or Fibrosis. Deviation AWAY = Tension pneumothorax or Massive effusion.",
             "text": "Palpation findings:",
             "input_type": "multi_select",
             "options": [
@@ -558,6 +631,9 @@
           {
             "id": "RESP_Q05",
             "phase": "percussion",
+            "phase_title": "Chest Percussion",
+            "instruction": "Percuss symmetrically front to back. Strike the pleximeter finger twice and lift off. Compare corresponding sites.",
+            "tip": "Tip: Stony dullness is highly specific for fluid (pleural effusion).",
             "text": "Percussion note findings:",
             "input_type": "multi_select",
             "options": [
@@ -584,6 +660,9 @@
           {
             "id": "RESP_Q06",
             "phase": "auscultation",
+            "phase_title": "Chest Auscultation",
+            "instruction": "Auscultate anteriorly, laterally, and posteriorly using the diaphragm. Assess intensity, character, and added sounds.",
+            "tip": "Tip: Bronchial breathing has a distinct pause between inspiration and expiration, indicating consolidated lung tissue.",
             "text": "Auscultation findings:",
             "input_type": "multi_select",
             "options": [
@@ -614,6 +693,9 @@
           {
             "id": "RESP_Q07_FOLLOWUP",
             "phase": "consolidation_assessment",
+            "phase_title": "Consolidation (Pneumonia) Assessment",
+            "instruction": "Check for the classic triad of dull percussion, bronchial breathing, and increased vocal resonance.",
+            "tip": "Tip: In consolidation, the trachea remains central because there is no significant volume loss or space-occupying mass.",
             "text": "FOLLOWUP — Bronchial breathing detected. Assess for consolidation (Pneumonia):",
             "input_type": "multi_select",
             "options": [
@@ -640,6 +722,9 @@
           {
             "id": "RESP_Q08_FOLLOWUP",
             "phase": "effusion_assessment",
+            "phase_title": "Pleural Effusion Assessment",
+            "instruction": "Confirm the absence of breath sounds and vocal resonance over the area of stony dullness.",
+            "tip": "Tip: Aegophony is frequently heard at the upper border of a large pleural effusion.",
             "text": "FOLLOWUP — Stony dull percussion note. Assess for Pleural Effusion:",
             "input_type": "multi_select",
             "options": [
@@ -664,6 +749,9 @@
           {
             "id": "RESP_Q09_FOLLOWUP",
             "phase": "pneumothorax_assessment",
+            "phase_title": "Pneumothorax Assessment",
+            "instruction": "Assess immediately for signs of tension (tracheal shift, hemodynamic compromise).",
+            "tip": "Tip: A hyper-resonant note combined with absent breath sounds and a deviated trachea indicates a Tension Pneumothorax.",
             "text": "FOLLOWUP — Hyper-resonant percussion note. Assess for Pneumothorax:",
             "input_type": "multi_select",
             "options": [
@@ -688,6 +776,9 @@
           {
             "id": "RESP_Q10_FOLLOWUP",
             "phase": "stridor_assessment",
+            "phase_title": "Upper Airway Obstruction / Stridor",
+            "instruction": "Observe for respiratory distress and use of accessory muscles. Do NOT attempt to examine the throat with a spatula if acute epiglottitis is suspected.",
+            "tip": "Tip: Biphasic stridor and drooling are extreme red flags indicating impending total airway collapse.",
             "text": "FOLLOWUP — Stridor reported. Assess for upper airway obstruction:",
             "input_type": "multi_select",
             "options": [
@@ -830,7 +921,7 @@
           {
             "id": "RESP_DX01",
             "name": "Tension Pneumothorax",
-            "min_score_threshold": 13,
+            "min_score_threshold": 6,
             "max_score": 32,
             "key_facts_required": [
               "resp_palpation",
@@ -839,12 +930,19 @@
               "pneumothorax_signs"
             ],
             "description": "Air under pressure in the pleural space causing mediastinal shift. Life-threatening emergency. Triad: tracheal deviation AWAY from affected side + hyper-resonance + absent breath sounds. Immediate needle decompression required.",
+            "key_findings": [
+              "Hyper-resonance confirmed",
+              "Absent breath sounds on affected side",
+              "Trachea deviated AWAY from hyper-resonance",
+              "Hyper-resonant on RIGHT",
+              "Hyper-resonant on LEFT"
+            ],
             "score_rationale": "Trachea deviation+reduced expansion(4) | hyper-resonance(2) | absent sounds(2) | full pneumothorax followup(11) = 19"
           },
           {
             "id": "RESP_DX02",
             "name": "Upper Airway Obstruction",
-            "min_score_threshold": 10,
+            "min_score_threshold": 5,
             "max_score": 28,
             "key_facts_required": [
               "resp_symptoms",
@@ -852,12 +950,19 @@
               "resp_inspection"
             ],
             "description": "Obstruction above the carina causing inspiratory stridor. Causes include foreign body, epiglottitis, anaphylaxis, or extrinsic compression. Biphasic stridor and drooling indicate severe obstruction requiring urgent airway management.",
+            "key_findings": [
+              "Stridor (harsh inspiratory sound)",
+              "Inspiratory stridor confirmed",
+              "Biphasic stridor",
+              "Drooling / difficulty swallowing",
+              "Foreign body inhalation history"
+            ],
             "score_rationale": "Stridor symptom(3) | inspiratory+biphasic+drooling+accessory(10) | tachypnea+accessory muscles(4) = 17"
           },
           {
             "id": "RESP_DX03",
             "name": "Pleural Effusion",
-            "min_score_threshold": 11,
+            "min_score_threshold": 6,
             "max_score": 30,
             "key_facts_required": [
               "resp_percussion",
@@ -866,12 +971,20 @@
               "effusion_signs"
             ],
             "description": "Fluid accumulation in the pleural space. Classic signs: stony dull percussion, absent/reduced breath sounds, tracheal deviation AWAY from effusion (large), and decreased vocal resonance. Underlying cause must be sought.",
+            "key_findings": [
+              "Stony dull on RIGHT",
+              "Stony dull on LEFT",
+              "Stony dull note confirmed",
+              "Absent / markedly reduced breath sounds",
+              "Trachea deviated AWAY from dullness",
+              "Shifting dullness on percussion (if bilateral)"
+            ],
             "score_rationale": "Stony dull(3) | absent sounds+decreased VR(3) | trachea+expansion(4) | effusion followup(9) = 19"
           },
           {
             "id": "RESP_DX04",
             "name": "Pneumonia / Consolidation",
-            "min_score_threshold": 13,
+            "min_score_threshold": 5,
             "max_score": 36,
             "key_facts_required": [
               "resp_auscultation",
@@ -880,12 +993,20 @@
               "resp_percussion"
             ],
             "description": "Infection causing alveolar consolidation. Classic signs: dull percussion, bronchial breathing, increased vocal resonance/aegophony, and crepitations over affected lobe. Rusty sputum is characteristic of pneumococcal pneumonia.",
+            "key_findings": [
+              "Bronchial breathing present",
+              "Bronchial breathing confirmed",
+              "Rusty colored (suggests pneumonia)",
+              "Rusty sputum",
+              "Increased vocal resonance / aegophony",
+              "Crepitations / crackles"
+            ],
             "score_rationale": "Symptoms(5) | rusty sputum(2) | dull percussion(2) | bronchial+creps(4) | consolidation followup(11) = 22 (typical confirmed pneumonia)"
           },
           {
             "id": "RESP_DX05",
             "name": "Asthma / COPD",
-            "min_score_threshold": 4,
+            "min_score_threshold": 2,
             "max_score": 16,
             "key_facts_required": [
               "resp_symptoms",
@@ -893,6 +1014,13 @@
               "resp_auscultation"
             ],
             "description": "Obstructive airway disease causing expiratory wheeze, dyspnea, and cough. Asthma is reversible; COPD features barrel chest from air trapping, accessory muscle use, and pursed-lip breathing. Both show bilateral rhonchi on auscultation.",
+            "key_findings": [
+              "Wheeze",
+              "Rhonchi / wheezes",
+              "Barrel chest (increased AP diameter)",
+              "Accessory muscle use",
+              "Intercostal recession"
+            ],
             "score_rationale": "Wheeze+dyspnea(3) | tachypnea+accessory+barrel(5) | rhonchi(1) = 9 — obstructive pattern is relatively low-weight"
           }
         ]
@@ -905,6 +1033,9 @@
           {
             "id": "ABD_Q01",
             "phase": "history",
+            "phase_title": "History — Alimentary Symptoms",
+            "instruction": "Inquire systematically about swallowing, vomiting, bowel habits, and the precise appearance of vomit and stool.",
+            "tip": "Tip: Absolute constipation combined with vomiting and distension is the hallmark of mechanical intestinal obstruction.",
             "text": "What abdominal symptoms does the patient report?",
             "input_type": "multi_select",
             "options": [
@@ -939,6 +1070,9 @@
           {
             "id": "ABD_Q02",
             "phase": "history",
+            "phase_title": "History — Abdominal Pain Characterization",
+            "instruction": "Ask the patient to point to the exact site of pain. Determine if pain is colicky, continuous, or relieved by specific factors.",
+            "tip": "Tip: Pain due to mechanical obstruction is colicky, whereas inflammatory pain is usually continuous.",
             "text": "Abdominal pain characteristics (if present):",
             "input_type": "multi_select",
             "options": [
@@ -975,6 +1109,9 @@
           {
             "id": "ABD_Q03",
             "phase": "inspection",
+            "phase_title": "Abdominal Inspection",
+            "instruction": "Observe shape, umbilicus, movements, and skin changes. Test the direction of blood flow in abnormal veins.",
+            "tip": "Tip: In portal hypertension, the flow in dilated veins is away from the umbilicus (caput medusae).",
             "text": "Inspection of the abdomen:",
             "input_type": "multi_select",
             "options": [
@@ -1007,6 +1144,9 @@
           {
             "id": "ABD_Q04",
             "phase": "palpation_light",
+            "phase_title": "Light Palpation",
+            "instruction": "Ensure patient is relaxed, head supported, knees flexed. Palpate gently across all 9 regions starting away from pain site.",
+            "tip": "Tip: Board-like rigidity means the entire abdominal wall feels hard as a board, indicating diffuse peritonitis.",
             "text": "Light palpation findings (start in right iliac fossa, move systematically):",
             "input_type": "multi_select",
             "options": [
@@ -1037,6 +1177,9 @@
           {
             "id": "ABD_Q05",
             "phase": "palpation_deep",
+            "phase_title": "Deep Palpation & Organomegaly",
+            "instruction": "Coordinate hand movements with patient's respiration to palpate liver, spleen, and kidneys.",
+            "tip": "Tip: The spleen must enlarge to more than twice its normal size before it becomes palpable below the left costal margin.",
             "text": "Deep palpation — organomegaly assessment:",
             "input_type": "multi_select",
             "options": [
@@ -1065,6 +1208,9 @@
           {
             "id": "ABD_Q06",
             "phase": "percussion",
+            "phase_title": "Abdominal Percussion",
+            "instruction": "Percuss for shifting dullness by marking the border of flank dullness, then asking the patient to roll to the opposite side.",
+            "tip": "Tip: Fluid thrill is only positive in massive, tense ascites and requires an assistant's hand in the midline.",
             "text": "Percussion findings:",
             "input_type": "multi_select",
             "options": [
@@ -1091,6 +1237,9 @@
           {
             "id": "ABD_Q07_FOLLOWUP",
             "phase": "ascites_assessment",
+            "phase_title": "Ascites Assessment",
+            "instruction": "Look for peripheral stigmata of chronic liver disease such as jaundice, palmar erythema, and spider nevi.",
+            "tip": "Tip: Splenomegaly + Ascites + Caput Medusae is the classic physical examination triad of Portal Hypertension.",
             "text": "FOLLOWUP — Ascites suspected. Full assessment:",
             "input_type": "multi_select",
             "options": [
@@ -1121,6 +1270,9 @@
           {
             "id": "ABD_Q08_FOLLOWUP",
             "phase": "peritonitis_assessment",
+            "phase_title": "Peritonitis Assessment",
+            "instruction": "Assess for signs of systemic toxicity and hemodynamic collapse. Do not perform deep palpation if board-like rigidity is clearly established.",
+            "tip": "Tip: Peritonitis is a surgical emergency. The classic triad is abdominal rigidity, rebound tenderness, and absent bowel sounds.",
             "text": "FOLLOWUP — Signs of peritoneal irritation. Assess for peritonitis:",
             "input_type": "multi_select",
             "options": [
@@ -1149,6 +1301,9 @@
           {
             "id": "ABD_Q09_FOLLOWUP",
             "phase": "upper_gi_bleed",
+            "phase_title": "Upper GI Bleed Assessment",
+            "instruction": "Immediate assessment of hemodynamic stability (pulse and blood pressure) is the priority.",
+            "tip": "Tip: Tachycardia and hypotension in the presence of melena/hematemesis indicate a massive, life-threatening hemorrhage.",
             "text": "FOLLOWUP — Hematemesis / Melena reported. Assess upper GI bleed:",
             "input_type": "multi_select",
             "options": [
@@ -1270,7 +1425,7 @@
           {
             "id": "ABD_DX01",
             "name": "Peritonitis",
-            "min_score_threshold": 16,
+            "min_score_threshold": 6,
             "max_score": 40,
             "key_facts_required": [
               "light_palpation",
@@ -1278,24 +1433,38 @@
               "abd_symptoms"
             ],
             "description": "Inflammation of the peritoneum, usually from bowel perforation or ruptured viscus. Classic signs: board-like rigid abdomen, generalized rebound tenderness, absent bowel sounds, and patient lying completely still. Surgical emergency.",
+            "key_findings": [
+              "Rigid board-like abdomen",
+              "Generalized rebound tenderness",
+              "Patient lying still (movement worsens pain)",
+              "Absent bowel sounds",
+              "Muscle guarding / rigidity (involuntary)"
+            ],
             "score_rationale": "Pain+vomiting(2) | guarding triad(9) | peritonitis signs fully positive(17) = ~25 for confirmed peritonitis with shock"
           },
           {
             "id": "ABD_DX02",
             "name": "Upper GI Bleed",
-            "min_score_threshold": 10,
+            "min_score_threshold": 5,
             "max_score": 26,
             "key_facts_required": [
               "abd_symptoms",
               "ugi_bleed_signs"
             ],
             "description": "Bleeding proximal to the ligament of Treitz. Presents as hematemesis (bright red or coffee-ground) and/or melena. Hemodynamic compromise (tachycardia + hypotension) indicates massive bleed. Most common cause: peptic ulcer disease.",
+            "key_findings": [
+              "Hematemesis (blood in vomit)",
+              "Melena (black tarry stools)",
+              "Hematemesis confirmed (bright red or coffee ground)",
+              "Melena confirmed (black tarry stools)",
+              "Pallor / signs of anemia"
+            ],
             "score_rationale": "Hematemesis+melena(6) | confirmed bleed+haemodynamic compromise+PUD+pallor(13) = ~16 typical massive UGI bleed"
           },
           {
             "id": "ABD_DX03",
             "name": "Liver Cirrhosis with Ascites",
-            "min_score_threshold": 17,
+            "min_score_threshold": 6,
             "max_score": 48,
             "key_facts_required": [
               "abd_percussion",
@@ -1304,12 +1473,20 @@
               "abd_inspection"
             ],
             "description": "End-stage liver disease with portal hypertension leading to ascites. Features: shifting dullness/fluid thrill, splenomegaly, caput medusae (dilated abdominal veins), jaundice, and everted umbilicus. Hepatomegaly or shrunken liver may be found.",
+            "key_findings": [
+              "Shifting dullness present (ascites)",
+              "Fluid thrill positive (massive ascites)",
+              "Distended superficial veins (caput medusae)",
+              "Umbilicus everted (suggests ascites / mass)",
+              "Jaundice",
+              "Splenomegaly"
+            ],
             "score_rationale": "Symptoms(3)+inspection(5)+percussion(7)+organomegaly(4)+ascites followup(10 typical) = ~29 advanced cirrhosis"
           },
           {
             "id": "ABD_DX04",
             "name": "Appendicitis",
-            "min_score_threshold": 8,
+            "min_score_threshold": 4,
             "max_score": 22,
             "key_facts_required": [
               "light_palpation",
@@ -1317,12 +1494,19 @@
               "pain_character"
             ],
             "description": "Inflammation of the appendix. Classic migration of pain from periumbilical to right iliac fossa (McBurney's point). Tenderness + guarding in RIF, low-grade fever, and anorexia. Rebound tenderness at McBurney's point is highly suggestive.",
+            "key_findings": [
+              "Tenderness in right iliac fossa",
+              "Right iliac fossa",
+              "Rebound tenderness (peritoneal irritation)",
+              "Muscle guarding / rigidity (involuntary)",
+              "Periumbilical"
+            ],
             "score_rationale": "Nausea+vomiting+pain(3) | RIF tenderness+guarding+rebound(8) | RIF+periumbilical pain character(2) = 13"
           },
           {
             "id": "ABD_DX05",
             "name": "Bowel Obstruction",
-            "min_score_threshold": 5,
+            "min_score_threshold": 1,
             "max_score": 16,
             "key_facts_required": [
               "abd_symptoms",
@@ -1330,6 +1514,11 @@
               "light_palpation"
             ],
             "description": "Mechanical or functional obstruction of small or large bowel. Features: colicky abdominal pain, vomiting, abdominal distension, absolute constipation (no flatus), and visible peristalsis on inspection. High-pitched tinkling bowel sounds on auscultation.",
+            "key_findings": [
+              "Visible peristalsis",
+              "Uniformly distended",
+              "Colicky / intermittent"
+            ],
             "score_rationale": "Vomiting+constipation+distension(3) | distension+visible peristalsis(3) | colicky pain(1) | mild tenderness(2) = 9"
           }
         ]
@@ -1342,6 +1531,9 @@
           {
             "id": "NEURO_Q01",
             "phase": "consciousness",
+            "phase_title": "Level of Consciousness",
+            "instruction": "Assess the conscious level using the Glasgow Coma Scale. Observe general appearance and behavior.",
+            "tip": "Tip: In deep coma, the GCS score is less than 8. Record the exact GCS components rather than just stating 'unconscious'.",
             "text": "Level of consciousness — Glasgow Coma Scale assessment:",
             "input_type": "multi_select",
             "options": [
@@ -1372,6 +1564,9 @@
           {
             "id": "NEURO_Q02",
             "phase": "higher_functions",
+            "phase_title": "Higher Mental Functions",
+            "instruction": "Test memory and speech by asking the patient to name objects, repeat phrases, and follow commands.",
+            "tip": "Tip: In Broca's dysphasia, the patient understands the command but cannot articulate. In Wernicke's, they speak fluently but the words are nonsensical.",
             "text": "Higher mental function assessment:",
             "input_type": "multi_select",
             "options": [
@@ -1404,6 +1599,9 @@
           {
             "id": "NEURO_Q03",
             "phase": "cranial_nerves",
+            "phase_title": "Cranial Nerves Examination",
+            "instruction": "Test visual fields, light reflexes, and facial movements. Differentiate UMN vs LMN facial palsy by asking patient to wrinkle forehead.",
+            "tip": "Tip: In an Upper Motor Neuron facial palsy, the forehead wrinkling is spared because the upper face has bilateral cortical representation.",
             "text": "Cranial nerve examination findings:",
             "input_type": "multi_select",
             "options": [
@@ -1456,6 +1654,9 @@
           {
             "id": "NEURO_Q04",
             "phase": "motor_system",
+            "phase_title": "Motor System Examination",
+            "instruction": "Assess muscle bulk, tone (spasticity vs rigidity), and power across all four limbs.",
+            "tip": "Tip: Clasp-knife spasticity abruptly gives way as passive movement continues; it is the hallmark of an Upper Motor Neuron lesion.",
             "text": "Motor system examination:",
             "input_type": "multi_select",
             "options": [
@@ -1496,6 +1697,9 @@
           {
             "id": "NEURO_Q05",
             "phase": "reflexes",
+            "phase_title": "Reflexes",
+            "instruction": "Elicit reflexes using a tendon hammer. Use reinforcement if reflexes are absent. Scratch the lateral sole for the Babinski response.",
+            "tip": "Tip: An upgoing plantar response (Babinski positive) is the single most reliable sign of an Upper Motor Neuron lesion.",
             "text": "Deep tendon reflex findings:",
             "input_type": "multi_select",
             "options": [
@@ -1528,6 +1732,9 @@
           {
             "id": "NEURO_Q06",
             "phase": "sensory_system",
+            "phase_title": "Sensory System Examination",
+            "instruction": "Test primary sensations first (pain, touch, vibration, joint position). Only test cortical sensations if primary sensations are completely intact.",
+            "tip": "Tip: Astereognosis with perfectly intact primary touch sensation strictly points to a lesion in the sensory cortex (Parietal lobe).",
             "text": "Sensory system examination:",
             "input_type": "multi_select",
             "options": [
@@ -1566,6 +1773,9 @@
           {
             "id": "NEURO_Q07",
             "phase": "coordination",
+            "phase_title": "Coordination and Gait",
+            "instruction": "Observe the patient walking. Test coordination with finger-nose and rapid alternating movements.",
+            "tip": "Tip: In cerebellar ataxia, the patient is unsteady with eyes open AND closed. In Romberg's positive (sensory ataxia), the patient is steady with eyes open but falls when eyes are closed.",
             "text": "Coordination and gait assessment:",
             "input_type": "multi_select",
             "options": [
@@ -1598,6 +1808,9 @@
           {
             "id": "NEURO_Q08",
             "phase": "meningeal_signs",
+            "phase_title": "Meningeal Irritation Signs",
+            "instruction": "Flex the patient's neck gently to check for rigidity. Elicit Kernig's and Brudzinski's signs.",
+            "tip": "Tip: Neck rigidity, fever, and severe headache form the classic triad of meningitis.",
             "text": "Signs of meningeal irritation:",
             "input_type": "multi_select",
             "options": [
@@ -1630,6 +1843,9 @@
           {
             "id": "NEURO_Q09_FOLLOWUP",
             "phase": "UMN_localization",
+            "phase_title": "Upper Motor Neuron (UMN) Localization",
+            "instruction": "Combine motor findings with sensory boundaries and cranial nerve deficits to map the exact lesion level.",
+            "tip": "Tip: A unilateral UMN lesion with cranial nerve deficits on the opposite side definitively localizes the lesion to the Brainstem.",
             "text": "FOLLOWUP — UMN pattern detected. Localize the lesion:",
             "input_type": "multi_select",
             "options": [
@@ -1656,6 +1872,9 @@
           {
             "id": "NEURO_Q10_FOLLOWUP",
             "phase": "LMN_localization",
+            "phase_title": "Lower Motor Neuron (LMN) Localization",
+            "instruction": "Assess if the weakness matches a specific nerve root, a peripheral nerve territory, or if it is a generalized polyneuropathy.",
+            "tip": "Tip: Generalized fasciculations combined with profound wasting and absent reflexes point toward Motor Neuron Disease.",
             "text": "FOLLOWUP — LMN pattern detected. Characterize further:",
             "input_type": "multi_select",
             "options": [
@@ -1686,6 +1905,9 @@
           {
             "id": "NEURO_Q11_FOLLOWUP",
             "phase": "meningitis_confirmation",
+            "phase_title": "Meningitis Assessment",
+            "instruction": "Perform fundoscopy on every patient with suspected meningitis before performing a lumbar puncture.",
+            "tip": "Tip: Performing a Lumbar Puncture in the presence of papilledema can cause fatal brain herniation.",
             "text": "FOLLOWUP — Meningeal irritation signs present. Full meningitis assessment:",
             "input_type": "multi_select",
             "options": [
@@ -1877,7 +2099,7 @@
           {
             "id": "NEURO_DX01",
             "name": "Meningitis",
-            "min_score_threshold": 15,
+            "min_score_threshold": 6,
             "max_score": 40,
             "key_facts_required": [
               "meningeal_signs",
@@ -1885,12 +2107,19 @@
               "consciousness_level"
             ],
             "description": "Infection/inflammation of the meninges. Classic triad: fever + severe headache + neck rigidity. Kernig's and Brudzinski's signs positive. Petechial rash suggests meningococcal disease. Lumbar puncture (L3-L4) is diagnostic; check for papilledema first to exclude raised ICP.",
+            "key_findings": [
+              "Neck rigidity PRESENT (resistance to passive flexion)",
+              "Kernig's Sign POSITIVE (cannot extend knee with hip flexed 90°)",
+              "Brudzinski's Sign POSITIVE (neck flexion causes hip/knee flexion)",
+              "Classic triad: fever + headache + neck stiffness",
+              "Petechial / purpuric rash"
+            ],
             "score_rationale": "Full meningeal triad(13)+photophobia+fever(4) | classic triad+altered consciousness+petechiae(9) | confusion(2) = 24"
           },
           {
             "id": "NEURO_DX02",
             "name": "Raised Intracranial Pressure",
-            "min_score_threshold": 7,
+            "min_score_threshold": 3,
             "max_score": 20,
             "key_facts_required": [
               "consciousness_level",
@@ -1898,12 +2127,17 @@
               "meningitis_assessment"
             ],
             "description": "Elevated pressure within the cranial vault from mass, edema, or hydrocephalus. Features: progressively deteriorating consciousness, CN III palsy (ptosis + dilated pupil), papilledema on fundoscopy, bradycardia with hypertension (Cushing's reflex). LP is contraindicated.",
+            "key_findings": [
+              "Papilledema PRESENT (raised ICP — LP contraindicated)",
+              "CN III — ptosis (drooping eyelid)",
+              "CN III/IV/VI — restricted eye movements / diplopia"
+            ],
             "score_rationale": "Drowsy(2) | CN II+III visual/eye signs(6) | papilledema on followup(3) = 11 — focal signs without meningeal triad"
           },
           {
             "id": "NEURO_DX03",
             "name": "Stroke / CVA",
-            "min_score_threshold": 11,
+            "min_score_threshold": 5,
             "max_score": 30,
             "key_facts_required": [
               "motor_findings",
@@ -1913,12 +2147,19 @@
               "umn_localization"
             ],
             "description": "Acute focal neurological deficit from cerebral ischemia or hemorrhage. UMN pattern: contralateral hemiplegia, facial weakness, Babinski positive, brisk reflexes. Aphasia if dominant hemisphere affected. Sudden onset is characteristic. Requires urgent imaging.",
+            "key_findings": [
+              "Hemiplegia (one side affected)",
+              "Aphasia present (cannot understand or produce speech)",
+              "Spasticity (clasp-knife resistance — UMN pattern)",
+              "Unilateral upper and lower limb involvement (same side) — Cortical / Capsular",
+              "Crossed signs (ipsilateral face + contralateral body) — Brainstem"
+            ],
             "score_rationale": "Hemiplegia+spasticity(5) | aphasia(3) | CN VII(2) | Babinski+brisk reflexes(5) | UMN localization(2) = 17"
           },
           {
             "id": "NEURO_DX04",
             "name": "Spinal Cord Compression",
-            "min_score_threshold": 17,
+            "min_score_threshold": 5,
             "max_score": 45,
             "key_facts_required": [
               "motor_findings",
@@ -1927,12 +2168,18 @@
               "umn_localization"
             ],
             "description": "Compression of the spinal cord by disc prolapse, tumor, or abscess. Bilateral UMN signs below level of lesion: paraplegia/tetraplegia, spasticity, brisk reflexes, Babinski positive, and a clear sensory level on the trunk. Bladder and bowel dysfunction common. Neurosurgical emergency.",
+            "key_findings": [
+              "Paraplegia (both legs affected)",
+              "Sensory level present (spinal cord lesion)",
+              "Sensory level on trunk — Spinal cord level lesion",
+              "Both lower limbs involved — Spinal cord lesion (Paraplegia)"
+            ],
             "score_rationale": "Paraplegia+spasticity+reduced power(7) | sensory level+JPS+vibration(7) | Babinski+brisk reflexes(7) | spinal localisation(6) = 27"
           },
           {
             "id": "NEURO_DX05",
             "name": "Peripheral Neuropathy",
-            "min_score_threshold": 13,
+            "min_score_threshold": 4,
             "max_score": 40,
             "key_facts_required": [
               "motor_findings",
@@ -1941,6 +2188,13 @@
               "lmn_localization"
             ],
             "description": "Damage to peripheral nerves producing LMN pattern: distal muscle wasting, fasciculations, flaccidity, absent/reduced deep tendon reflexes (especially ankle jerks), and glove-and-stocking sensory loss. Vibration and joint position sense impaired. Common causes: diabetes, alcohol, B12 deficiency.",
+            "key_findings": [
+              "Distal limbs predominantly affected",
+              "Distribution — multiple peripheral nerves (polyneuropathy)",
+              "Muscle wasting prominent",
+              "Fasciculations (fine muscle twitching)",
+              "Flaccidity / hypotonia (LMN pattern)"
+            ],
             "score_rationale": "Wasting+fasciculations+flaccidity(6) | vibration+JPS(4) | absent ankle+knee jerks(4) | LMN localization typical(10) = ~24"
           }
         ]
@@ -1969,3 +2223,4 @@
     }
   }
 }
+

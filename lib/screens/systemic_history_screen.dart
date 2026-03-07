@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'vitals_screen.dart'; // next screen after this one
+
 import '../core/app_colors.dart';
 
 
@@ -83,8 +86,8 @@ class SystemDef {
   final String title;
   final String emoji;
   final List<String> symptoms;
-  final bool alwaysAsk;       // Constitutional flag
-  final bool femaleOnly;      // Gynaecological flag
+  final bool alwaysAsk;
+  final bool femaleOnly;
 
   const SystemDef({
     required this.id,
@@ -94,116 +97,70 @@ class SystemDef {
     this.alwaysAsk = false,
     this.femaleOnly = false,
   });
+
+  factory SystemDef.fromJson(Map<String, dynamic> j) => SystemDef(
+    id:         j['id'] as String,
+    title:      j['title'] as String,
+    emoji:      j['emoji'] as String? ?? '',
+    symptoms:   List<String>.from(j['symptoms'] as List? ?? []),
+    femaleOnly: j['female_only'] as bool? ?? false,
+    alwaysAsk:  j['always_ask'] as bool? ?? false,
+  );
 }
 
-const List<SystemDef> kSystems = [
-  SystemDef(
-    id: 'cardiovascular',
-    title: 'Cardiovascular',
-    emoji: '🫀',
-    symptoms: [
-      'Chest pain',
-      'Shortness of breath',
-      'Palpitations',
-      'Syncope',
-      'Leg swelling',
-    ],
-  ),
-  SystemDef(
-    id: 'respiratory',
-    title: 'Respiratory',
-    emoji: '🫁',
-    symptoms: [
-      'Cough',
-      'Sputum / hemoptysis',
-      'Shortness of breath',
-      'Wheeze',
-      'Pleuritic chest pain',
-    ],
-  ),
-  SystemDef(
-    id: 'cns',
-    title: 'CNS',
-    emoji: '🧠',
-    symptoms: [
-      'Headache',
-      'Weakness',
-      'Numbness / tingling',
-      'Seizures',
-      'Loss of consciousness',
-      'Visual or speech changes',
-    ],
-  ),
-  SystemDef(
-    id: 'gastrointestinal',
-    title: 'Gastrointestinal',
-    emoji: '🍽️',
-    symptoms: [
-      'Abdominal pain',
-      'Nausea / vomiting',
-      'Change in bowel habit',
-      'Blood in stool / black stool',
-      'Weight loss',
-    ],
-  ),
-  SystemDef(
-    id: 'genitourinary',
-    title: 'Genitourinary',
-    emoji: '🚽',
-    symptoms: [
-      'Dysuria',
-      'Frequency / nocturia',
-      'Hematuria',
-      'Incontinence',
-    ],
-  ),
-  SystemDef(
-    id: 'musculoskeletal',
-    title: 'Musculoskeletal',
-    emoji: '🦴',
-    symptoms: [
-      'Joint pain',
-      'Joint swelling',
-      'Morning stiffness',
-      'Back pain',
-    ],
-  ),
-  SystemDef(
-    id: 'gynaecological',
-    title: 'Gynaecological',
-    emoji: '🩸',
-    symptoms: [
-      'Amenorrhea',
-      'Dysmenorrhea',
-    ],
-    femaleOnly: true,
-  ),
-  SystemDef(
-    id: 'endocrine',
-    title: 'Endocrine',
-    emoji: '🧴',
-    symptoms: [
-      'Weight change',
-      'Heat / cold intolerance',
-      'Polyuria / polydipsia',
-    ],
-  ),
-  SystemDef(
-    id: 'constitutional',
-    title: 'Constitutional',
-    emoji: '🌡️',
-    symptoms: [
-      'Fever',
-      'Weight loss',
-      'Night sweats',
-      'Loss of appetite',
-    ],
-    alwaysAsk: true,
-  ),
-];
+// Loads systems from clinical_terms.json.
+// Call await SystemicReviewService.init() in main() before runApp.
+// Add to pubspec.yaml: flutter: assets: - assets/clinical_terms.json
+class SystemicReviewService {
+  SystemicReviewService._();
+  static List<SystemDef> _systems = _fallback();
+  static bool _loaded = false;
+
+  static Future<void> init() async {
+    if (_loaded) return;
+    try {
+      final raw = await rootBundle.loadString('assets/clinical_terms.json');
+      final data = (jsonDecode(raw) as Map<String, dynamic>)['clinical_terms'] as Map<String, dynamic>;
+      final list = data['systemic_review'] as List;
+      _systems = list.map((e) => SystemDef.fromJson(e as Map<String, dynamic>)).toList();
+      _loaded = true;
+    } catch (_) {
+      _loaded = true; // keep fallback
+    }
+  }
+
+  static List<SystemDef> get systems => _systems;
+
+  static List<SystemDef> _fallback() => [
+    const SystemDef(id: 'cardiovascular', title: 'Cardiovascular', emoji: '🫀',
+      symptoms: ['Chest pain', 'Shortness of breath', 'Palpitations', 'Syncope', 'Leg swelling']),
+    const SystemDef(id: 'respiratory', title: 'Respiratory', emoji: '🫁',
+      symptoms: ['Cough', 'Sputum / hemoptysis', 'Shortness of breath', 'Wheeze', 'Pleuritic chest pain']),
+    const SystemDef(id: 'cns', title: 'CNS', emoji: '🧠',
+      symptoms: ['Headache', 'Weakness', 'Numbness / tingling', 'Seizures', 'Loss of consciousness', 'Visual or speech changes']),
+    const SystemDef(id: 'gastrointestinal', title: 'Gastrointestinal', emoji: '🍽️',
+      symptoms: ['Abdominal pain', 'Nausea / vomiting', 'Change in bowel habit', 'Blood in stool / black stool', 'Weight loss']),
+    const SystemDef(id: 'genitourinary', title: 'Genitourinary', emoji: '🚽',
+      symptoms: ['Dysuria', 'Frequency / nocturia', 'Hematuria', 'Incontinence']),
+    const SystemDef(id: 'musculoskeletal', title: 'Musculoskeletal', emoji: '🦴',
+      symptoms: ['Joint pain', 'Joint swelling', 'Morning stiffness', 'Back pain']),
+    const SystemDef(id: 'gynaecological', title: 'Gynaecological', emoji: '🩸',
+      femaleOnly: true,
+      symptoms: ['Amenorrhea', 'Dysmenorrhea']),
+    const SystemDef(id: 'endocrine', title: 'Endocrine', emoji: '🧴',
+      symptoms: ['Weight change', 'Heat / cold intolerance', 'Polyuria / polydipsia']),
+    const SystemDef(id: 'constitutional', title: 'Constitutional', emoji: '🌡️',
+      alwaysAsk: true,
+      symptoms: ['Fever', 'Weight loss', 'Night sweats', 'Loss of appetite']),
+  ];
+}
 
 // Remove main() when integrating into the app
-void main() => runApp(const _PreviewApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SystemicReviewService.init();
+  runApp(const _PreviewApp());
+}
 
 class _PreviewApp extends StatelessWidget {
   const _PreviewApp();
@@ -250,10 +207,16 @@ class _SystemicHistoryScreenState extends State<SystemicHistoryScreen> {
   // Track which system panels are collapsed
   final Set<String> _collapsed = {};
 
+  @override
+  void initState() {
+    super.initState();
+    SystemicReviewService.init().then((_) { if (mounted) setState(() {}); });
+  }
+
   bool get _isFemale =>
       widget.patientGender.toLowerCase() == 'female';
 
-  List<SystemDef> get _visibleSystems => kSystems
+  List<SystemDef> get _visibleSystems => SystemicReviewService.systems
       .where((s) => s.femaleOnly ? _isFemale : true)
       .toList();
 

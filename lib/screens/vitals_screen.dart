@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'systemic_history_screen.dart'; // uncomment to push next screen
+import 'examination_screen.dart';
 import '../core/app_colors.dart';
 
 // VITAL STATUS ENUM
@@ -438,22 +438,15 @@ class _VitalsScreenState extends State<VitalsScreen> {
   void _onSave() {
     final flags = VitalsEngine.generateFlags(_data);
 
-    // When integrating with Hive, save here:
+    // When integrating with Hive, save before navigating:
     // await Hive.box<VitalsData>('vitals').put(patientId, _data);
 
-    // Then push to the next screen and pass flags + data forward.
-    // Add patientGender, chiefComplaints, and autoFlags as constructor params
-    // to VitalsScreen first, then navigate here.
-
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(
-        flags.isEmpty
-            ? 'Vitals saved — all values normal'
-            : 'Vitals saved — ${flags.length} flag${flags.length > 1 ? 's' : ''} noted',
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ExaminationScreen(autoFlags: flags),
       ),
-      backgroundColor: flags.isEmpty ? AppColors.sectionHeader : AppColors.dangerText,
-      duration: const Duration(seconds: 3),
-    ));
+    );
   }
 
   @override
@@ -1861,4 +1854,3 @@ class _SaveButton extends StatelessWidget {
     );
   }
 }
-

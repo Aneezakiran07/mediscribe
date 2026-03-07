@@ -22,3 +22,5 @@ flutter:
   uses-material-design: true
   assets:
     - assets/knowledge_base.json
+    - assets/clinical_terms.json  
+    - assets/vitals_reference.json   

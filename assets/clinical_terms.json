@@ -1,0 +1,267 @@
+{
+  "clinical_terms": {
+    "common_conditions": [
+      "Malaria",
+      "Enteric fever",
+      "Dengue fever",
+      "Pulmonary tuberculosis",
+      "Hepatitis B",
+      "Hepatitis C",
+      "Diabetes mellitus",
+      "Essential hypertension",
+      "Ischemic heart disease",
+      "Myocardial infarction",
+      "Bronchial asthma",
+      "Chronic obstructive pulmonary disease",
+      "Peptic ulcer disease",
+      "Liver cirrhosis",
+      "Chronic renal failure",
+      "Rheumatic heart disease",
+      "Infective endocarditis",
+      "Rheumatoid arthritis",
+      "Cerebrovascular accident",
+      "Meningitis",
+      "Epilepsy",
+      "Iron deficiency anemia",
+      "Nephrotic syndrome",
+      "Acute gastroenteritis",
+      "Urinary tract infection",
+      "Thyrotoxicosis",
+      "Hypothyroidism",
+      "Cor pulmonale",
+      "Pleural effusion",
+      "Hepatocellular carcinoma"
+    ],
+    "common_drugs": [
+      "Isoniazid",
+      "Rifampicin",
+      "Pyrazinamide",
+      "Ethambutol",
+      "Paracetamol",
+      "Ibuprofen",
+      "Diclofenac",
+      "Aspirin",
+      "Omeprazole",
+      "Pantoprazole",
+      "Amoxicillin",
+      "Ciprofloxacin",
+      "Ceftriaxone",
+      "Azithromycin",
+      "Metronidazole",
+      "Artesunate",
+      "Artemether",
+      "Metformin",
+      "Glibenclamide",
+      "Glimepiride",
+      "Insulin",
+      "Amlodipine",
+      "Losartan",
+      "Valsartan",
+      "Enalapril",
+      "Captopril",
+      "Atenolol",
+      "Bisoprolol",
+      "Atorvastatin",
+      "Furosemide",
+      "Hydrochlorothiazide",
+      "Spironolactone",
+      "Digoxin",
+      "Clopidogrel",
+      "Rosuvastatin",
+      "Salbutamol",
+      "Montelukast",
+      "Levothyroxine",
+      "Domperidone",
+      "Dexamethasone"
+    ],
+    "condition_chips": [
+      "Hypertension",
+      "Diabetes",
+      "Asthma",
+      "IHD",
+      "Tuberculosis",
+      "Hepatitis",
+      "Stroke",
+      "CKD"
+    ],
+    "drug_chips": [
+      "Paracetamol",
+      "Aspirin",
+      "Metformin",
+      "Amlodipine",
+      "Omeprazole",
+      "Ibuprofen"
+    ],
+    "family_condition_chips": [
+      "Hypertension",
+      "Diabetes",
+      "Ischemic Heart Disease",
+      "Asthma",
+      "Tuberculosis",
+      "Stroke",
+      "Epilepsy",
+      "Cancer",
+      "Thyroid Disease",
+      "Rheumatoid Arthritis",
+      "Thalassemia",
+      "Hemophilia"
+    ],
+    "family_relationships": [
+      "Father",
+      "Mother",
+      "Brother",
+      "Sister",
+      "Son",
+      "Daughter",
+      "Paternal Uncle",
+      "Paternal Aunt",
+      "Maternal Uncle",
+      "Maternal Aunt",
+      "Paternal Grandfather",
+      "Paternal Grandmother",
+      "Maternal Grandfather",
+      "Maternal Grandmother"
+    ],
+    "systemic_review": [
+      {
+        "id": "cardiovascular",
+        "title": "Cardiovascular",
+        "emoji": "🫀",
+        "female_only": false,
+        "always_ask": false,
+        "symptoms": [
+          "Chest pain",
+          "Breathlessness",
+          "Palpitation",
+          "Orthopnea",
+          "Paroxysmal nocturnal dyspnea",
+          "Edema feet",
+          "Syncope"
+        ]
+      },
+      {
+        "id": "respiratory",
+        "title": "Respiratory",
+        "emoji": "🫁",
+        "female_only": false,
+        "always_ask": false,
+        "symptoms": [
+          "Cough",
+          "Sputum",
+          "Hemoptysis",
+          "Wheeze",
+          "Stridor",
+          "Pleuritic chest pain"
+        ]
+      },
+      {
+        "id": "gastrointestinal",
+        "title": "Gastrointestinal",
+        "emoji": "🍽️",
+        "female_only": false,
+        "always_ask": false,
+        "symptoms": [
+          "Nausea",
+          "Vomiting",
+          "Abdominal pain",
+          "Heartburn",
+          "Dysphagia",
+          "Diarrhea",
+          "Constipation"
+        ]
+      },
+      {
+        "id": "genitourinary",
+        "title": "Genitourinary",
+        "emoji": "🚽",
+        "female_only": false,
+        "always_ask": false,
+        "symptoms": [
+          "Flank pain",
+          "Dysuria",
+          "Hematuria",
+          "Frequency",
+          "Polyuria",
+          "Oliguria",
+          "Nocturia"
+        ]
+      },
+      {
+        "id": "cns",
+        "title": "CNS",
+        "emoji": "🧠",
+        "female_only": false,
+        "always_ask": false,
+        "symptoms": [
+          "Headache",
+          "Fits",
+          "Weakness",
+          "Numbness",
+          "Vertigo",
+          "Visual loss",
+          "Diplopia"
+        ]
+      },
+      {
+        "id": "musculoskeletal",
+        "title": "Musculoskeletal",
+        "emoji": "🦴",
+        "female_only": false,
+        "always_ask": false,
+        "symptoms": [
+          "Joint pain",
+          "Joint swelling",
+          "Joint stiffness",
+          "Muscle weakness",
+          "Restricted movements"
+        ]
+      },
+      {
+        "id": "gynaecological",
+        "title": "Gynaecological",
+        "emoji": "🩸",
+        "female_only": true,
+        "always_ask": false,
+        "symptoms": [
+          "Amenorrhea",
+          "Irregular cycle",
+          "Heavy bleeding",
+          "Dysmenorrhea",
+          "Intermenstrual bleeding",
+          "Postcoital bleeding",
+          "Vaginal discharge"
+        ]
+      },
+      {
+        "id": "endocrine",
+        "title": "Endocrine",
+        "emoji": "🧴",
+        "female_only": false,
+        "always_ask": false,
+        "symptoms": [
+          "Heat intolerance",
+          "Cold intolerance",
+          "Excessive sweating",
+          "Polydipsia",
+          "Polyphagia",
+          "Weight gain"
+        ]
+      },
+      {
+        "id": "constitutional",
+        "title": "Constitutional",
+        "emoji": "🌡️",
+        "female_only": false,
+        "always_ask": true,
+        "symptoms": [
+          "Fever",
+          "Loss of appetite",
+          "Weight loss",
+          "Fatigue",
+          "Disturbed sleep",
+          "Lethargy"
+        ]
+      }
+    ]
+  }
+}
