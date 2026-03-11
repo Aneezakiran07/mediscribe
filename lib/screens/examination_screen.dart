@@ -568,7 +568,10 @@ class _ExaminationScreenState extends State<ExaminationScreen> {
     final s = _data.sessionFor(examId);
     return exam.questions
         .where((q) => !q.isInjected || s.unlockedFollowUps.contains(q.id))
-        .where((q) => s.answers.containsKey(q.storesAs))
+        .where((q) {
+          final stored = s.answers[q.storesAs];
+          return stored != null && stored.isNotEmpty;  
+        })
         .length;
   }
 
@@ -697,10 +700,21 @@ class _GuidedExamPageState extends State<GuidedExamPage> {
   SystemExamSession get session => widget.session;
 
   // Visible questions: base (non-injected) + unlocked follow-ups in original order
-  List<KBQuestion> get _steps => exam.questions
-      .where((q) => !q.isInjected || session.unlockedFollowUps.contains(q.id))
-      .toList();
-
+  List<KBQuestion> get _steps {
+  final result = <KBQuestion>[];
+  for (final q in exam.questions) {
+    if (q.isInjected) continue;          // skip injected in base pass
+    result.add(q);
+    // insert any unlocked follow-ups that belong after this question
+    for (final fq in exam.questions) {
+      if (fq.isInjected && session.unlockedFollowUps.contains(fq.id)) {
+        if (!result.contains(fq)) result.add(fq);
+      }
+    }
+  }
+  return result;
+}
+  
   KBQuestion get _current => _steps[_currentIndex];
 
   List<String> get _currentSelections =>
@@ -746,13 +760,14 @@ class _GuidedExamPageState extends State<GuidedExamPage> {
     }
   }
 
-  void _goNext() {
-    if (_currentIndex < _steps.length - 1) {
-      setState(() {
-        _currentIndex++;
-        _showTip = false;
-        _contradictionMessage = null;
-      });
+ void _goNext() {
+  final steps = _steps;   // capture current list
+  if (_currentIndex < steps.length - 1) {
+    setState(() {
+      _currentIndex++;
+      _showTip = false;
+      _contradictionMessage = null;
+    });
       _scrollController.animateTo(0,
           duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
     } else {
@@ -769,24 +784,30 @@ class _GuidedExamPageState extends State<GuidedExamPage> {
       });
     }
   }
+void _showResultsSheet() {
+  final score = session.computeScore(exam);
+  final certaintyDiagnoses = session.calculateCertaintyFactors(exam);
 
-  void _showResultsSheet() {
-    final score = session.computeScore(exam);
-    final certaintyDiagnoses = session.calculateCertaintyFactors(exam);
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _ResultsSheet(
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (_) => DraggableScrollableSheet(
+      initialChildSize: 0.75,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      expand: false,
+      builder: (_, scrollController) => _ResultsSheet(
         exam: exam,
         session: session,
         score: score,
         certaintyDiagnoses: certaintyDiagnoses,
+        scrollController: scrollController,
         onDone: () { Navigator.pop(context); Navigator.pop(context); },
       ),
-    );
-  }
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -1260,12 +1281,15 @@ class _ResultsSheet extends StatelessWidget {
   final KBExamination exam;
   final SystemExamSession session;
   final int score;
+  final ScrollController? scrollController; 
   final List<Map<String, dynamic>> certaintyDiagnoses;
   final VoidCallback onDone;
+  
 
   const _ResultsSheet({
     required this.exam, required this.session, required this.score,
     required this.certaintyDiagnoses, required this.onDone,
+    this.scrollController,
   });
 
   @override
@@ -1286,6 +1310,7 @@ class _ResultsSheet extends StatelessWidget {
       ),
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
       child: SingleChildScrollView(
+      controller: scrollController,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

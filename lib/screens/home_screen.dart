@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'history_taking_screen.dart';
 import '../core/app_colors.dart';
+import 'patient_info_screen.dart';
 
 
 // DATA MODELS
@@ -70,7 +71,6 @@ class PatientRepository {
   static int getTotalSaved()    => 12;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
 void main() => runApp(const _PreviewApp());
 
 class _PreviewApp extends StatelessWidget {
@@ -129,163 +129,151 @@ class _HomeScreenState extends State<HomeScreen> {
 class _HomeBody extends StatelessWidget {
   const _HomeBody();
 
-  @override
-  Widget build(BuildContext context) {
-    final patients = PatientRepository.getRecentPatients();
+@override
+Widget build(BuildContext context) {
+  final patients = PatientRepository.getRecentPatients();
 
-    return SafeArea(
-      child: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
+  return SafeArea(
+    child: CustomScrollView(
+      physics: const BouncingScrollPhysics(),
+      slivers: [
 
-          const SliverToBoxAdapter(child: _AppHeader()),
-          //. quick actiosn
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+        const SliverToBoxAdapter(child: _AppHeader()),
 
-                  // New Patient 
-                  _QuickActionCard(
-                    // person_add_alt_1: adds a person with a plus 
-                    icon: Icons.person_add_alt_1,
-                    label: 'New Patient',
-                    description: 'Start history taking for a new case.',
-                    fullWidth: true,
-                    onTap: () {
-                      // navigate to history taking
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+
+                // New Patient — now goes to PatientInfoScreen
+                _QuickActionCard(
+                  icon: Icons.person_add_alt_1,
+                  label: 'New Patient',
+                  description: 'Start history taking for a new case.',
+                  fullWidth: true,
+                  onTap: () {
                     Navigator.push(
-                       context,
-                       MaterialPageRoute(
-                          builder: (_) => const HistoryTakingScreen(),
-                       ),
-                      );
-                    
-                    },
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // 2-column row
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _QuickActionCard(
-                          // folder_open: open folder — standard Material
-                          icon: Icons.folder_open,
-                          label: 'Patient Records',
-                          description: 'Browse all saved records.',
-                          onTap: () {
-                            // TODO: Navigator.push → PatientListScreen
-                          },
-                        ),
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const PatientInfoScreen(),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _QuickActionCard(
-                          // assignment_outlined: clipboard checklist 
-                          icon: Icons.assignment_outlined,
-                          label: 'Exam Guidance',
-                          description: 'Step-by-step clinical exam.',
-                          onTap: () {
-                            // TODO: Navigator.push → ExaminationScreen
-                          },
-                        ),
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 12),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: _QuickActionCard(
+                        icon: Icons.folder_open,
+                        label: 'Patient Records',
+                        description: 'Browse all saved records.',
+                        onTap: () {
+                          // TODO: Navigator.push → PatientListScreen
+                        },
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _QuickActionCard(
+                        icon: Icons.assignment_outlined,
+                        label: 'Exam Guidance',
+                        description: 'Step-by-step clinical exam.',
+                        onTap: () {
+                          // TODO: Navigator.push → ExaminationScreen
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
+        ),
 
-          // ─today stats
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
-              child: _SectionHeader(title: "Today's Summary"),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+            child: _SectionHeader(title: "Today's Summary"),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _StatCard(
+                    icon: Icons.assignment_turned_in,
+                    value: PatientRepository.getTodayCases().toString(),
+                    label: 'Cases\nToday',
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _StatCard(
+                    icon: Icons.warning_amber_rounded,
+                    value: PatientRepository.getPendingFlags().toString(),
+                    label: 'Pending\nFlags',
+                    highlight: true,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _StatCard(
+                    icon: Icons.save_outlined,
+                    value: PatientRepository.getTotalSaved().toString(),
+                    label: 'Total\nSaved',
+                  ),
+                ),
+              ],
             ),
           ),
-          SliverToBoxAdapter(
-            child: Padding(
+        ),
+
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+            child: _SectionHeader(
+              title: 'Recent Patients',
+              actionLabel: 'View All',
+              onAction: () {
+                // TODO: Navigator.push → PatientListScreen
+              },
+            ),
+          ),
+        ),
+
+        SliverToBoxAdapter(
+          child: SizedBox(
+            height: 108,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _StatCard(
-                      // assignment_turned_in: clipboard with tick 
-                      icon: Icons.assignment_turned_in,
-                      value: PatientRepository.getTodayCases().toString(),
-                      label: 'Cases\nToday',
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _StatCard(
-                      // warning_amber_rounded: triangle warning
-                      icon: Icons.warning_amber_rounded,
-                      value: PatientRepository.getPendingFlags().toString(),
-                      label: 'Pending\nFlags',
-                      highlight: true,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _StatCard(
-                      // save_outlined: floppy disk save — standard Material
-                      icon: Icons.save_outlined,
-                      value: PatientRepository.getTotalSaved().toString(),
-                      label: 'Total\nSaved',
-                    ),
-                  ),
-                ],
-              ),
+              itemCount: patients.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 10),
+              itemBuilder: (_, i) => _PatientChip(patient: patients[i]),
             ),
           ),
+        ),
 
-          // recent patients
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
-              child: _SectionHeader(
-                title: 'Recent Patients',
-                actionLabel: 'View All',
-                onAction: () {
-                  // TODO: Navigator.push → PatientListScreen
-                },
-              ),
-            ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+            child: _TipBanner(),
           ),
+        ),
 
-          // Horizontal patient chips
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 108,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: patients.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 10),
-                itemBuilder: (_, i) => _PatientChip(patient: patients[i]),
-              ),
-            ),
-          ),
-
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
-              child: _TipBanner(),
-            ),
-          ),
-
-          const SliverToBoxAdapter(child: SizedBox(height: 32)),
-        ],
-      ),
-    );
-  }
+        const SliverToBoxAdapter(child: SizedBox(height: 32)),
+      ],
+    ),
+  );
+}
 }
 
 // WIDGETS FINALLY

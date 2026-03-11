@@ -6,16 +6,14 @@ import 'screens/systemic_history_screen.dart';
 import 'screens/examination_screen.dart';
 
 void main() async {
-  
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
 
-  // Load all JSON assets in parallel before showing UI
   await Future.wait([
-    ClinicalTermsService.init(),   // assets/clinical_terms.json
-    SystemicReviewService.init(),  // assets/clinical_terms.json (systemic_review array)
-    KBSearchService.init(),        // assets/knowledge_base.json  (also calls ClinicalTermsService internally)
-    KBService.init(),              // assets/knowledge_base.json  (examination engine)
+    ClinicalTermsService.init(),    // history_taking_screen.dart
+    KBSearchService.init(),         // history_taking_screen.dart
+    SystemicReviewService.init(),   // systemic_history_screen.dart
+    KBService.init(),               // examination_screen.dart
   ]);
 
   runApp(const MediScribeApp());

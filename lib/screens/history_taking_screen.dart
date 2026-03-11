@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'systemic_history_screen.dart'; // ← uncomment when integrating
-
+import 'patient_info_screen.dart';
 import '../core/app_colors.dart';
+import 'systemic_history_screen.dart'; // ← uncomment when integrating
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // KNOWLEDGE BASE SEARCH ENGINE
@@ -298,7 +298,8 @@ class _PreviewApp extends StatelessWidget {
 // HISTORY TAKING SCREEN — 3-page flow
 // ═══════════════════════════════════════════════════════════════════════════════
 class HistoryTakingScreen extends StatefulWidget {
-  const HistoryTakingScreen({super.key});
+  final PatientInfo? patientInfo;
+  const HistoryTakingScreen({super.key, this.patientInfo});
 
   @override
   State<HistoryTakingScreen> createState() => _HistoryTakingScreenState();
@@ -322,28 +323,17 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen> {
         curve: Curves.easeInOut,
       );
     } else {
-      // ══════════════════════════════════════════════════════════════════════
-      // NAVIGATION TO SYSTEMIC HISTORY SCREEN
-      // Uncomment the import at top of file and the push below:
+
        Navigator.push(
-        context,
-       MaterialPageRoute(
-          builder: (_) => SystemicHistoryScreen(
-            patientGender: _formData.patientGender,
+         context,
+         MaterialPageRoute(
+           builder: (_) => SystemicHistoryScreen(
+             patientGender: _formData.patientGender,
              chiefComplaints: _formData.complaints,
-     ),
-     ),
-     );
-      // ══════════════════════════════════════════════════════════════════════
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Uncomment Navigator.push in _nextPage() to go to SystemicHistoryScreen',
-          ),
-          backgroundColor: AppColors.sectionHeader,
-          duration: Duration(seconds: 4),
+           ),
         ),
-      );
+       );
+      
     }
   }
 
