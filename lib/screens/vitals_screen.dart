@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'examination_screen.dart';
 import '../core/app_colors.dart';
+import 'labs_screen.dart';
 
 // VITAL STATUS ENUM
 enum VitalStatus { normal, warning, danger }
@@ -442,13 +443,12 @@ class _VitalsScreenState extends State<VitalsScreen> {
     // await Hive.box<VitalsData>('vitals').put(patientId, _data);
 
     Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ExaminationScreen(autoFlags: flags),
-      ),
-    );
+  context,
+  MaterialPageRoute(
+    builder: (_) => const LabsScreen(),
+  ),
+);
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
