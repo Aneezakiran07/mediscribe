@@ -3,24 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'patient_info_screen.dart';
 import '../core/app_colors.dart';
-import 'systemic_history_screen.dart'; // ← uncomment when integrating
+import 'systemic_history_screen.dart'; 
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// KNOWLEDGE BASE SEARCH ENGINE
-// Searches symptoms, diagnoses, conditions, options from knowledge_base.json.
-// All "Add custom" fields across every section funnel through KBSearchService.
-// KBSearchService.init() loads and parses knowledge_base.json at startup.
-// To activate:
-//   1. Add to pubspec.yaml:  flutter: assets: - assets/knowledge_base.json
-//   2. Place knowledge_base.json in assets/ folder
-//   3. Call await KBSearchService.init() in main() before runApp — already done below
-// ═══════════════════════════════════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════════════════════════════════
-// CLINICAL TERMS SERVICE
-// Loads clinical_terms.json — provides conditions, drugs, chips, relationships.
-// Call await ClinicalTermsService.init() in main() before runApp.
-// Add to pubspec.yaml: flutter: assets: - assets/clinical_terms.json
-// ═══════════════════════════════════════════════════════════════════════════════
 class ClinicalTermsService {
   ClinicalTermsService._();
   static Map<String, dynamic> _data = {};
@@ -55,7 +39,7 @@ class ClinicalTermsService {
   static List<String> get familyRelationships =>
       List<String>.from(_data['family_relationships'] ?? _fallbackRelationships);
 
-  // ── Fallbacks (used if JSON not yet in assets) ────────────────────────────
+  // Fallbacks (used if JSON not yet in assets)
   static const _fallbackConditionChips = [
     'Diabetes', 'Hypertension', 'Asthma', 'Heart Disease', 'Tuberculosis', 'None',
   ];
@@ -79,14 +63,7 @@ class ClinicalTermsService {
   static const _fallbackDrugs = [
     'Aspirin', 'Metformin', 'Amlodipine', 'Lisinopril',
     'Omeprazole', 'Salbutamol', 'Prednisolone',
-  ];
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// KNOWLEDGE BASE SEARCH ENGINE
-// Searches symptoms, diagnoses, conditions, options from knowledge_base.json
-// + conditions/drugs from clinical_terms.json via ClinicalTermsService.
-// ═══════════════════════════════════════════════════════════════════════════════
+  ];}
 class KBSearchResult {
   final String term;
   final String source;
@@ -197,9 +174,7 @@ class KBSearchService {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// DATA MODELS
-// ═══════════════════════════════════════════════════════════════════════════════
+
 class ComplaintDetail {
   String complaint;
   int durationValue;
@@ -264,9 +239,6 @@ class HistoryFormData {
   String patientGender = 'Male'; // 'Male' | 'Female' | 'Other'
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// STANDALONE ENTRY
-// ═══════════════════════════════════════════════════════════════════════════════
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await ClinicalTermsService.init(); // loads clinical_terms.json (conditions, drugs, chips)
@@ -293,10 +265,6 @@ class _PreviewApp extends StatelessWidget {
     );
   }
 }
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// HISTORY TAKING SCREEN — 3-page flow
-// ═══════════════════════════════════════════════════════════════════════════════
 class HistoryTakingScreen extends StatefulWidget {
   final PatientInfo? patientInfo;
   const HistoryTakingScreen({super.key, this.patientInfo});
@@ -392,10 +360,6 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen> {
     );
   }
 }
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// SHARED WIDGETS
-// ═══════════════════════════════════════════════════════════════════════════════
 
 class _HistoryAppBar extends StatelessWidget {
   final String title;
@@ -612,11 +576,9 @@ class _TagChip extends StatelessWidget {
   }
 }
 
-// ───────────────────────────────────────────────────────────────────────────────
 // KB SEARCH FIELD — the universal "Add custom" widget used across all sections.
 // Shows a search pill → expands to a TextField that queries KBSearchService
 // → shows a dropdown of matched results + "Add as custom" option at bottom.
-// ───────────────────────────────────────────────────────────────────────────────
 class _KBSearchField extends StatefulWidget {
   final String hint;              // placeholder when typing
   final String buttonLabel;       // text on the collapsed pill e.g. "Add symptom"
@@ -943,9 +905,7 @@ class _SmallDropdown extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
 // PAGE 1 — PRESENTING COMPLAINTS + HOPI
-// ═══════════════════════════════════════════════════════════════════════════════
 class _Page1ComplaintsHOPI extends StatefulWidget {
   final HistoryFormData formData;
   final VoidCallback onChanged;
@@ -985,7 +945,7 @@ class _Page1State extends State<_Page1ComplaintsHOPI> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
-          // ── Presenting Complaints ──────────────────────────────────────────
+          //  Presenting Complaints 
           const _SectionBar(title: 'Presenting Complaints'),
           Padding(
             padding: const EdgeInsets.all(16),
@@ -1008,13 +968,12 @@ class _Page1State extends State<_Page1ComplaintsHOPI> {
                   buttonLabel: 'Add complaint',
                   alreadySelected: fd.complaints,
                   onAdd: _addComplaint,
-                  // No filter — searches all terms so any symptom can be a complaint
+                  // No filter 
                 ),
               ],
             ),
           ),
 
-          // ── History of Present Illness ─────────────────────────────────────
           const _SectionBar(title: 'History of Present Illness'),
           const SizedBox(height: 8),
 
@@ -1153,9 +1112,6 @@ class _HOPICardState extends State<_HOPICard> {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// PAGE 2 — PAST TREATMENT + SOCIO-ECONOMIC + PERSONAL + DRUG HISTORY
-// ═══════════════════════════════════════════════════════════════════════════════
 class _Page2PastPersonalHistory extends StatefulWidget {
   final HistoryFormData formData;
   final VoidCallback onChanged;
@@ -1180,7 +1136,6 @@ class _Page2State extends State<_Page2PastPersonalHistory> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
-          // ── Past Treatment History ─────────────────────────────────────────
           const _SectionBar(title: 'Past Treatment History'),
           Container(
             margin: const EdgeInsets.all(16),
@@ -1262,7 +1217,6 @@ class _Page2State extends State<_Page2PastPersonalHistory> {
             ]),
           ),
 
-          // ── Socio-economic History ─────────────────────────────────────────
           const _SectionBar(title: 'Socio-economic History'),
           Container(
             margin: const EdgeInsets.all(16),
@@ -1307,7 +1261,7 @@ class _Page2State extends State<_Page2PastPersonalHistory> {
             ]),
           ),
 
-          // ── Personal History ───────────────────────────────────────────────
+          // Personal History
           const _SectionBar(title: 'Personal History'),
           Container(
             margin: const EdgeInsets.all(16),
@@ -1333,7 +1287,7 @@ class _Page2State extends State<_Page2PastPersonalHistory> {
             ]),
           ),
 
-          // ── Drug History ───────────────────────────────────────────────────
+          //Drug History
           const _SectionBar(title: 'Drug History'),
           Container(
             margin: const EdgeInsets.all(16),
@@ -1417,9 +1371,7 @@ class _Page2State extends State<_Page2PastPersonalHistory> {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// PAGE 3 — FAMILY HISTORY
-// ═══════════════════════════════════════════════════════════════════════════════
+
 class _Page3FamilyHistory extends StatefulWidget {
   final HistoryFormData formData;
   final VoidCallback onChanged;
@@ -1539,7 +1491,6 @@ class _Page3State extends State<_Page3FamilyHistory> {
   }
 }
 
-// ── Family Member Card ────────────────────────────────────────────────────────
 class _FamilyMemberCard extends StatefulWidget {
   final FamilyMember member;
   final int index;

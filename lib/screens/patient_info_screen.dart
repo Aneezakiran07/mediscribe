@@ -1,27 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'history_taking_screen.dart';
+import '../models/patient_info.dart';
 import '../core/app_colors.dart';
+import 'history_taking_screen.dart';
 
-// @HiveType(typeId: 0)
-class PatientInfo {
-  String fullName        = '';
-  int?   age;
-  String gender          = '';          // 'Male' | 'Female' | 'Other'
-  String dateOfBirth     = '';          // stored as dd/MM/yyyy string
-  String address         = '';
-  DateTime? dateOfAdmission;
-  String modeOfAdmission = 'OPD';       // 'OPD' | 'Emergency'
-  String maritalStatus   = '';
-  String religion        = '';
-  String patientId       = '';          // auto-generated MR number
-
-  bool get isComplete =>
-      fullName.trim().isNotEmpty &&
-      age != null &&
-      gender.isNotEmpty;
-}
-
+// ═══════════════════════════════════════════════════════════════════════════════
+// STANDALONE ENTRY — remove when integrating
+// ═══════════════════════════════════════════════════════════════════════════════
 void main() => runApp(const _PreviewApp());
 
 class _PreviewApp extends StatelessWidget {
@@ -42,6 +27,9 @@ class _PreviewApp extends StatelessWidget {
   );
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// PATIENT INFO SCREEN
+// ═══════════════════════════════════════════════════════════════════════════════
 class PatientInfoScreen extends StatefulWidget {
   const PatientInfoScreen({super.key});
 
@@ -69,50 +57,19 @@ class _PatientInfoScreenState extends State<PatientInfoScreen> {
     super.dispose();
   }
 
-void _onNext() {
-  setState(() => _submitted = true);
-  if (!_formKey.currentState!.validate()) return;
-  _formKey.currentState!.save();
+  void _onNext() {
+    setState(() => _submitted = true);
+    if (!_formKey.currentState!.validate()) return;
+    _formKey.currentState!.save();
 
-  if (_info.dateOfBirth.isNotEmpty && _info.age != null) {
-    final parts = _info.dateOfBirth.split('/');
-    if (parts.length == 3) {
-      final dob = DateTime(
-        int.parse(parts[2]), // year
-        int.parse(parts[1]), // month
-        int.parse(parts[0]), // day
-      );
-      final today = DateTime.now();
-      final expectedAge = today.year - dob.year -
-          ((today.month < dob.month ||
-                  (today.month == dob.month && today.day < dob.day))
-              ? 1
-              : 0);
+    // Auto-generate patient ID
+    _info.patientId = 'MR-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
 
-      if ((_info.age! - expectedAge).abs() > 1) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Age (${_info.age}) doesn\'t match date of birth (expected ~$expectedAge). Please check.',
-            ),
-            backgroundColor: AppColors.emergencyRed,
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 4),
-          ),
-        );
-        return; // block navigation until fixed
-      }
-    }
+    Navigator.push(context, MaterialPageRoute(
+      builder: (_) => HistoryTakingScreen(patientInfo: _info),
+    ));
   }
 
-
-  // Auto-generate patient ID
-  _info.patientId = 'MR-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
-
-  Navigator.push(context, MaterialPageRoute(
-    builder: (_) => HistoryTakingScreen(patientInfo: _info),
-  ));
-}
   Future<void> _pickAdmissionDate() async {
     final picked = await showDatePicker(
       context: context,
@@ -153,11 +110,12 @@ void _onNext() {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
 
+                    // ── Page heading ────────────────────────────────────────
                     _PageHeading(),
 
                     const SizedBox(height: 20),
 
-               
+                    // ── Section: Personal Details ────────────────────────────
                     _SectionCard(
                       title: 'Personal Details',
                       icon: Icons.person_outline,
@@ -167,7 +125,7 @@ void _onNext() {
                         _FieldLabel('Full Name', required: true),
                         _TextInput(
                           controller: _nameCtrl,
-                          hint: 'e.g. John Doe',
+                          hint: 'e.g. Muhammad Ali',
                           validator: (v) => (v == null || v.trim().isEmpty)
                               ? 'Full name is required' : null,
                           onSaved: (v) => _info.fullName = v?.trim() ?? '',
@@ -273,6 +231,7 @@ void _onNext() {
 
                     const SizedBox(height: 16),
 
+                    // ── Section: Admission Details ───────────────────────────
                     _SectionCard(
                       title: 'Admission Details',
                       icon: Icons.local_hospital_outlined,
@@ -324,6 +283,8 @@ void _onNext() {
                     ),
 
                     const SizedBox(height: 28),
+
+                    // ── Next Button ──────────────────────────────────────────
                     _NextButton(onPressed: _onNext),
 
                     const SizedBox(height: 8),
@@ -346,11 +307,15 @@ void _onNext() {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// WIDGETS
+// ═══════════════════════════════════════════════════════════════════════════════
+
 class _AppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.sectionHeader,
+      color: AppColors.deepTeal,
       child: SafeArea(
         bottom: false,
         child: Padding(
@@ -595,7 +560,7 @@ class _DropdownInput extends StatelessWidget {
   }
 }
 
-// Date of Birth
+// Date of Birth — three linked dropdowns (Day / Month / Year)
 // More reliable than showDatePicker for entering historical dates
 class _DOBField extends StatefulWidget {
   final void Function(String) onSaved;
@@ -719,7 +684,7 @@ class _CompactDropdown extends StatelessWidget {
   }
 }
 
-// Emergency / OPD toggle 
+// Emergency / OPD toggle — two pills, only one active at a time
 class _ModeOfAdmissionToggle extends StatelessWidget {
   final String value;
   final void Function(String) onChanged;
@@ -825,7 +790,7 @@ class _NextButton extends StatelessWidget {
     child: ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.sectionHeader,
+        backgroundColor: AppColors.deepTeal,
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
