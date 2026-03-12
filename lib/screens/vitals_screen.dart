@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'examination_screen.dart';
 import '../core/app_colors.dart';
+import '../models/patient_info.dart';
 import 'labs_screen.dart';
+import 'history_taking_screen.dart' show HistoryFormData;
+import 'systemic_history_screen.dart' show SystemicHistoryData;
 
+// Colors - import from lib/core/app_colors.dart when integrating
 // VITAL STATUS ENUM
 enum VitalStatus { normal, warning, danger }
 
@@ -424,7 +427,11 @@ class _App extends StatelessWidget {
 
 // VITALS SCREEN - main widget
 class VitalsScreen extends StatefulWidget {
-  const VitalsScreen({super.key});
+  final PatientInfo? patient;
+  final HistoryFormData? history;
+  final SystemicHistoryData? systemic;
+
+  const VitalsScreen({super.key, this.patient, this.history, this.systemic});
 
   @override
   State<VitalsScreen> createState() => _VitalsScreenState();
@@ -443,12 +450,18 @@ class _VitalsScreenState extends State<VitalsScreen> {
     // await Hive.box<VitalsData>('vitals').put(patientId, _data);
 
     Navigator.push(
-  context,
-  MaterialPageRoute(
-    builder: (_) => const LabsScreen(),
-  ),
-);
+      context,
+      MaterialPageRoute(
+        builder: (_) => LabsScreen(
+          patient:  widget.patient,
+          history:  widget.history,
+          systemic: widget.systemic,
+          vitals:   _data,
+        ),
+      ),
+    );
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

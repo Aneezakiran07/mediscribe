@@ -3,9 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../core/app_colors.dart';
+import 'soap_note_screen.dart';
+import '../models/patient_info.dart';
+import 'history_taking_screen.dart';
+import 'systemic_history_screen.dart';
+import 'vitals_screen.dart';
+import 'labs_screen.dart';
 
 
-// ─── DATA MODELS ─────────────────────────────────────────────────────────────
+//models
 
 // One question parsed from knowledge_base.json
 // Hive: @HiveType(typeId: 6) when ready
@@ -190,8 +196,6 @@ class SystemExamSession {
       default:             return false;
     }
   }
-
-  // ── CONSTRAINT CHECKING ──────────────────────────────────────────────────────
   // Returns a violation message if the current working answers contain a
   // clinically impossible (contradictory) combination, or null if valid.
   // Called after every selection. If non-null → caller must rollback the selection.
@@ -202,7 +206,6 @@ class SystemExamSession {
   // All keys and option strings copied verbatim from knowledge_base.json
   static const Map<String, List<List<String>>> _constraints = {
 
-    // ── CVS ──────────────────────────────────────────────────────────────────
     'pulse_findings': [
       ['Rate normal (60-100 bpm)', 'Tachycardia (>100 bpm)'],
       ['Rate normal (60-100 bpm)', 'Bradycardia (<50 bpm)'],
@@ -227,7 +230,7 @@ class SystemExamSession {
       ['Duration less than 30 minutes (Angina pattern)', 'Duration more than 30 minutes (MI pattern)'],
     ],
 
-    // ── RESP ──────────────────────────────────────────────────────────────────
+    // Resp
     'resp_inspection': [
       ['Respiratory rate normal (14-16/min)', 'Tachypnea (RR > 20/min)'],
       ['Respiratory rate normal (14-16/min)', 'Bradypnea (RR < 10/min)'],
@@ -261,7 +264,7 @@ class SystemExamSession {
       ['Increased vocal resonance', 'Decreased vocal resonance'],
     ],
 
-    // ── ABD ───────────────────────────────────────────────────────────────────
+    // ABD
     'pain_character': [
       ['Relieved by food intake', 'Worsened by food intake'],
     ],
@@ -289,7 +292,7 @@ class SystemExamSession {
       ['Liver dullness in right hypochondrium (normal)', 'Liver dullness area enlarged (hepatomegaly)'],
     ],
 
-    // ── NEURO ─────────────────────────────────────────────────────────────────
+    // NEURO
     'consciousness_level': [
       ['Alert and oriented (GCS 15)', 'Confused / disoriented'],
       ['Alert and oriented (GCS 15)', 'Drowsy but rousable'],
@@ -365,8 +368,6 @@ class SystemExamSession {
     answers[storesAs]?.remove(option);
   }
 
-  // ── CERTAINTY FACTORS ────────────────────────────────────────────────────────
-  // ── DIAGNOSIS ENGINE v2 ─────────────────────────────────────────────────────
   //
   // The old engine had a fatal flaw: one shared total score meant every
   // diagnosis got 100% if you selected enough findings. This engine fixes that.
@@ -406,7 +407,7 @@ class SystemExamSession {
       int dxMaxPossible;
 
       if (dx.keyFindings.isNotEmpty) {
-        // ── MODE A: Key-findings based scoring ──────────────────────────────
+        // ── MODE A: Key-findings based scoring 
         // Build a lookup of weight for each key finding from the question bank
         final Map<String, int> findingWeights = {};
         for (final q in exam.questions) {
@@ -432,7 +433,6 @@ class SystemExamSession {
         if (dxMaxPossible == 0) dxMaxPossible = dx.keyFindings.length;
 
       } else {
-        // ── MODE B: Total-score fallback ─────────────────────────────────────
         dxScore = computeScore(exam);
         dxMaxPossible = dx.maxScore;
       }
@@ -446,7 +446,6 @@ class SystemExamSession {
           ? 100
           : (((dxScore - dx.minScoreThreshold) / range) * 100).clamp(0, 100).round();
 
-      // ── CONTRADICTING FINDINGS PENALTY ──────────────────────────────────
       // If the user selected "normal" findings that contradict this diagnosis,
       // reduce certainty. Penalty = 15 per contradicting finding, max 45.
       // This handles the case where someone checks "Regular rhythm" AND
@@ -517,7 +516,6 @@ const List<ExamSystemConfig> kExamConfigs = [
   ExamSystemConfig(examId: 'NEURO_001', title: 'Neurological',    subtitle: 'CNS, cranial nerves, reflexes',    icon: Icons.psychology_outlined),
 ];
 
-// ─── APP ENTRY ───────────────────────────────────────────────────────────────
 
 // Remove main() when integrating
 void main() async {
@@ -540,12 +538,25 @@ class _PreviewApp extends StatelessWidget {
   );
 }
 
-// ─── OVERVIEW SCREEN ─────────────────────────────────────────────────────────
 
 // Pass vitalsFlags from VitalsScreen: ExaminationScreen(autoFlags: flags)
 class ExaminationScreen extends StatefulWidget {
   final List<String> autoFlags;
-  const ExaminationScreen({super.key, this.autoFlags = const []});
+  final PatientInfo? patient;
+  final HistoryFormData? history;
+  final SystemicHistoryData? systemic;
+  final VitalsData? vitals;
+  final LabData? labs;
+
+  const ExaminationScreen({
+    super.key,
+    this.autoFlags = const [],
+    this.patient,
+    this.history,
+    this.systemic,
+    this.vitals,
+    this.labs,
+  });
 
   @override
   State<ExaminationScreen> createState() => _ExaminationScreenState();
@@ -595,15 +606,19 @@ class _ExaminationScreenState extends State<ExaminationScreen> {
       kExamConfigs.fold(0, (s, c) => s + _flags(c.examId)) + widget.autoFlags.length;
 
   void _onSave() {
-    // Hive save: await Hive.box<ExaminationData>('examinations').put(patientId, _data);
-    // Then navigate to SOAP / Diagnosis screen
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(_totalFlags == 0
-          ? 'Examination saved — no critical findings'
-          : 'Examination saved — $_totalFlags finding${_totalFlags > 1 ? "s" : ""} flagged'),
-      backgroundColor: _totalFlags == 0 ? AppColors.sectionHeader : AppColors.emergencyRed,
-      duration: const Duration(seconds: 3),
-    ));
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SoapNoteScreen(
+          patient:     widget.patient     ?? PatientInfo(),
+          history:     widget.history     ?? HistoryFormData(),
+          systemic:    widget.systemic    ?? SystemicHistoryData(),
+          vitals:      widget.vitals      ?? VitalsData(),
+          examination: _data,
+          labs:        widget.labs        ?? LabData(),
+        ),
+      ),
+    );
   }
 
   @override
@@ -672,7 +687,6 @@ class _ExaminationScreenState extends State<ExaminationScreen> {
   }
 }
 
-// ─── GUIDED STEP-BY-STEP EXAM PAGE ───────────────────────────────────────────
 
 // This is the main innovation: one question at a time, step-by-step,
 // matching the mockup exactly: step counter, progress bar, instruction,
@@ -1172,8 +1186,6 @@ void _showResultsSheet() {
   }
 }
 
-// ─── SUB-STEP ROW ─────────────────────────────────────────────────────────────
-
 // One numbered checkbox row in the sub-steps section
 class _SubStepRow extends StatelessWidget {
   final int number;
@@ -1275,7 +1287,6 @@ class _SubStepRow extends StatelessWidget {
   }
 }
 
-// ─── RESULTS BOTTOM SHEET ────────────────────────────────────────────────────
 
 class _ResultsSheet extends StatelessWidget {
   final KBExamination exam;
@@ -1480,9 +1491,6 @@ class _ResultsSheet extends StatelessWidget {
     );
   }
 }
-
-// ─── CONTRADICTION BANNER ─────────────────────────────────────────────────────
-
 // Shown when user tries to select two mutually exclusive findings.
 // Has a dismiss (×) button. The selection is already rolled back when this shows.
 class _ContradictionBanner extends StatelessWidget {
@@ -1526,7 +1534,6 @@ class _ContradictionBanner extends StatelessWidget {
     );
   }
 }
-// ─── SHARED WIDGETS ───────────────────────────────────────────────────────────
 
 class _AlertBanner extends StatelessWidget {
   final String message;

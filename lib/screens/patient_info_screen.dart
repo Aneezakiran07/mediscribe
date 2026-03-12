@@ -4,9 +4,6 @@ import '../models/patient_info.dart';
 import '../core/app_colors.dart';
 import 'history_taking_screen.dart';
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// STANDALONE ENTRY — remove when integrating
-// ═══════════════════════════════════════════════════════════════════════════════
 void main() => runApp(const _PreviewApp());
 
 class _PreviewApp extends StatelessWidget {
@@ -27,9 +24,6 @@ class _PreviewApp extends StatelessWidget {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// PATIENT INFO SCREEN
-// ═══════════════════════════════════════════════════════════════════════════════
 class PatientInfoScreen extends StatefulWidget {
   const PatientInfoScreen({super.key});
 
@@ -38,15 +32,14 @@ class PatientInfoScreen extends StatefulWidget {
 }
 
 class _PatientInfoScreenState extends State<PatientInfoScreen> {
-  final _formKey   = GlobalKey<FormState>();
-  final _info      = PatientInfo();
-  bool _submitted  = false;
+  final _formKey  = GlobalKey<FormState>();
+  final _info     = PatientInfo();
+  bool _submitted = false;
 
-  // Text controllers for fields that need them
-  final _nameCtrl      = TextEditingController();
-  final _ageCtrl       = TextEditingController();
-  final _addressCtrl   = TextEditingController();
-  final _religionCtrl  = TextEditingController();
+  final _nameCtrl     = TextEditingController();
+  final _ageCtrl      = TextEditingController();
+  final _addressCtrl  = TextEditingController();
+  final _religionCtrl = TextEditingController();
 
   @override
   void dispose() {
@@ -62,7 +55,36 @@ class _PatientInfoScreenState extends State<PatientInfoScreen> {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
 
-    // Auto-generate patient ID
+    if (_info.dateOfBirth.isNotEmpty && _info.age != null) {
+      final parts = _info.dateOfBirth.split('/');
+      if (parts.length == 3) {
+        final dob = DateTime(
+          int.parse(parts[2]),
+          int.parse(parts[1]),
+          int.parse(parts[0]),
+        );
+        final today = DateTime.now();
+        final expectedAge = today.year - dob.year -
+            ((today.month < dob.month ||
+                    (today.month == dob.month && today.day < dob.day))
+                ? 1
+                : 0);
+        if ((_info.age! - expectedAge).abs() > 1) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Age (${_info.age}) doesn\'t match date of birth (expected ~$expectedAge). Please check.',
+              ),
+              backgroundColor: AppColors.emergencyRed,
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+          return;
+        }
+      }
+    }
+
     _info.patientId = 'MR-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
 
     Navigator.push(context, MaterialPageRoute(
@@ -110,22 +132,18 @@ class _PatientInfoScreenState extends State<PatientInfoScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
 
-                    // ── Page heading ────────────────────────────────────────
                     _PageHeading(),
-
                     const SizedBox(height: 20),
 
-                    // ── Section: Personal Details ────────────────────────────
                     _SectionCard(
                       title: 'Personal Details',
                       icon: Icons.person_outline,
                       children: [
 
-                        // Full Name
                         _FieldLabel('Full Name', required: true),
                         _TextInput(
                           controller: _nameCtrl,
-                          hint: 'e.g. Muhammad Ali',
+                          hint: 'e.g. John Doe',
                           validator: (v) => (v == null || v.trim().isEmpty)
                               ? 'Full name is required' : null,
                           onSaved: (v) => _info.fullName = v?.trim() ?? '',
@@ -136,11 +154,9 @@ class _PatientInfoScreenState extends State<PatientInfoScreen> {
 
                         const _FieldDivider(),
 
-                        // Age + Gender row
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Age
                             Expanded(
                               flex: 2,
                               child: Column(
@@ -164,7 +180,6 @@ class _PatientInfoScreenState extends State<PatientInfoScreen> {
                               ),
                             ),
                             const SizedBox(width: 12),
-                            // Gender
                             Expanded(
                               flex: 3,
                               child: Column(
@@ -188,15 +203,11 @@ class _PatientInfoScreenState extends State<PatientInfoScreen> {
 
                         const _FieldDivider(),
 
-                        // Date of Birth
                         _FieldLabel('Date of Birth'),
-                        _DOBField(
-                          onSaved: (v) => _info.dateOfBirth = v,
-                        ),
+                        _DOBField(onSaved: (v) => _info.dateOfBirth = v),
 
                         const _FieldDivider(),
 
-                        // Address
                         _FieldLabel('Address'),
                         _TextInput(
                           controller: _addressCtrl,
@@ -207,7 +218,6 @@ class _PatientInfoScreenState extends State<PatientInfoScreen> {
 
                         const _FieldDivider(),
 
-                        // Marital Status
                         _FieldLabel('Marital Status'),
                         _DropdownInput(
                           value: _info.maritalStatus.isEmpty ? null : _info.maritalStatus,
@@ -219,7 +229,6 @@ class _PatientInfoScreenState extends State<PatientInfoScreen> {
 
                         const _FieldDivider(),
 
-                        // Religion
                         _FieldLabel('Religion'),
                         _TextInput(
                           controller: _religionCtrl,
@@ -231,13 +240,11 @@ class _PatientInfoScreenState extends State<PatientInfoScreen> {
 
                     const SizedBox(height: 16),
 
-                    // ── Section: Admission Details ───────────────────────────
                     _SectionCard(
                       title: 'Admission Details',
                       icon: Icons.local_hospital_outlined,
                       children: [
 
-                        // Date of Admission
                         _FieldLabel('Date of Admission'),
                         GestureDetector(
                           onTap: _pickAdmissionDate,
@@ -251,7 +258,7 @@ class _PatientInfoScreenState extends State<PatientInfoScreen> {
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.calendar_today_outlined,
+                                const Icon(Icons.calendar_today_outlined,
                                     size: 16, color: AppColors.sectionHeader),
                                 const SizedBox(width: 10),
                                 Text(
@@ -272,7 +279,6 @@ class _PatientInfoScreenState extends State<PatientInfoScreen> {
 
                         const _FieldDivider(),
 
-                        // Mode of Admission toggle
                         _FieldLabel('Mode of Admission'),
                         const SizedBox(height: 4),
                         _ModeOfAdmissionToggle(
@@ -283,13 +289,9 @@ class _PatientInfoScreenState extends State<PatientInfoScreen> {
                     ),
 
                     const SizedBox(height: 28),
-
-                    // ── Next Button ──────────────────────────────────────────
                     _NextButton(onPressed: _onNext),
-
                     const SizedBox(height: 8),
 
-                    // Required fields note
                     Center(
                       child: Text(
                         '* Full Name, Age and Gender are required',
@@ -307,15 +309,11 @@ class _PatientInfoScreenState extends State<PatientInfoScreen> {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// WIDGETS
-// ═══════════════════════════════════════════════════════════════════════════════
-
 class _AppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.deepTeal,
+      color: AppColors.sectionHeader,
       child: SafeArea(
         bottom: false,
         child: Padding(
@@ -326,8 +324,7 @@ class _AppBar extends StatelessWidget {
                 icon: const Icon(Icons.arrow_back, color: AppColors.headerText, size: 22),
                 onPressed: () => Navigator.maybePop(context),
               ),
-              const Icon(Icons.psychology_outlined,
-                  color: AppColors.headerText, size: 20),
+              const Icon(Icons.psychology_outlined, color: AppColors.headerText, size: 20),
               const SizedBox(width: 8),
               const Expanded(
                 child: Text('MediScribe AI',
@@ -385,12 +382,11 @@ class _SectionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Section header bar
           Container(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.constitutional,
-              borderRadius: const BorderRadius.only(
+              borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(15), topRight: Radius.circular(15),
               ),
             ),
@@ -560,8 +556,6 @@ class _DropdownInput extends StatelessWidget {
   }
 }
 
-// Date of Birth — three linked dropdowns (Day / Month / Year)
-// More reliable than showDatePicker for entering historical dates
 class _DOBField extends StatefulWidget {
   final void Function(String) onSaved;
   const _DOBField({required this.onSaved});
@@ -587,13 +581,10 @@ class _DOBFieldState extends State<_DOBField> {
 
   @override
   Widget build(BuildContext context) {
-    final years = List.generate(
-      120, (i) => DateTime.now().year - i,
-    );
+    final years = List.generate(120, (i) => DateTime.now().year - i);
 
     return Row(
       children: [
-        // Day
         Expanded(
           child: _CompactDropdown(
             hint: 'Day',
@@ -606,7 +597,6 @@ class _DOBFieldState extends State<_DOBField> {
           ),
         ),
         const SizedBox(width: 8),
-        // Month
         Expanded(
           flex: 2,
           child: _CompactDropdown(
@@ -620,7 +610,6 @@ class _DOBFieldState extends State<_DOBField> {
           ),
         ),
         const SizedBox(width: 8),
-        // Year
         Expanded(
           flex: 2,
           child: _CompactDropdown(
@@ -640,7 +629,7 @@ class _DOBFieldState extends State<_DOBField> {
   void _save() {
     if (_day != null && _month != null && _year != null) {
       widget.onSaved(
-          '${_day.toString().padLeft(2,'0')}/${_month.toString().padLeft(2,'0')}/$_year');
+          '${_day.toString().padLeft(2, '0')}/${_month.toString().padLeft(2, '0')}/$_year');
     }
   }
 }
@@ -684,7 +673,6 @@ class _CompactDropdown extends StatelessWidget {
   }
 }
 
-// Emergency / OPD toggle — two pills, only one active at a time
 class _ModeOfAdmissionToggle extends StatelessWidget {
   final String value;
   final void Function(String) onChanged;
@@ -751,7 +739,6 @@ class _ModePill extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Toggle circle indicator
             AnimatedContainer(
               duration: const Duration(milliseconds: 150),
               width: 20, height: 20,
@@ -790,7 +777,7 @@ class _NextButton extends StatelessWidget {
     child: ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.deepTeal,
+        backgroundColor: AppColors.sectionHeader,
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),

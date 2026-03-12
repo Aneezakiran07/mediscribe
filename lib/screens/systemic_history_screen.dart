@@ -2,10 +2,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'vitals_screen.dart'; // next screen after this one
-
 import '../core/app_colors.dart';
+import '../models/patient_info.dart';
+import 'history_taking_screen.dart' show HistoryFormData;
 
-
+// Colors shared across all screens
+// Move to lib/core/app_colors.dart and import everywhere
 // Hive integration steps when ready:
 // @HiveType(typeId: 3) on SystemicHistoryData
 // @HiveField(n) on each field
@@ -190,11 +192,15 @@ class _PreviewApp extends StatelessWidget {
 class SystemicHistoryScreen extends StatefulWidget {
   final String patientGender;         // 'Male' | 'Female' | 'Other'
   final List<String> chiefComplaints; // from HistoryTakingScreen Page 1
+  final PatientInfo? patient;
+  final HistoryFormData? history;
 
   const SystemicHistoryScreen({
     super.key,
     required this.patientGender,
     required this.chiefComplaints,
+    this.patient,
+    this.history,
   });
 
   @override
@@ -203,6 +209,8 @@ class SystemicHistoryScreen extends StatefulWidget {
 
 class _SystemicHistoryScreenState extends State<SystemicHistoryScreen> {
   final SystemicHistoryData _data = SystemicHistoryData();
+
+  SystemicHistoryData _buildSystemicData() => _data;
 
   // Track which system panels are collapsed
   final Set<String> _collapsed = {};
@@ -330,7 +338,11 @@ class _SystemicHistoryScreenState extends State<SystemicHistoryScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const VitalsScreen(),
+                  builder: (_) => VitalsScreen(
+                    patient: widget.patient,
+                    history: widget.history,
+                    systemic: _buildSystemicData(),
+                  ),
                 ),
               );
             },

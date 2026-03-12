@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../core/app_colors.dart';
 import 'examination_screen.dart';
+import '../models/patient_info.dart';
+import 'history_taking_screen.dart' show HistoryFormData;
+import 'systemic_history_screen.dart' show SystemicHistoryData;
+import 'vitals_screen.dart' show VitalsData;
 
 enum LabStatus { normal, low, high, critical }
 
@@ -335,7 +339,12 @@ class _PreviewApp extends StatelessWidget {
 }
 
 class LabsScreen extends StatefulWidget {
-  const LabsScreen({super.key});
+  final PatientInfo? patient;
+  final HistoryFormData? history;
+  final SystemicHistoryData? systemic;
+  final VitalsData? vitals;
+
+  const LabsScreen({super.key, this.patient, this.history, this.systemic, this.vitals});
 
   @override
   State<LabsScreen> createState() => _LabsScreenState();
@@ -372,7 +381,14 @@ class _LabsScreenState extends State<LabsScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => const ExaminationScreen(),
+            builder: (_) => ExaminationScreen(
+              autoFlags: [],
+              patient:  widget.patient,
+              history:  widget.history,
+              systemic: widget.systemic,
+              vitals:   widget.vitals,
+              labs:     _data,
+            ),
           ),
         );
       },
@@ -1162,4 +1178,3 @@ class _SaveSummarySheet extends StatelessWidget {
     );
   }
 }
-
