@@ -1,285 +1,10 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import '../models/patient_info.dart';
 import '../core/app_colors.dart';
+import '../models/patient_info.dart';
+import '../models/history_models.dart';
+import '../models/kb_search_models.dart';
 import 'systemic_history_screen.dart';
 
-class ClinicalTermsService {
-  ClinicalTermsService._();
-  static Map<String, dynamic> _data = {};
-  static bool _loaded = false;
-
-  static Future<void> init() async {
-    if (_loaded) return;
-    try {
-      final raw = await rootBundle.loadString('assets/clinical_terms.json');
-      _data = (jsonDecode(raw) as Map<String, dynamic>)['clinical_terms'] as Map<String, dynamic>;
-      _loaded = true;
-    } catch (_) {
-      _loaded = true; // use fallbacks
-    }
-  }
-
-  static List<String> get commonConditions =>
-      List<String>.from(_data['common_conditions'] ?? _fallbackConditions);
-
-  static List<String> get commonDrugs =>
-      List<String>.from(_data['common_drugs'] ?? _fallbackDrugs);
-
-  static List<String> get conditionChips =>
-      List<String>.from(_data['condition_chips'] ?? _fallbackConditionChips);
-
-  static List<String> get drugChips =>
-      List<String>.from(_data['drug_chips'] ?? _fallbackDrugChips);
-
-  static List<String> get familyConditionChips =>
-      List<String>.from(_data['family_condition_chips'] ?? _fallbackFamilyChips);
-
-  static List<String> get familyRelationships =>
-      List<String>.from(_data['family_relationships'] ?? _fallbackRelationships);
-//fallbacks
-  static const _fallbackConditionChips = [
-    'Diabetes', 'Hypertension', 'Asthma', 'Heart Disease', 'Tuberculosis', 'None',
-  ];
-  static const _fallbackDrugChips = [
-    'Aspirin', 'Metformin', 'Atorvastatin', 'Amlodipine', 'Lisinopril', 'Omeprazole',
-  ];
-  static const _fallbackFamilyChips = [
-    'Diabetes', 'Hypertension', 'Heart Disease', 'Cancer',
-    'Tuberculosis', 'Asthma', 'Mental Illness', 'Stroke',
-    'Kidney Disease', 'Liver Disease', 'Epilepsy', 'None',
-  ];
-  static const _fallbackRelationships = [
-    'Father', 'Mother', 'Brother', 'Sister', 'Son', 'Daughter',
-    'Paternal Uncle', 'Paternal Aunt', 'Maternal Uncle', 'Maternal Aunt',
-    'Paternal Grandfather', 'Paternal Grandmother', 'Maternal Grandfather', 'Maternal Grandmother',
-  ];
-  static const _fallbackConditions = [
-    'Diabetes mellitus', 'Hypertension', 'Asthma',
-    'Tuberculosis', 'Chronic Kidney Disease', 'Ischemic Heart Disease',
-  ];
-  static const _fallbackDrugs = [
-    'Aspirin', 'Metformin', 'Amlodipine', 'Lisinopril',
-    'Omeprazole', 'Salbutamol', 'Prednisolone',
-  ];
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// KNOWLEDGE BASE SEARCH ENGINE
-// Searches symptoms, diagnoses, conditions, options from knowledge_base.json
-// + conditions/drugs from clinical_terms.json via ClinicalTermsService.
-// ═══════════════════════════════════════════════════════════════════════════════
-class KBSearchResult {
-  final String term;
-  final String source;
-  const KBSearchResult({required this.term, required this.source});
-}
-
-class KBSearchService {
-  KBSearchService._();
-  static List<KBSearchResult> _allTerms = [];
-  static bool _loaded = false;
-
-  static Future<void> init() async {
-    if (_loaded) return;
-    // Init ClinicalTermsService first so conditions/drugs come from JSON
-    await ClinicalTermsService.init();
-    try {
-      final raw = await rootBundle.loadString('assets/knowledge_base.json');
-      final json = jsonDecode(raw) as Map<String, dynamic>;
-      _allTerms = _parseFromJson(json);
-      _loaded = true;
-    } catch (_) {
-      _allTerms = _builtInConditionsAndDrugs();
-      _loaded = true;
-    }
-  }
-
-  static List<KBSearchResult> _parseFromJson(Map<String, dynamic> json) {
-    final List<KBSearchResult> results = [];
-    final examinations = json['knowledge_base']['examinations'] as List;
-
-    const prefixMap = {
-      'CVS_001':   'CVS',
-      'RESP_001':  'RESP',
-      'ABD_001':   'ABD',
-      'NEURO_001': 'NEURO',
-    };
-
-    String phaseLabel(String phase) {
-      const map = {
-        'history': 'Symptoms', 'general_examination': 'GPE',
-        'pulse_examination': 'Pulse', 'precordium_inspection': 'Inspection',
-        'precordium_palpation': 'Palpation', 'auscultation': 'Auscultation',
-        'auscultation_detail': 'Auscultation', 'tamponade_assessment': 'Assessment',
-        'pnd_assessment': 'Assessment', 'inspection': 'Inspection',
-        'palpation': 'Palpation', 'palpation_light': 'Palpation',
-        'palpation_deep': 'Palpation', 'percussion': 'Percussion',
-        'consolidation_assessment': 'Assessment', 'effusion_assessment': 'Assessment',
-        'pneumothorax_assessment': 'Assessment', 'stridor_assessment': 'Assessment',
-        'ascites_assessment': 'Assessment', 'peritonitis_assessment': 'Assessment',
-        'upper_gi_bleed': 'Assessment', 'consciousness': 'Consciousness',
-        'higher_functions': 'Higher Functions', 'cranial_nerves': 'Cranial Nerves',
-        'motor_system': 'Motor', 'reflexes': 'Reflexes', 'sensory_system': 'Sensory',
-        'coordination': 'Coordination', 'meningeal_signs': 'Meningeal',
-        'UMN_localization': 'Localisation', 'LMN_localization': 'Localisation',
-        'meningitis_confirmation': 'Assessment',
-      };
-      return map[phase] ?? phase.replaceAll('_', ' ');
-    }
-
-    for (final exam in examinations) {
-      final examId    = exam['examination_id'] as String;
-      final prefix    = prefixMap[examId] ?? examId;
-      final questions = exam['questions'] as List;
-      final diagnoses = exam['diagnoses'] as List;
-      for (final q in questions) {
-        final phase   = q['phase'] as String;
-        final options = q['options'] as List;
-        final source  = '$prefix · ${phaseLabel(phase)}';
-        for (final opt in options) {
-          final term = opt as String;
-          if (term.toLowerCase().startsWith('no ') ||
-              term.toLowerCase().startsWith('normal') ||
-              term.toLowerCase().startsWith('absent (') ||
-              term.toLowerCase() == 'none') continue;
-          results.add(KBSearchResult(term: term, source: source));
-        }
-      }
-      for (final dx in diagnoses) {
-        results.add(KBSearchResult(term: dx['name'] as String, source: '$prefix · Diagnosis'));
-      }
-    }
-    // Conditions and drugs now come from clinical_terms.json via ClinicalTermsService
-    results.addAll(_builtInConditionsAndDrugs());
-    return results;
-  }
-
-  // Now reads from ClinicalTermsService (which loaded clinical_terms.json)
-  static List<KBSearchResult> _builtInConditionsAndDrugs() => [
-    ...ClinicalTermsService.commonConditions
-        .map((c) => KBSearchResult(term: c, source: 'Conditions')),
-    ...ClinicalTermsService.commonDrugs
-        .map((d) => KBSearchResult(term: d, source: 'Drugs')),
-  ];
-
-  static List<KBSearchResult> search(
-    String query, {
-    String? filter,
-    List<String> alreadySelected = const [],
-  }) {
-    if (query.isEmpty) return [];
-    final q = query.toLowerCase();
-    return _allTerms.where((r) {
-      final matchesQuery  = r.term.toLowerCase().contains(q);
-      final matchesFilter = filter == null || r.source.contains(filter);
-      final notSelected   = !alreadySelected.contains(r.term);
-      return matchesQuery && matchesFilter && notSelected;
-    }).take(8).toList();
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// DATA MODELS
-// ═══════════════════════════════════════════════════════════════════════════════
-class ComplaintDetail {
-  String complaint;
-  int durationValue;
-  String durationUnit; // 'hours' | 'days' | 'weeks' | 'months' | 'years'
-  String severity;     // 'mild' | 'moderate' | 'severe'
-  String notes;
-
-  ComplaintDetail({
-    required this.complaint,
-    this.durationValue = 1,
-    this.durationUnit = 'days',
-    this.severity = 'mild',
-    this.notes = '',
-  });
-}
-
-// @HiveType(typeId: 2)
-class FamilyMember {
-  String relationship;
-  List<String> conditions;
-  String notes;
-  bool isDeceased;
-
-  FamilyMember({
-    this.relationship = '',
-    List<String>? conditions,
-    this.notes = '',
-    this.isDeceased = false,
-  }) : conditions = conditions ?? [];
-}
-
-// @HiveType(typeId: 1)
-class HistoryFormData {
-  // Page 1
-  List<String> complaints = [];
-  List<ComplaintDetail> complaintDetails = [];
-  // Page 2
-  bool? hadHospitalizations;
-  String hospitalizationDetails = '';
-  bool? hadSurgeries;
-  String surgeryDetails = '';
-  bool? hasAllergies;
-  String allergyDetails = '';
-  List<String> knownConditions = [];
-  String occupation = '';
-  String smoking = '';
-  String alcohol = '';
-  String livingConditions = '';
-  String diet = '';
-  String sleep = '';
-  String bladder = '';
-  String bowelHabits = '';
-  List<String> currentDrugs = [];
-  bool? onRegularMedication;
-  String regularMedicationDetails = '';
-  bool? hasAdverseReactions;
-  String adverseReactionDetails = '';
-  // Page 3
-  List<FamilyMember> familyMembers = [];
-  String familyNotes = '';
-  // Patient gender — needed when pushing systemic screen
-  String patientGender = 'Male'; // 'Male' | 'Female' | 'Other'
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// STANDALONE ENTRY
-// ═══════════════════════════════════════════════════════════════════════════════
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await ClinicalTermsService.init(); // loads clinical_terms.json (conditions, drugs, chips)
-  await KBSearchService.init(); // parses knowledge_base.json into search index
-  runApp(const _PreviewApp());
-}
-
-class _PreviewApp extends StatelessWidget {
-  const _PreviewApp();
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'MediScribe AI',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        scaffoldBackgroundColor: AppColors.background,
-        colorScheme: const ColorScheme.light(
-          primary: AppColors.sectionHeader,
-          surface: AppColors.background,
-        ),
-      ),
-      home: const HistoryTakingScreen(),
-    );
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// HISTORY TAKING SCREEN — 3-page flow
-// ═══════════════════════════════════════════════════════════════════════════════
 class HistoryTakingScreen extends StatefulWidget {
   final PatientInfo? patientInfo;
   const HistoryTakingScreen({super.key, this.patientInfo});
@@ -595,6 +320,11 @@ class _TagChip extends StatelessWidget {
   }
 }
 
+// ───────────────────────────────────────────────────────────────────────────────
+// KB SEARCH FIELD — the universal "Add custom" widget used across all sections.
+// Shows a search pill → expands to a TextField that queries KBSearchService
+// → shows a dropdown of matched results + "Add as custom" option at bottom.
+// ───────────────────────────────────────────────────────────────────────────────
 class _KBSearchField extends StatefulWidget {
   final String hint;              // placeholder when typing
   final String buttonLabel;       // text on the collapsed pill e.g. "Add symptom"
@@ -963,6 +693,7 @@ class _Page1State extends State<_Page1ComplaintsHOPI> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
+          // ── Presenting Complaints ──────────────────────────────────────────
           const _SectionBar(title: 'Presenting Complaints'),
           Padding(
             padding: const EdgeInsets.all(16),
@@ -989,7 +720,9 @@ class _Page1State extends State<_Page1ComplaintsHOPI> {
                 ),
               ],
             ),
-),
+          ),
+
+          // ── History of Present Illness ─────────────────────────────────────
           const _SectionBar(title: 'History of Present Illness'),
           const SizedBox(height: 8),
 
@@ -1155,6 +888,7 @@ class _Page2State extends State<_Page2PastPersonalHistory> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
+          // ── Past Treatment History ─────────────────────────────────────────
           const _SectionBar(title: 'Past Treatment History'),
           Container(
             margin: const EdgeInsets.all(16),

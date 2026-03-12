@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'screens/home_screen.dart';
-import 'screens/history_taking_screen.dart';
-import 'screens/systemic_history_screen.dart';
-import 'screens/examination_screen.dart';
+
+import '../models/systemic_models.dart';
+import '../models/examination_models.dart';
+import '../models/kb_search_models.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

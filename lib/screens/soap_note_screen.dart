@@ -1,31 +1,16 @@
-import 'dart:collection';
 import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:hive/hive.dart';
 import '../core/app_colors.dart';
 import '../models/patient_info.dart';
-import 'history_taking_screen.dart';
-import 'systemic_history_screen.dart';
-import 'vitals_screen.dart';
-import 'examination_screen.dart';
-import 'labs_screen.dart';
+import '../models/history_models.dart';
+import '../models/systemic_models.dart';
+import '../models/vitals_models.dart';
+import '../models/lab_models.dart';
+import '../models/examination_models.dart';
+import '../models/soap_models.dart';
 
-// SOAP Note model — holds the auto-generated + user-edited text for each section
-// Hive: @HiveType(typeId: 9)
-class SoapNote {
-  String subjective  = '';
-  String objective   = '';
-  String assessment  = '';
-  String plan        = '';
-  DateTime generatedAt = DateTime.now();
-}
-
-// Generates a SoapNote from all collected session data
 class SoapNoteGenerator {
 
   static SoapNote generate({
@@ -934,32 +919,4 @@ class _SoapSection extends StatelessWidget {
       ),
     );
   }
-}
-
-// Standalone preview entry — remove when integrating
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await KBService.init();
-  runApp(const _PreviewApp());
-}
-
-class _PreviewApp extends StatelessWidget {
-  const _PreviewApp();
-  @override
-  Widget build(BuildContext context) => MaterialApp(
-    debugShowCheckedModeBanner: false,
-    theme: ThemeData(
-      useMaterial3: true,
-      scaffoldBackgroundColor: AppColors.pageBackground,
-      colorScheme: const ColorScheme.light(primary: AppColors.sectionHeader),
-    ),
-    home: SoapNoteScreen(
-      patient:     PatientInfo(),
-      history:     HistoryFormData(),
-      systemic:    SystemicHistoryData(),
-      vitals:      VitalsData(),
-      examination: ExaminationData(),
-      labs:        LabData(),
-    ),
-  );
 }
