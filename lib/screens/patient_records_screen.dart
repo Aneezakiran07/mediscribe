@@ -4,13 +4,15 @@ import '../core/app_colors.dart';
 import '../models/patient_info.dart';
 import 'patient_info_screen.dart';
 
+// ═══════════════════════════════════════════════════════════════════════════════
 // PATIENT RECORDS SCREEN
 // Designed to be embedded inside HomeScreen's Scaffold (no Scaffold of its own)
 // so the bottom nav bar persists. HomeScreen passes a FAB via floatingActionButton.
 //
 // Use patientRecordsFAB() to get the FAB widget to pass to HomeScreen.
+// ═══════════════════════════════════════════════════════════════════════════════
 
-enum _StatusDot { green, amber, red }
+enum StatusDot { green, amber, red }
 
 class PatientRecord {
   final String    id;
@@ -21,7 +23,7 @@ class PatientRecord {
   final String    provisionalDiagnosis;
   final DateTime  dateOfAdmission;
   final String    admissionMode;
-  final _StatusDot status;
+  final StatusDot status;
 
   const PatientRecord({
     required this.id,
@@ -44,39 +46,40 @@ class PatientRecordRepo {
       chiefComplaint: 'Chest Pain',
       provisionalDiagnosis: 'Acute Myocardial Infarction',
       dateOfAdmission: DateTime(2023, 10, 26),
-      admissionMode: 'Emergency', status: _StatusDot.green,
+      admissionMode: 'Emergency', status: StatusDot.green,
     ),
     PatientRecord(
       id: '002', name: 'Jane Smith', age: '32', gender: 'Female',
       chiefComplaint: 'Fever & Cough',
       provisionalDiagnosis: 'Pneumonia',
       dateOfAdmission: DateTime(2023, 11, 5),
-      admissionMode: 'OPD', status: _StatusDot.green,
+      admissionMode: 'OPD', status: StatusDot.green,
     ),
     PatientRecord(
       id: '003', name: 'Robert Brown', age: '68', gender: 'Male',
       chiefComplaint: 'Shortness of Breath',
       provisionalDiagnosis: 'Congestive Heart Failure',
       dateOfAdmission: DateTime(2023, 11, 12),
-      admissionMode: 'Emergency', status: _StatusDot.amber,
+      admissionMode: 'Emergency', status: StatusDot.amber,
     ),
     PatientRecord(
       id: '004', name: 'Maria Garcia', age: '55', gender: 'Female',
       chiefComplaint: 'Abdominal Pain',
       provisionalDiagnosis: 'Appendicitis',
       dateOfAdmission: DateTime(2023, 11, 18),
-      admissionMode: 'Emergency', status: _StatusDot.green,
+      admissionMode: 'Emergency', status: StatusDot.green,
     ),
     PatientRecord(
       id: '005', name: 'David Lee', age: '41', gender: 'Male',
       chiefComplaint: 'Dizziness',
       provisionalDiagnosis: 'Hypertension',
       dateOfAdmission: DateTime(2023, 11, 21),
-      admissionMode: 'OPD', status: _StatusDot.amber,
+      admissionMode: 'OPD', status: StatusDot.amber,
     ),
   ];
 }
 
+// ── FAB — pass this to HomeScreen's floatingActionButton when on Patients tab ─
 FloatingActionButton patientRecordsFAB(BuildContext context) {
   return FloatingActionButton(
     onPressed: () => Navigator.push(context,
@@ -120,78 +123,90 @@ class _PatientRecordsScreenState extends State<PatientRecordsScreen> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.background,
-      child: SafeArea(
+      color: AppColors.pageBackground,
       child: Column(
         children: [
-          
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'MediScribe AI',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.bodyText,
-                    letterSpacing: -0.4,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                // Search bar — Material wrapper required for TextField
-                Material(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.background,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.divider),
+          Container(
+            color: AppColors.sectionHeader,
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                child: Row(
+                   children: [
+              const Icon(Icons.psychology_outlined, color: AppColors.headerText, size: 24),
+              const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        'Patient Records',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.headerText,
+                        ),
+                      ),
                     ),
-                    child: TextField(
-                      controller: _searchCtrl,
-                      onChanged: (v) => setState(() => _query = v),
-                      style: const TextStyle(fontSize: 14, color: AppColors.bodyText),
-                      decoration: const InputDecoration(
-                        hintText: 'Search patients...',
-                        hintStyle: TextStyle(fontSize: 14, color: AppColors.subtleGrey),
-                        prefixIcon: Icon(Icons.search, size: 20, color: AppColors.subtleGrey),
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 13),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: SafeArea(
+              top: false,
+              child: Column(
+                children: [
+                  // Search bar
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+                    child: Material(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.background,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.divider),
+                        ),
+                        child: TextField(
+                          controller: _searchCtrl,
+                          onChanged: (v) => setState(() => _query = v),
+                          style: const TextStyle(
+                              fontSize: 14, color: AppColors.bodyText),
+                          decoration: const InputDecoration(
+                            hintText: 'Search patients...',
+                            hintStyle: TextStyle(
+                                fontSize: 14, color: AppColors.subtleGrey),
+                            prefixIcon: Icon(Icons.search,
+                                size: 20, color: AppColors.subtleGrey),
+                            border: InputBorder.none,
+                            contentPadding:
+                                EdgeInsets.symmetric(vertical: 13),
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 18),
-                const Text(
-                  'Patient Records',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.bodyText,
-                    letterSpacing: -0.3,
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: _filtered.isEmpty
+                        ? _buildEmpty()
+                        : ListView.separated(
+                            padding:
+                                const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                            itemCount: _filtered.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 10),
+                            itemBuilder: (_, i) =>
+                                _PatientCard(record: _filtered[i]),
+                          ),
                   ),
-                ),
-                const SizedBox(height: 12),
-              ],
+                ],
+              ),
             ),
-          ),
-
-          Expanded(
-            child: _filtered.isEmpty
-                ? _buildEmpty()
-                : ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-                    itemCount: _filtered.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 10),
-                    itemBuilder: (_, i) => _PatientCard(record: _filtered[i]),
-                  ),
           ),
         ],
       ),
-    ),
     );
   }
 
@@ -222,15 +237,16 @@ class _PatientRecordsScreenState extends State<PatientRecordsScreen> {
   }
 }
 
+
 class _PatientCard extends StatelessWidget {
   final PatientRecord record;
   const _PatientCard({required this.record});
 
   Color get _dotColor {
     switch (record.status) {
-      case _StatusDot.green: return AppColors.onlineGreen;
-      case _StatusDot.amber: return const Color(0xFFF59E0B);
-      case _StatusDot.red:   return AppColors.emergencyRed;
+      case StatusDot.green: return AppColors.onlineGreen;
+      case StatusDot.amber: return const Color(0xFFF59E0B);
+      case StatusDot.red:   return AppColors.emergencyRed;
     }
   }
 
@@ -416,7 +432,6 @@ class _PatientCard extends StatelessWidget {
                     ],
                   ),
                 ),
-            
                 GestureDetector(
                   onTap: () => _showMenu(context),
                   child: const Padding(
@@ -433,7 +448,6 @@ class _PatientCard extends StatelessWidget {
     );
   }
 }
-
 
 class _PatientActionSheet extends StatelessWidget {
   final PatientRecord record;
@@ -623,4 +637,3 @@ class _InfoRow extends StatelessWidget {
     );
   }
 }
-

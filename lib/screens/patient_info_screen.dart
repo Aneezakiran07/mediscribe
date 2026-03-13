@@ -343,7 +343,7 @@ class _AppBar extends StatelessWidget {
                 icon: const Icon(Icons.arrow_back, color: AppColors.headerText, size: 22),
                 onPressed: () => Navigator.maybePop(context),
               ),
-              const Icon(Icons.psychology_outlined, color: AppColors.headerText, size: 20),
+              const Icon(Icons.psychology_outlined, color: AppColors.headerText, size: 30),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(isEditMode ? 'Edit Patient' : 'New Patient',

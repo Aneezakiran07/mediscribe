@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
 import 'patient_info_screen.dart';
 import 'patient_records_screen.dart';
+import 'settings_screen.dart';
 
 // DATA MODELS
 // Hive wiring notes (RecentPatient):
@@ -77,8 +78,8 @@ class _HomeScreenState extends State<HomeScreen> {
   int _activeNavIndex = 0;
 
   void _onNavTap(int i) {
-    if (i == 2) {
-      // New tab — push PatientInfoScreen as a focused flow, no navbar
+    if (i == 3) {
+      // New tab (rightmost) — push PatientInfoScreen as a focused flow, no navbar
       Navigator.push(context,
           MaterialPageRoute(builder: (_) => const PatientInfoScreen()));
     } else {
@@ -93,11 +94,11 @@ class _HomeScreenState extends State<HomeScreen> {
       // Use IndexedStack so all tabs stay alive when switching
       body: IndexedStack(
         index: _activeNavIndex,
-        children: const [
-          _HomeBody(),
-          PatientRecordsScreen(), // tab 1 — rendered inline, keeps its state
-          SizedBox.shrink(),      // tab 2 = New (always pushes, never shown here)
-          _SettingsPlaceholder(), // tab 3
+        children: [
+          _HomeBody(onViewAllPatients: () => setState(() => _activeNavIndex = 1)),
+          const PatientRecordsScreen(), // tab 1 — Patients
+          const SettingsScreen(),       // tab 2 — Settings
+          const SizedBox.shrink(),      // tab 3 = New (always pushes, never shown here)
         ],
       ),
       // Show FAB only on Patients tab (tab 1)
@@ -113,7 +114,8 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 //home body extracted so can be used later above
 class _HomeBody extends StatelessWidget {
-  const _HomeBody();
+  final VoidCallback? onViewAllPatients;
+  const _HomeBody({this.onViewAllPatients});
 
 @override
 Widget build(BuildContext context) {
@@ -156,14 +158,7 @@ Widget build(BuildContext context) {
                   label: 'Patient Records',
                   description: 'Browse and search all saved patient records.',
                   fullWidth: true,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const PatientRecordsScreen(),
-                      ),
-                    );
-                  },
+                  onTap: () => onViewAllPatients?.call(),
                 ),
               ],
             ),
@@ -216,7 +211,7 @@ Widget build(BuildContext context) {
             child: _SectionHeader(
               title: 'Recent Patients',
               actionLabel: 'View All',
-              onAction: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PatientRecordsScreen())),
+              onAction: onViewAllPatients,
             ),
           ),
         ),
@@ -230,7 +225,10 @@ Widget build(BuildContext context) {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: patients.length,
               separatorBuilder: (_, __) => const SizedBox(width: 10),
-              itemBuilder: (_, i) => _PatientChip(patient: patients[i]),
+              itemBuilder: (_, i) => _PatientChip(
+                patient: patients[i],
+                onTapCallback: onViewAllPatients,
+              ),
             ),
           ),
         ),
@@ -266,8 +264,8 @@ class _AppHeader extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
+              children: [
+                const Text(
                   'MediScribe AI',
                   style: TextStyle(
                     fontSize: 24,
@@ -280,8 +278,8 @@ class _AppHeader extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      'Welcome, Doctor ',
-                      style: TextStyle(
+                      'Welcome, ${SettingsService.instance.clinicianName}',
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                         color: AppColors.bodyText,
@@ -417,7 +415,7 @@ class _QuickActionCard extends StatelessWidget {
           border: Border.all(color: AppColors.divider),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -551,18 +549,16 @@ class _StatCard extends StatelessWidget {
 
 class _PatientChip extends StatelessWidget {
   final RecentPatient patient;
+  final VoidCallback? onTapCallback;
 
-  const _PatientChip({required this.patient});
+  const _PatientChip({required this.patient, this.onTapCallback});
 
   @override
   Widget build(BuildContext context) {
     final isEmergency = patient.admissionMode == 'Emergency';
 
     return GestureDetector(
-      onTap: () {
-        Navigator.push(context,
-          MaterialPageRoute(builder: (_) => const PatientRecordsScreen()));
-      },
+      onTap: () => onTapCallback?.call(),
       child: Container(
         width: 140,
         padding: const EdgeInsets.all(12),
@@ -572,7 +568,7 @@ class _PatientChip extends StatelessWidget {
           border: Border.all(color: AppColors.divider),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),
@@ -665,7 +661,7 @@ class _TipBanner extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: AppColors.sectionHeader.withOpacity(0.15),
+              color: AppColors.sectionHeader.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(
@@ -716,10 +712,10 @@ class _BottomNavBar extends StatelessWidget {
   // Tab 2 (New) is special — it pushes a screen instead of switching tabs
   // so it renders differently (teal circle button) and never becomes "active"
   static const List<_NavItemData> _items = [
-    _NavItemData(icon: Icons.home_outlined,   activeIcon: Icons.home,   label: 'Home'),
-    _NavItemData(icon: Icons.people_outline,  activeIcon: Icons.people, label: 'Patients'),
-    _NavItemData(icon: Icons.add,             activeIcon: Icons.add,    label: 'New',     isAction: true),
+    _NavItemData(icon: Icons.home_outlined,     activeIcon: Icons.home,     label: 'Home'),
+    _NavItemData(icon: Icons.people_outline,    activeIcon: Icons.people,   label: 'Patients'),
     _NavItemData(icon: Icons.settings_outlined, activeIcon: Icons.settings, label: 'Settings'),
+    _NavItemData(icon: Icons.add,               activeIcon: Icons.add,      label: 'New', isAction: true),
   ];
 
   @override
@@ -829,37 +825,3 @@ class _NavItemData {
     this.isAction = false,
   });
 }
-
-// Temporary placeholder.replace with a real Settings screen
-class _SettingsPlaceholder extends StatelessWidget {
-  const _SettingsPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: AppColors.pageBackground,
-      body: SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.settings_outlined,
-                  size: 48, color: AppColors.sectionHeader),
-              SizedBox(height: 16),
-              Text('Settings',
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.bodyText)),
-              SizedBox(height: 8),
-              Text('Coming soon — clinician name, hospital, preferences.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13, color: AppColors.subtleGrey)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-

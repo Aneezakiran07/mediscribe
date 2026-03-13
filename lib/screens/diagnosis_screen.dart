@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
 import '../models/patient_info.dart';
@@ -10,12 +8,14 @@ import '../models/lab_models.dart';
 import '../models/examination_models.dart';
 import 'soap_note_screen.dart';
 
+// ═══════════════════════════════════════════════════════════════════════════════
 // DIAGNOSIS SCREEN
 // Pulls calculateCertaintyFactors() from each examined SystemExamSession,
 // ranks diagnoses by certainty, groups into Probable / Possible / Unlikely,
 // and shows contributing key findings + clinical alerts.
 //
 // Flow: ExaminationScreen → DiagnosisScreen → SoapNoteScreen
+// ═══════════════════════════════════════════════════════════════════════════════
 
 class DiagnosisScreen extends StatefulWidget {
   final PatientInfo?        patient;
@@ -127,10 +127,9 @@ class _DiagnosisScreenState extends State<DiagnosisScreen>
     );
   }
 
-  // Total number of diagnoses across all systems with certainty ≥ 40
+  // Count of all diagnoses (shown regardless of certainty)
   int get _probableCount => _systemDiagnoses
       .expand((s) => s.results)
-      .where((r) => r.certainty >= 40)
       .length;
 
   @override
@@ -164,7 +163,7 @@ class _DiagnosisScreenState extends State<DiagnosisScreen>
         children: [
           CircularProgressIndicator(color: AppColors.sectionHeader, strokeWidth: 2.5),
           SizedBox(height: 16),
-          Text('Analysing findings…',
+          Text('Analysing findings...',
               style: TextStyle(fontSize: 14, color: AppColors.subtleGrey)),
         ],
       ),
@@ -212,11 +211,15 @@ class _DiagnosisScreenState extends State<DiagnosisScreen>
       child: ListView(
         padding: const EdgeInsets.only(bottom: 24),
         children: [
+          // ── Alert banner ──────────────────────────────────────────────────
           if (_allAlerts.isNotEmpty) _AlertBanner(alerts: _allAlerts),
 
+          // ── Summary pill row ──────────────────────────────────────────────
           _SummaryRow(systemDiagnoses: _systemDiagnoses),
 
           const SizedBox(height: 8),
+
+          // ── Per-system diagnosis cards ────────────────────────────────────
           ...List.generate(_systemDiagnoses.length, (i) {
             final delay = i * 0.15;
             return AnimatedBuilder(
@@ -243,6 +246,8 @@ class _DiagnosisScreenState extends State<DiagnosisScreen>
     );
   }
 }
+
+// ── DATA CLASSES ──────────────────────────────────────────────────────────────
 
 class _DiagnosisResult {
   final String name;
@@ -306,6 +311,8 @@ extension _DxBandStyle on _DxBand {
     }
   }
 }
+
+// ── APP BAR ───────────────────────────────────────────────────────────────────
 
 class _DiagnosisAppBar extends StatelessWidget {
   final VoidCallback onBack;
@@ -393,6 +400,8 @@ class _DiagnosisAppBar extends StatelessWidget {
     );
   }
 }
+
+// ── ALERT BANNER ──────────────────────────────────────────────────────────────
 
 class _AlertBanner extends StatefulWidget {
   final List<String> alerts;
@@ -487,6 +496,9 @@ class _AlertBannerState extends State<_AlertBanner> {
     );
   }
 }
+
+// ── SUMMARY ROW ───────────────────────────────────────────────────────────────
+
 class _SummaryRow extends StatelessWidget {
   final List<_SystemDiagnosis> systemDiagnoses;
   const _SummaryRow({required this.systemDiagnoses});
@@ -574,6 +586,8 @@ class _SummaryPill extends StatelessWidget {
   }
 }
 
+// ── SYSTEM DIAGNOSIS CARD ─────────────────────────────────────────────────────
+
 class _SystemDiagnosisCard extends StatefulWidget {
   final _SystemDiagnosis systemDx;
   const _SystemDiagnosisCard({required this.systemDx});
@@ -614,6 +628,7 @@ class _SystemDiagnosisCardState extends State<_SystemDiagnosisCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── System header ─────────────────────────────────────────────────
           Container(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
             decoration: BoxDecoration(
@@ -667,8 +682,10 @@ class _SystemDiagnosisCardState extends State<_SystemDiagnosisCard> {
             ),
           ),
 
+          // ── Diagnosis rows ────────────────────────────────────────────────
           ..._visible.map((result) => _DiagnosisRow(result: result)),
 
+          // ── Show more toggle ──────────────────────────────────────────────
           if (_hasMore)
             InkWell(
               onTap: () => setState(() => _showAll = !_showAll),
@@ -709,6 +726,9 @@ class _SystemDiagnosisCardState extends State<_SystemDiagnosisCard> {
     );
   }
 }
+
+// ── DIAGNOSIS ROW ─────────────────────────────────────────────────────────────
+
 class _DiagnosisRow extends StatefulWidget {
   final _DiagnosisResult result;
   const _DiagnosisRow({required this.result});
@@ -843,6 +863,9 @@ class _DiagnosisRowState extends State<_DiagnosisRow>
     );
   }
 }
+
+// ── CERTAINTY BAR ─────────────────────────────────────────────────────────────
+
 class _CertaintyBar extends StatelessWidget {
   final int    certainty;
   final Color  barColor;
@@ -886,6 +909,9 @@ class _CertaintyBar extends StatelessWidget {
     });
   }
 }
+
+// ── PROCEED BUTTON ────────────────────────────────────────────────────────────
+
 class _ProceedButton extends StatelessWidget {
   final VoidCallback onTap;
   const _ProceedButton({required this.onTap});
@@ -922,5 +948,3 @@ class _ProceedButton extends StatelessWidget {
     );
   }
 }
-         
-

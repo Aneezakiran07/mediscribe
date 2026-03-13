@@ -303,11 +303,19 @@ class _LabPanelCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: AppColors.dangerBorder),
                       ),
-                      child: Text('$abnormals ⚠',
-                          style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.dangerText)),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('$abnormals',
+                              style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.dangerText)),
+                          const SizedBox(width: 3),
+                          const Icon(Icons.warning_amber_rounded,
+                              size: 10, color: AppColors.dangerText),
+                        ],
+                      ),
                     ),
                     const SizedBox(width: 8),
                   ],
@@ -495,7 +503,7 @@ class _LabTestRowState extends State<_LabTestRow> {
                 width: 80,
                 child: interp == null
                     ? Center(
-                        child: Text('—',
+                        child: Text('-',
                             style: TextStyle(
                                 fontSize: 12, color: AppColors.subtleGrey)),
                       )
