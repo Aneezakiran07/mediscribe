@@ -1,12 +1,7 @@
-import 'dart:collection';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'history_taking_screen.dart';
 import '../core/app_colors.dart';
 import 'patient_info_screen.dart';
-
+import 'patient_records_screen.dart';
 
 // DATA MODELS
 // Hive wiring notes (RecentPatient):
@@ -71,29 +66,6 @@ class PatientRepository {
   static int getTotalSaved()    => 12;
 }
 
-void main() => runApp(const _PreviewApp());
-
-class _PreviewApp extends StatelessWidget {
-  const _PreviewApp();
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'MediScribe AI',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        scaffoldBackgroundColor: AppColors.background,
-        colorScheme: const ColorScheme.light(
-          primary: AppColors.sectionHeader,
-          surface: AppColors.background,
-        ),
-),
-      home: const HomeScreen(),
-    );
-  }
-}
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -104,23 +76,37 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _activeNavIndex = 0;
 
-  // Each nav tab would push its own screen 
-  // TODO: replace body with Navigator when screens exist
-  final List<Widget> _pages = const [
-    _HomeBody(),
-    // TODO: PatientListScreen(),
-    // TODO: DiagnoseScreen(),
-    // TODO: LabsScreen(),
-  ];
+  void _onNavTap(int i) {
+    if (i == 2) {
+      // New tab — push PatientInfoScreen as a focused flow, no navbar
+      Navigator.push(context,
+          MaterialPageRoute(builder: (_) => const PatientInfoScreen()));
+    } else {
+      setState(() => _activeNavIndex = i);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: _HomeBody(), // always show home body for now
+      // Use IndexedStack so all tabs stay alive when switching
+      body: IndexedStack(
+        index: _activeNavIndex,
+        children: const [
+          _HomeBody(),
+          PatientRecordsScreen(), // tab 1 — rendered inline, keeps its state
+          SizedBox.shrink(),      // tab 2 = New (always pushes, never shown here)
+          _SettingsPlaceholder(), // tab 3
+        ],
+      ),
+      // Show FAB only on Patients tab (tab 1)
+      floatingActionButton: _activeNavIndex == 1
+          ? patientRecordsFAB(context)
+          : null,
       bottomNavigationBar: _BottomNavBar(
         activeIndex: _activeNavIndex,
-        onTap: (i) => setState(() => _activeNavIndex = i),
+        onTap: _onNavTap,
       ),
     );
   }
@@ -165,30 +151,19 @@ Widget build(BuildContext context) {
 
                 const SizedBox(height: 12),
 
-                Row(
-                  children: [
-                    Expanded(
-                      child: _QuickActionCard(
-                        icon: Icons.folder_open,
-                        label: 'Patient Records',
-                        description: 'Browse all saved records.',
-                        onTap: () {
-                          // TODO: Navigator.push → PatientListScreen
-                        },
+                _QuickActionCard(
+                  icon: Icons.folder_open,
+                  label: 'Patient Records',
+                  description: 'Browse and search all saved patient records.',
+                  fullWidth: true,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const PatientRecordsScreen(),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _QuickActionCard(
-                        icon: Icons.assignment_outlined,
-                        label: 'Exam Guidance',
-                        description: 'Step-by-step clinical exam.',
-                        onTap: () {
-                          // TODO: Navigator.push → ExaminationScreen
-                        },
-                      ),
-                    ),
-                  ],
+                    );
+                  },
                 ),
               ],
             ),
@@ -241,9 +216,7 @@ Widget build(BuildContext context) {
             child: _SectionHeader(
               title: 'Recent Patients',
               actionLabel: 'View All',
-              onAction: () {
-                // TODO: Navigator.push → PatientListScreen
-              },
+              onAction: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PatientRecordsScreen())),
             ),
           ),
         ),
@@ -587,8 +560,8 @@ class _PatientChip extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        // TODO: Navigator.push(context,
-        //   MaterialPageRoute(builder: (_) => PatientDetailScreen(id: patient.id)));
+        Navigator.push(context,
+          MaterialPageRoute(builder: (_) => const PatientRecordsScreen()));
       },
       child: Container(
         width: 140,
@@ -740,31 +713,13 @@ class _BottomNavBar extends StatelessWidget {
 
   const _BottomNavBar({required this.activeIndex, required this.onTap});
 
+  // Tab 2 (New) is special — it pushes a screen instead of switching tabs
+  // so it renders differently (teal circle button) and never becomes "active"
   static const List<_NavItemData> _items = [
-    _NavItemData(
-      // home_outlined / home — house shape
-      icon: Icons.home_outlined,
-      activeIcon: Icons.home,
-      label: 'Home',
-    ),
-    _NavItemData(
-      // people_outline / people — group of people
-      icon: Icons.people_outline,
-      activeIcon: Icons.people,
-      label: 'Patients',
-    ),
-    _NavItemData(
-      // psychology_outlined / psychology — brain/head shape, represents AI diagnosis
-      icon: Icons.psychology_outlined,
-      activeIcon: Icons.psychology,
-      label: 'Diagnose',
-    ),
-    _NavItemData(
-      // biotech_outlined / biotech — microscope shape, represents lab/science
-      icon: Icons.biotech_outlined,
-      activeIcon: Icons.biotech,
-      label: 'Labs',
-    ),
+    _NavItemData(icon: Icons.home_outlined,   activeIcon: Icons.home,   label: 'Home'),
+    _NavItemData(icon: Icons.people_outline,  activeIcon: Icons.people, label: 'Patients'),
+    _NavItemData(icon: Icons.add,             activeIcon: Icons.add,    label: 'New',     isAction: true),
+    _NavItemData(icon: Icons.settings_outlined, activeIcon: Icons.settings, label: 'Settings'),
   ];
 
   @override
@@ -782,6 +737,37 @@ class _BottomNavBar extends StatelessWidget {
             children: List.generate(_items.length, (i) {
               final item = _items[i];
               final active = i == activeIndex;
+
+              // "New" tab — rendered as teal FAB-style circle
+              if (item.isAction) {
+                return GestureDetector(
+                  onTap: () => onTap(i),
+                  behavior: HitTestBehavior.opaque,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: const BoxDecoration(
+                          color: AppColors.sectionHeader,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.add,
+                            color: AppColors.headerText, size: 24),
+                      ),
+                      const SizedBox(height: 3),
+                      const Text('New',
+                          style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.sectionHeader)),
+                    ],
+                  ),
+                );
+              }
+
+              // Regular tab
               return GestureDetector(
                 onTap: () => onTap(i),
                 behavior: HitTestBehavior.opaque,
@@ -790,7 +776,6 @@ class _BottomNavBar extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Active indicator dot above icon
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
                         width: active ? 4 : 0,
@@ -813,8 +798,7 @@ class _BottomNavBar extends StatelessWidget {
                         item.label,
                         style: TextStyle(
                           fontSize: 10,
-                          fontWeight:
-                              active ? FontWeight.w700 : FontWeight.w400,
+                          fontWeight: active ? FontWeight.w700 : FontWeight.w400,
                           color: active
                               ? AppColors.sectionHeader
                               : AppColors.subtleGrey,
@@ -836,10 +820,46 @@ class _NavItemData {
   final IconData icon;
   final IconData activeIcon;
   final String label;
+  final bool isAction; // true = teal circle button (New Patient)
 
   const _NavItemData({
     required this.icon,
     required this.activeIcon,
     required this.label,
+    this.isAction = false,
   });
 }
+
+// Temporary placeholder.replace with a real Settings screen
+class _SettingsPlaceholder extends StatelessWidget {
+  const _SettingsPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      backgroundColor: AppColors.pageBackground,
+      body: SafeArea(
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.settings_outlined,
+                  size: 48, color: AppColors.sectionHeader),
+              SizedBox(height: 16),
+              Text('Settings',
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.bodyText)),
+              SizedBox(height: 8),
+              Text('Coming soon — clinician name, hospital, preferences.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 13, color: AppColors.subtleGrey)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+

@@ -1,6 +1,6 @@
 // lib/models/lab_models.dart
 // Extracted from labs_screen.dart
-// Import this wherever you need LabData, LabTest, LabPanel, LabStatus, kLabPanels
+// Import this wherever i need LabData, LabTest, LabPanel, LabStatus, kLabPanels
 
 import 'package:flutter/material.dart';
 import '../core/app_colors.dart';

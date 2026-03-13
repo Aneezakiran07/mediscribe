@@ -36,11 +36,11 @@ class FamilyMember {
 
 // @HiveType(typeId: 3)
 class HistoryFormData {
-  // Page 1 — Complaints + HOPI
+  // Page 1, Complaints + HOPI
   List<String>          complaints        = [];
   List<ComplaintDetail> complaintDetails  = [];
 
-  // Page 2 — Past / Personal / Drug history
+  // Page 2, Past / Personal / Drug history
   bool?  hadHospitalizations;
   String hospitalizationDetails    = '';
   bool?  hadSurgeries;
@@ -62,11 +62,11 @@ class HistoryFormData {
   bool?  hasAdverseReactions;
   String adverseReactionDetails    = '';
 
-  // Page 3 — Family history
+  // Page 3, Family history
   List<FamilyMember> familyMembers = [];
   String familyNotes               = '';
 
-  // Passed to SystemicHistoryScreen — mirrors PatientInfo.gender
+  // Passed to SystemicHistoryScreen
   // Keep in sync when PatientInfo is available (set from patientInfo.gender)
   String patientGender = 'Male'; // 'Male' | 'Female' | 'Other'
 }

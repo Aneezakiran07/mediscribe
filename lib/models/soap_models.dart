@@ -9,3 +9,4 @@ class SoapNote {
   String   plan        = '';
   DateTime generatedAt = DateTime.now();
 }
+

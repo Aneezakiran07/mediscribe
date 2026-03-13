@@ -145,3 +145,4 @@ class SystemicReviewService {
       symptoms: ['Fever', 'Weight loss', 'Night sweats', 'Loss of appetite']),
   ];
 }
+

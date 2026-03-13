@@ -101,9 +101,6 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen> {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// SHARED WIDGETS
-// ═══════════════════════════════════════════════════════════════════════════════
 
 class _HistoryAppBar extends StatelessWidget {
   final String title;
@@ -320,11 +317,9 @@ class _TagChip extends StatelessWidget {
   }
 }
 
-// ───────────────────────────────────────────────────────────────────────────────
 // KB SEARCH FIELD — the universal "Add custom" widget used across all sections.
 // Shows a search pill → expands to a TextField that queries KBSearchService
 // → shows a dropdown of matched results + "Add as custom" option at bottom.
-// ───────────────────────────────────────────────────────────────────────────────
 class _KBSearchField extends StatefulWidget {
   final String hint;              // placeholder when typing
   final String buttonLabel;       // text on the collapsed pill e.g. "Add symptom"
@@ -651,9 +646,7 @@ class _SmallDropdown extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
 // PAGE 1 — PRESENTING COMPLAINTS + HOPI
-// ═══════════════════════════════════════════════════════════════════════════════
 class _Page1ComplaintsHOPI extends StatefulWidget {
   final HistoryFormData formData;
   final VoidCallback onChanged;
@@ -693,7 +686,6 @@ class _Page1State extends State<_Page1ComplaintsHOPI> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
-          // ── Presenting Complaints ──────────────────────────────────────────
           const _SectionBar(title: 'Presenting Complaints'),
           Padding(
             padding: const EdgeInsets.all(16),
@@ -722,7 +714,6 @@ class _Page1State extends State<_Page1ComplaintsHOPI> {
             ),
           ),
 
-          // ── History of Present Illness ─────────────────────────────────────
           const _SectionBar(title: 'History of Present Illness'),
           const SizedBox(height: 8),
 
@@ -860,10 +851,8 @@ class _HOPICardState extends State<_HOPICard> {
     );
   }
 }
-
-// ═══════════════════════════════════════════════════════════════════════════════
 // PAGE 2 — PAST TREATMENT + SOCIO-ECONOMIC + PERSONAL + DRUG HISTORY
-// ═══════════════════════════════════════════════════════════════════════════════
+
 class _Page2PastPersonalHistory extends StatefulWidget {
   final HistoryFormData formData;
   final VoidCallback onChanged;
@@ -887,8 +876,6 @@ class _Page2State extends State<_Page2PastPersonalHistory> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
-          // ── Past Treatment History ─────────────────────────────────────────
           const _SectionBar(title: 'Past Treatment History'),
           Container(
             margin: const EdgeInsets.all(16),

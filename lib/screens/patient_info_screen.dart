@@ -4,28 +4,11 @@ import '../models/patient_info.dart';
 import '../core/app_colors.dart';
 import 'history_taking_screen.dart';
 
-void main() => runApp(const _PreviewApp());
-
-class _PreviewApp extends StatelessWidget {
-  const _PreviewApp();
-  @override
-  Widget build(BuildContext context) => MaterialApp(
-    title: 'MediScribe AI',
-    debugShowCheckedModeBanner: false,
-    theme: ThemeData(
-      useMaterial3: true,
-      scaffoldBackgroundColor: AppColors.pageBackground,
-      colorScheme: const ColorScheme.light(
-        primary: AppColors.sectionHeader,
-        surface: AppColors.background,
-      ),
-    ),
-    home: const PatientInfoScreen(),
-  );
-}
 
 class PatientInfoScreen extends StatefulWidget {
-  const PatientInfoScreen({super.key});
+  /// Pass an existing PatientInfo to pre-fill for editing. Null = new patient.
+  final PatientInfo? existingPatient;
+  const PatientInfoScreen({super.key, this.existingPatient});
 
   @override
   State<PatientInfoScreen> createState() => _PatientInfoScreenState();
@@ -33,13 +16,40 @@ class PatientInfoScreen extends StatefulWidget {
 
 class _PatientInfoScreenState extends State<PatientInfoScreen> {
   final _formKey  = GlobalKey<FormState>();
-  final _info     = PatientInfo();
+  late final PatientInfo _info;
   bool _submitted = false;
 
   final _nameCtrl     = TextEditingController();
   final _ageCtrl      = TextEditingController();
   final _addressCtrl  = TextEditingController();
   final _religionCtrl = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final p = widget.existingPatient;
+    if (p != null) {
+      // Edit mode — copy fields so we don't mutate the original until saved
+      _info = PatientInfo()
+        ..fullName        = p.fullName
+        ..age             = p.age
+        ..gender          = p.gender
+        ..dateOfBirth     = p.dateOfBirth
+        ..address         = p.address
+        ..dateOfAdmission = p.dateOfAdmission
+        ..modeOfAdmission = p.modeOfAdmission
+        ..maritalStatus   = p.maritalStatus
+        ..religion        = p.religion
+        ..patientId       = p.patientId;
+      // Pre-fill text controllers
+      _nameCtrl.text     = p.fullName;
+      _ageCtrl.text      = p.age?.toString() ?? '';
+      _addressCtrl.text  = p.address;
+      _religionCtrl.text = p.religion;
+    } else {
+      _info = PatientInfo();
+    }
+  }
 
   @override
   void dispose() {
@@ -85,7 +95,10 @@ class _PatientInfoScreenState extends State<PatientInfoScreen> {
       }
     }
 
-    _info.patientId = 'MR-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
+    // Preserve existing patientId when editing; generate new one for new patients
+    if (_info.patientId.isEmpty) {
+      _info.patientId = 'MR-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
+    }
 
     Navigator.push(context, MaterialPageRoute(
       builder: (_) => HistoryTakingScreen(patientInfo: _info),
@@ -121,7 +134,7 @@ class _PatientInfoScreenState extends State<PatientInfoScreen> {
       backgroundColor: AppColors.pageBackground,
       body: Column(
         children: [
-          _AppBar(),
+          _AppBar(isEditMode: widget.existingPatient != null),
           Expanded(
             child: Form(
               key: _formKey,
@@ -132,7 +145,7 @@ class _PatientInfoScreenState extends State<PatientInfoScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
 
-                    _PageHeading(),
+                    _PageHeading(isEditMode: widget.existingPatient != null),
                     const SizedBox(height: 20),
 
                     _SectionCard(
@@ -204,7 +217,10 @@ class _PatientInfoScreenState extends State<PatientInfoScreen> {
                         const _FieldDivider(),
 
                         _FieldLabel('Date of Birth'),
-                        _DOBField(onSaved: (v) => _info.dateOfBirth = v),
+                        _DOBField(
+                          onSaved: (v) => _info.dateOfBirth = v,
+                          initialValue: widget.existingPatient?.dateOfBirth,
+                        ),
 
                         const _FieldDivider(),
 
@@ -289,7 +305,7 @@ class _PatientInfoScreenState extends State<PatientInfoScreen> {
                     ),
 
                     const SizedBox(height: 28),
-                    _NextButton(onPressed: _onNext),
+                    _NextButton(onPressed: _onNext, isEditMode: widget.existingPatient != null),
                     const SizedBox(height: 8),
 
                     Center(
@@ -310,6 +326,9 @@ class _PatientInfoScreenState extends State<PatientInfoScreen> {
 }
 
 class _AppBar extends StatelessWidget {
+  final bool isEditMode;
+  const _AppBar({this.isEditMode = false});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -326,9 +345,9 @@ class _AppBar extends StatelessWidget {
               ),
               const Icon(Icons.psychology_outlined, color: AppColors.headerText, size: 20),
               const SizedBox(width: 8),
-              const Expanded(
-                child: Text('MediScribe AI',
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
+              Expanded(
+                child: Text(isEditMode ? 'Edit Patient' : 'New Patient',
+                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
                       color: AppColors.headerText)),
               ),
             ],
@@ -340,16 +359,21 @@ class _AppBar extends StatelessWidget {
 }
 
 class _PageHeading extends StatelessWidget {
+  final bool isEditMode;
+  const _PageHeading({this.isEditMode = false});
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('New Patient Profile',
-          style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800,
+        Text(isEditMode ? 'Edit Patient Profile' : 'New Patient Profile',
+          style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800,
               color: AppColors.bodyText, letterSpacing: -0.5)),
         const SizedBox(height: 4),
-        Text('Fill in the patient\'s basic information to begin.',
+        Text(isEditMode
+            ? "Update the patient's information below."
+            : "Fill in the patient's basic information to begin.",
           style: TextStyle(fontSize: 13, color: AppColors.subtleGrey)),
       ],
     );
@@ -558,7 +582,8 @@ class _DropdownInput extends StatelessWidget {
 
 class _DOBField extends StatefulWidget {
   final void Function(String) onSaved;
-  const _DOBField({required this.onSaved});
+  final String? initialValue; // format: "DD/MM/YYYY"
+  const _DOBField({required this.onSaved, this.initialValue});
 
   @override
   State<_DOBField> createState() => _DOBFieldState();
@@ -568,6 +593,20 @@ class _DOBFieldState extends State<_DOBField> {
   int? _day;
   int? _month;
   int? _year;
+
+  @override
+  void initState() {
+    super.initState();
+    final v = widget.initialValue;
+    if (v != null && v.isNotEmpty) {
+      final parts = v.split('/');
+      if (parts.length == 3) {
+        _day   = int.tryParse(parts[0]);
+        _month = int.tryParse(parts[1]);
+        _year  = int.tryParse(parts[2]);
+      }
+    }
+  }
 
   static const _months = [
     'Jan','Feb','Mar','Apr','May','Jun',
@@ -768,7 +807,8 @@ class _ModePill extends StatelessWidget {
 
 class _NextButton extends StatelessWidget {
   final VoidCallback onPressed;
-  const _NextButton({required this.onPressed});
+  final bool isEditMode;
+  const _NextButton({required this.onPressed, this.isEditMode = false});
 
   @override
   Widget build(BuildContext context) => SizedBox(
@@ -781,14 +821,14 @@ class _NextButton extends StatelessWidget {
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
-      child: const Row(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('Next — History Taking',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700,
+          Text(isEditMode ? 'Save & Continue' : 'Next — History Taking',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700,
                 color: AppColors.headerText)),
-          SizedBox(width: 8),
-          Icon(Icons.arrow_forward, color: AppColors.headerText, size: 18),
+          const SizedBox(width: 8),
+          const Icon(Icons.arrow_forward, color: AppColors.headerText, size: 18),
         ],
       ),
     ),

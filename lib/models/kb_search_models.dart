@@ -3,6 +3,7 @@
 // Import this wherever you need ClinicalTermsService, KBSearchService, KBSearchResult
 // Used by: history_taking_screen.dart
 
+import 'dart:collection';
 import 'dart:convert';
 import 'package:flutter/services.dart';
 

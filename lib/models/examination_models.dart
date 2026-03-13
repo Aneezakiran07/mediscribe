@@ -2,14 +2,11 @@
 // Extracted from examination_screen.dart
 // Import this wherever you need ExaminationData, SystemExamSession, KBExamination etc.
 // The KB classes (KBQuestion, KBRule, KBDiagnosis, KBExamination, KBService)
-// and ExamSystemConfig / kExamConfigs are also here since they are pure data/logic.
+// and ExamSystemConfig / kExamConfigs are also here
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-// ── KNOWLEDGE BASE MODELS ─────────────────────────────────────────────────────
-
 // @HiveType(typeId: 8)
 class KBQuestion {
   final String       id;
@@ -116,9 +113,7 @@ class KBExamination {
   );
 }
 
-// ── KB SERVICE ────────────────────────────────────────────────────────────────
 // Call await KBService.init() in main() before runApp()
-// Requires: flutter: assets: - assets/knowledge_base.json
 class KBService {
   static final Map<String, KBExamination> _exams = {};
   static bool _loaded = false;
@@ -134,7 +129,6 @@ class KBService {
         _exams[exam.examinationId] = exam;
       }
     } catch (_) {
-      // JSON not yet registered — screens still show, questions just empty
     }
     _loaded = true;
   }
@@ -142,7 +136,6 @@ class KBService {
   static KBExamination? getExam(String id) => _exams[id];
 }
 
-// ── SYSTEM EXAM SESSION ───────────────────────────────────────────────────────
 // @HiveType(typeId: 9)
 class SystemExamSession {
   final Map<String, List<String>> answers          = {}; // storesAs → selected options
@@ -341,7 +334,7 @@ class SystemExamSession {
     answers[storesAs]?.remove(option);
   }
 
-  // Diagnosis certainty engine — see examination_screen.dart for detailed comments
+  // Diagnosis certainty engine, see examination_screen.dart for detailed comments
   List<Map<String, dynamic>> calculateCertaintyFactors(KBExamination exam) {
     final allAnswers = answers;
     final results    = <Map<String, dynamic>>[];
@@ -405,7 +398,6 @@ class SystemExamSession {
   }
 }
 
-// ── EXAMINATION DATA ──────────────────────────────────────────────────────────
 // @HiveType(typeId: 10)
 class ExaminationData {
   final Map<String, SystemExamSession> sessions = {};
@@ -416,8 +408,6 @@ class ExaminationData {
   SystemExamSession sessionFor(String examId) =>
       sessions.putIfAbsent(examId, SystemExamSession.new);
 }
-
-// ── EXAM SYSTEM CONFIG ────────────────────────────────────────────────────────
 class ExamSystemConfig {
   final String   examId;
   final String   title;
