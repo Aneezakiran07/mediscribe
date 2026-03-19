@@ -1,4 +1,5 @@
-
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../core/app_colors.dart';
@@ -9,6 +10,7 @@ import '../models/vitals_models.dart';
 import '../models/lab_models.dart';
 import '../models/examination_models.dart';
 import '../models/soap_models.dart';
+import '../services/patient_repository.dart';
 
 class SoapNoteGenerator {
 
@@ -468,19 +470,6 @@ class _SoapNoteScreenState extends State<SoapNoteScreen>
     if (!_edited) setState(() => _edited = true);
   }
 
-  void _onSave() {
-    _note.subjective = _sCtrl.text;
-    _note.objective  = _oCtrl.text;
-    _note.assessment = _aCtrl.text;
-    _note.plan       = _pCtrl.text;
-    setState(() => _edited = false);
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('SOAP note saved'),
-      backgroundColor: AppColors.sectionHeader,
-      duration: Duration(seconds: 2),
-    ));
-  }
-
   void _onCopyAll() {
     final full = 'SUBJECTIVE\n${_sCtrl.text}\n\n'
         'OBJECTIVE\n${_oCtrl.text}\n\n'
@@ -518,6 +507,50 @@ class _SoapNoteScreenState extends State<SoapNoteScreen>
         ],
       ),
     );
+  }
+
+
+  // ── Save to Hive ──────────────────────────────────────────────────────────
+  bool _saving = false;
+  bool _saved  = false;
+
+  Future<void> _saveToHive() async {
+    if (_saving) return;
+    setState(() => _saving = true);
+
+    final soap = SoapNote()
+      ..subjective  = _sCtrl.text
+      ..objective   = _oCtrl.text
+      ..assessment  = _aCtrl.text
+      ..plan        = _pCtrl.text
+      ..generatedAt = DateTime.now();
+
+    try {
+      await PatientRepository.saveSession(
+        patient:     widget.patient,
+        history:     widget.history,
+        systemic:    widget.systemic,
+        vitals:      widget.vitals,
+        labs:        widget.labs,
+        examination: widget.examination,
+        soap:        soap,
+      );
+      if (!mounted) return;
+      setState(() { _saving = false; _saved = true; });
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Patient record saved'),
+        backgroundColor: AppColors.sectionHeader,
+        duration: Duration(seconds: 2),
+      ));
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Save failed: $e'),
+        backgroundColor: AppColors.emergencyRed,
+        duration: const Duration(seconds: 3),
+      ));
+    }
   }
 
   @override
@@ -618,6 +651,15 @@ class _SoapNoteScreenState extends State<SoapNoteScreen>
                   ),
                 ),
               IconButton(
+                icon: _saving
+                    ? const SizedBox(width: 20, height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.headerText))
+                    : Icon(_saved ? Icons.check_circle_outline : Icons.save_outlined,
+                        color: AppColors.headerText, size: 20),
+                tooltip: 'Save record',
+                onPressed: _saveToHive,
+              ),
+              IconButton(
                 icon: const Icon(Icons.copy_outlined, color: AppColors.headerText, size: 20),
                 tooltip: 'Copy full note',
                 onPressed: _onCopyAll,
@@ -679,7 +721,7 @@ class _SoapNoteScreenState extends State<SoapNoteScreen>
             decoration: BoxDecoration(
               color: AppColors.constitutional,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.sectionHeader.withOpacity(0.3)),
+              border: Border.all(color: AppColors.sectionHeader.withValues(alpha: 0.3)),
             ),
             child: const Text(
               'SOAP Note',
@@ -731,28 +773,26 @@ class _SoapNoteScreenState extends State<SoapNoteScreen>
       child: SizedBox(
         width: double.infinity,
         height: 50,
-        child: ElevatedButton(
-          onPressed: _onSave,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _edited ? AppColors.sectionHeader : AppColors.constitutional,
-            elevation: 0,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        child: OutlinedButton(
+          onPressed: () => Navigator.of(context)
+              .popUntil((route) => route.isFirst),
+          style: OutlinedButton.styleFrom(
+            side: const BorderSide(color: AppColors.sectionHeader, width: 1.5),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14)),
           ),
-          child: Row(
+          child: const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.save_outlined,
-                color: _edited ? AppColors.headerText : AppColors.sectionHeader,
-                size: 18,
-              ),
-              const SizedBox(width: 8),
+              Icon(Icons.home_outlined,
+                  color: AppColors.sectionHeader, size: 18),
+              SizedBox(width: 8),
               Text(
-                _edited ? 'Save SOAP Note' : 'Note Saved',
+                'Back to Home',
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: _edited ? AppColors.headerText : AppColors.sectionHeader,
+                  color: AppColors.sectionHeader,
                 ),
               ),
             ],
@@ -800,7 +840,7 @@ class _SoapSection extends StatelessWidget {
                 Container(
                   width: 36, height: 36,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Center(
@@ -828,7 +868,7 @@ class _SoapSection extends StatelessWidget {
                       Text(
                         description,
                         style: TextStyle(
-                          fontSize: 11, color: AppColors.headerText.withOpacity(0.8), height: 1.3,
+                          fontSize: 11, color: AppColors.headerText.withValues(alpha: 0.8), height: 1.3,
                         ),
                       ),
                     ],
@@ -848,7 +888,7 @@ class _SoapSection extends StatelessWidget {
               border: Border.all(color: AppColors.divider),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
+                  color: Colors.black.withValues(alpha: 0.03),
                   blurRadius: 8, offset: const Offset(0, 2),
                 ),
               ],
@@ -919,3 +959,6 @@ class _SoapSection extends StatelessWidget {
     );
   }
 }
+
+
+

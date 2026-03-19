@@ -1,7 +1,3 @@
-
-import 'dart:io';
-import 'dart:js_interop';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../core/app_colors.dart';
@@ -237,12 +233,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       padding: const EdgeInsets.fromLTRB(4, 4, 16, 4),
       child: Row(
          children: [
-              const Icon(Icons.settings_outlined, color: AppColors.headerText, size: 24),
-              const SizedBox(width: 10),
+              const Icon(Icons.settings_outlined, color: AppColors.headerText, size: 22),
+              const SizedBox(width: 8),
           const Expanded(
             child: Text('Settings',
                 style: TextStyle(
-                    fontSize: 22,
+                    fontSize: 17,
                     fontWeight: FontWeight.w700,
                     color: AppColors.headerText)),
           ),
@@ -543,5 +539,6 @@ class _Divider extends StatelessWidget {
         height: 1, thickness: 1, color: AppColors.divider, indent: 50);
   }
 }
+
 
 

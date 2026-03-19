@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
 import 'patient_info_screen.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import '../models/patient_session.dart';
+import '../services/patient_repository.dart' as repo;
 import 'patient_records_screen.dart';
 import 'settings_screen.dart';
 
 // DATA MODELS
-// Hive wiring notes (RecentPatient):
-//   @HiveType(typeId: 0)  on class
-//   @HiveField(n)         on each field
-//   run: flutter pub run build_runner build
-//   read: Hive.box<RecentPatient>('patients').values.toList()
+// ── RecentPatient — lightweight view-model for home screen cards ─────────────
 class RecentPatient {
-  final String id;
-  final String name;
-  final String diagnosis;
-  final String admissionMode; // 'Emergency' | 'OPD'
+  final String   id;
+  final String   name;
+  final String   diagnosis;
+  final String   admissionMode;
   final DateTime admittedOn;
-  final bool isOnline;
+  final bool     isOnline;
 
   const RecentPatient({
     required this.id,
@@ -28,43 +27,36 @@ class RecentPatient {
   });
 }
 
-//swap body w hive when reade
+// ── PatientRepository (home-screen view) — reads from Hive ───────────────────
 class PatientRepository {
-  static List<RecentPatient> getRecentPatients() => [
-        RecentPatient(
-          id: '001', name: 'John Doe',
-          diagnosis: 'Hypertension',
-          admissionMode: 'OPD',
-          admittedOn: DateTime(2026, 2, 28),
-          isOnline: true,
-        ),
-        RecentPatient(
-          id: '002', name: 'Jane Smith',
-          diagnosis: 'Pneumonia',
-          admissionMode: 'Emergency',
-          admittedOn: DateTime(2026, 2, 27),
-          isOnline: true,
-        ),
-        RecentPatient(
-          id: '003', name: 'Robert B.',
-          diagnosis: 'Acute Myocarditis',
-          admissionMode: 'Emergency',
-          admittedOn: DateTime(2026, 2, 25),
-          isOnline: false,
-        ),
-        RecentPatient(
-          id: '004', name: 'Aisha K.',
-          diagnosis: 'Appendicitis',
-          admissionMode: 'Emergency',
-          admittedOn: DateTime(2026, 2, 24),
-          isOnline: true,
-        ),
-      ];
+  static List<RecentPatient> getRecentPatients() {
+    return repo.PatientRepository.getAllSessions()
+        .take(5)
+        .map((s) => RecentPatient(
+              id:            s.sessionId,
+              name:          s.patientName.isEmpty ? 'Unknown' : s.patientName,
+              diagnosis:     s.provisionalDx.isEmpty ? s.chiefComplaint : s.provisionalDx,
+              admissionMode: s.modeOfAdmission,
+              admittedOn:    s.dateOfAdmission,
+              isOnline:      s.status == 'active',
+            ))
+        .toList();
+  }
 
-  // Replace with: Hive.box('stats').get('todayCases', defaultValue: 0)
-  static int getTodayCases()    => 4;
-  static int getPendingFlags()  => 2;
-  static int getTotalSaved()    => 12;
+  static int getTodayCases() {
+    final today = DateTime.now();
+    return repo.PatientRepository.getAllSessions()
+        .where((s) =>
+            s.dateOfAdmission.year  == today.year &&
+            s.dateOfAdmission.month == today.month &&
+            s.dateOfAdmission.day   == today.day)
+        .length;
+  }
+
+  static int getPendingFlags() => repo.PatientRepository.getAllSessions()
+      .where((s) => s.provisionalDx.isNotEmpty).length;
+
+  static int getTotalSaved() => repo.PatientRepository.getAllSessions().length;
 }
 
 class HomeScreen extends StatefulWidget {
@@ -119,8 +111,16 @@ class _HomeBody extends StatelessWidget {
 
 @override
 Widget build(BuildContext context) {
-  final patients = PatientRepository.getRecentPatients();
+  return ValueListenableBuilder(
+    valueListenable: Hive.box<PatientSession>('sessions').listenable(),
+    builder: (context, box, _) {
+      final patients = PatientRepository.getRecentPatients();
+      return _buildContent(context, patients);
+    },
+  );
+}
 
+Widget _buildContent(BuildContext context, List<RecentPatient> patients) {
   return SafeArea(
     child: CustomScrollView(
       physics: const BouncingScrollPhysics(),
@@ -188,7 +188,7 @@ Widget build(BuildContext context) {
                   child: _StatCard(
                     icon: Icons.warning_amber_rounded,
                     value: PatientRepository.getPendingFlags().toString(),
-                    label: 'Pending\nFlags',
+                    label: 'Diagnosed',
                     highlight: true,
                   ),
                 ),
@@ -825,3 +825,4 @@ class _NavItemData {
     this.isAction = false,
   });
 }
+
