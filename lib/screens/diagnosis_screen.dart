@@ -8,22 +8,19 @@ import '../models/lab_models.dart';
 import '../models/examination_models.dart';
 import 'soap_note_screen.dart';
 
-// ═══════════════════════════════════════════════════════════════════════════════
 // DIAGNOSIS SCREEN
 // Pulls calculateCertaintyFactors() from each examined SystemExamSession,
 // ranks diagnoses by certainty, groups into Probable / Possible / Unlikely,
 // and shows contributing key findings + clinical alerts.
-//
 // Flow: ExaminationScreen → DiagnosisScreen → SoapNoteScreen
-// ═══════════════════════════════════════════════════════════════════════════════
-
 class DiagnosisScreen extends StatefulWidget {
-  final PatientInfo?        patient;
-  final HistoryFormData?    history;
+  final PatientInfo?         patient;
+  final HistoryFormData?     history;
   final SystemicHistoryData? systemic;
-  final VitalsData?         vitals;
-  final ExaminationData     examination;
-  final LabData?            labs;
+  final VitalsData?          vitals;
+  final ExaminationData      examination;
+  final LabData?             labs;
+  final String?              existingSessionId;
 
   const DiagnosisScreen({
     super.key,
@@ -33,6 +30,7 @@ class DiagnosisScreen extends StatefulWidget {
     this.vitals,
     required this.examination,
     this.labs,
+    this.existingSessionId,
   });
 
   @override
@@ -116,12 +114,13 @@ class _DiagnosisScreenState extends State<DiagnosisScreen>
       context,
       MaterialPageRoute(
         builder: (_) => SoapNoteScreen(
-          patient:     widget.patient     ?? PatientInfo(),
-          history:     widget.history     ?? HistoryFormData(),
-          systemic:    widget.systemic    ?? SystemicHistoryData(),
-          vitals:      widget.vitals      ?? VitalsData(),
-          examination: widget.examination,
-          labs:        widget.labs        ?? LabData(),
+          patient:           widget.patient     ?? PatientInfo(),
+          history:           widget.history     ?? HistoryFormData(),
+          systemic:          widget.systemic    ?? SystemicHistoryData(),
+          vitals:            widget.vitals      ?? VitalsData(),
+          examination:       widget.examination,
+          labs:              widget.labs        ?? LabData(),
+          existingSessionId: widget.existingSessionId,
         ),
       ),
     );
@@ -211,15 +210,14 @@ class _DiagnosisScreenState extends State<DiagnosisScreen>
       child: ListView(
         padding: const EdgeInsets.only(bottom: 24),
         children: [
-          // ── Alert banner ──────────────────────────────────────────────────
+          // alert banner
           if (_allAlerts.isNotEmpty) _AlertBanner(alerts: _allAlerts),
 
-          // ── Summary pill row ──────────────────────────────────────────────
+          // summary pill
           _SummaryRow(systemDiagnoses: _systemDiagnoses),
 
           const SizedBox(height: 8),
 
-          // ── Per-system diagnosis cards ────────────────────────────────────
           ...List.generate(_systemDiagnoses.length, (i) {
             final delay = i * 0.15;
             return AnimatedBuilder(
@@ -247,8 +245,7 @@ class _DiagnosisScreenState extends State<DiagnosisScreen>
   }
 }
 
-// ── DATA CLASSES ──────────────────────────────────────────────────────────────
-
+// data classes
 class _DiagnosisResult {
   final String name;
   final String description;
@@ -311,8 +308,6 @@ extension _DxBandStyle on _DxBand {
     }
   }
 }
-
-// ── APP BAR ───────────────────────────────────────────────────────────────────
 
 class _DiagnosisAppBar extends StatelessWidget {
   final VoidCallback onBack;
@@ -390,7 +385,7 @@ class _DiagnosisAppBar extends StatelessWidget {
                     : 'Review findings below',
                 style: TextStyle(
                     fontSize: 13,
-                    color: AppColors.headerText.withOpacity(0.75),
+                    color: AppColors.headerText.withValues(alpha: 0.75),
                     fontWeight: FontWeight.w400),
               ),
             ),
@@ -401,7 +396,6 @@ class _DiagnosisAppBar extends StatelessWidget {
   }
 }
 
-// ── ALERT BANNER ──────────────────────────────────────────────────────────────
 
 class _AlertBanner extends StatefulWidget {
   final List<String> alerts;
@@ -421,7 +415,7 @@ class _AlertBannerState extends State<_AlertBanner> {
       decoration: BoxDecoration(
         color: AppColors.emergencyBg,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.emergencyRed.withOpacity(0.4), width: 1.5),
+        border: Border.all(color: AppColors.emergencyRed.withValues(alpha: 0.4), width: 1.5),
       ),
       child: Column(
         children: [
@@ -436,7 +430,7 @@ class _AlertBannerState extends State<_AlertBanner> {
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: AppColors.emergencyRed.withOpacity(0.12),
+                      color: AppColors.emergencyRed.withValues(alpha: 0.12),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.warning_amber_rounded,
@@ -496,9 +490,7 @@ class _AlertBannerState extends State<_AlertBanner> {
     );
   }
 }
-
-// ── SUMMARY ROW ───────────────────────────────────────────────────────────────
-
+//sumary row
 class _SummaryRow extends StatelessWidget {
   final List<_SystemDiagnosis> systemDiagnoses;
   const _SummaryRow({required this.systemDiagnoses});
@@ -586,8 +578,6 @@ class _SummaryPill extends StatelessWidget {
   }
 }
 
-// ── SYSTEM DIAGNOSIS CARD ─────────────────────────────────────────────────────
-
 class _SystemDiagnosisCard extends StatefulWidget {
   final _SystemDiagnosis systemDx;
   const _SystemDiagnosisCard({required this.systemDx});
@@ -597,16 +587,16 @@ class _SystemDiagnosisCard extends StatefulWidget {
 }
 
 class _SystemDiagnosisCardState extends State<_SystemDiagnosisCard> {
-  // Show top 3 by default, expand to show all
-  bool _showAll = false;
+  // All results shown — sorted by certainty descending
+  bool _showAll = true;
 
   List<_DiagnosisResult> get _visible {
     final sorted = [...widget.systemDx.results];
     sorted.sort((a, b) => b.certainty.compareTo(a.certainty));
-    return _showAll ? sorted : sorted.take(3).toList();
+    return sorted;
   }
 
-  bool get _hasMore => widget.systemDx.results.length > 3;
+  bool get _hasMore => false; // Always show all
 
   @override
   Widget build(BuildContext context) {
@@ -620,7 +610,7 @@ class _SystemDiagnosisCardState extends State<_SystemDiagnosisCard> {
         border: Border.all(color: AppColors.divider),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 8,
               offset: const Offset(0, 2)),
         ],
@@ -628,7 +618,6 @@ class _SystemDiagnosisCardState extends State<_SystemDiagnosisCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── System header ─────────────────────────────────────────────────
           Container(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
             decoration: BoxDecoration(
@@ -641,7 +630,7 @@ class _SystemDiagnosisCardState extends State<_SystemDiagnosisCard> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.sectionHeader.withOpacity(0.12),
+                    color: AppColors.sectionHeader.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(config.icon,
@@ -667,7 +656,7 @@ class _SystemDiagnosisCardState extends State<_SystemDiagnosisCard> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.sectionHeader.withOpacity(0.1),
+                    color: AppColors.sectionHeader.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -682,10 +671,8 @@ class _SystemDiagnosisCardState extends State<_SystemDiagnosisCard> {
             ),
           ),
 
-          // ── Diagnosis rows ────────────────────────────────────────────────
           ..._visible.map((result) => _DiagnosisRow(result: result)),
 
-          // ── Show more toggle ──────────────────────────────────────────────
           if (_hasMore)
             InkWell(
               onTap: () => setState(() => _showAll = !_showAll),
@@ -726,9 +713,6 @@ class _SystemDiagnosisCardState extends State<_SystemDiagnosisCard> {
     );
   }
 }
-
-// ── DIAGNOSIS ROW ─────────────────────────────────────────────────────────────
-
 class _DiagnosisRow extends StatefulWidget {
   final _DiagnosisResult result;
   const _DiagnosisRow({required this.result});
@@ -864,8 +848,6 @@ class _DiagnosisRowState extends State<_DiagnosisRow>
   }
 }
 
-// ── CERTAINTY BAR ─────────────────────────────────────────────────────────────
-
 class _CertaintyBar extends StatelessWidget {
   final int    certainty;
   final Color  barColor;
@@ -910,7 +892,7 @@ class _CertaintyBar extends StatelessWidget {
   }
 }
 
-// ── PROCEED BUTTON ────────────────────────────────────────────────────────────
+// PROCEED BUTTON
 
 class _ProceedButton extends StatelessWidget {
   final VoidCallback onTap;

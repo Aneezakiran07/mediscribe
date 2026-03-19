@@ -5,13 +5,23 @@ import '../core/app_colors.dart';
 import '../models/patient_info.dart';
 import '../models/history_models.dart';
 import '../models/systemic_models.dart';
+import '../models/vitals_models.dart';
+import '../models/examination_models.dart';
+import '../models/lab_models.dart';
+import '../models/soap_models.dart';
 import 'vitals_screen.dart';
 
 class SystemicHistoryScreen extends StatefulWidget {
-  final String patientGender;         // 'Male' | 'Female' | 'Other'
-  final List<String> chiefComplaints; // from HistoryTakingScreen Page 1
+  final String patientGender;
+  final List<String> chiefComplaints;
   final PatientInfo? patient;
   final HistoryFormData? history;
+  final String?              existingSessionId;
+  final SystemicHistoryData? existingSystemic;
+  final VitalsData?          existingVitals;
+  final LabData?             existingLabs;
+  final ExaminationData?     existingExamination;
+  final SoapNote?            existingSoap;
 
   const SystemicHistoryScreen({
     super.key,
@@ -19,6 +29,12 @@ class SystemicHistoryScreen extends StatefulWidget {
     required this.chiefComplaints,
     this.patient,
     this.history,
+    this.existingSessionId,
+    this.existingSystemic,
+    this.existingVitals,
+    this.existingLabs,
+    this.existingExamination,
+    this.existingSoap,
   });
 
   @override
@@ -36,6 +52,20 @@ class _SystemicHistoryScreenState extends State<SystemicHistoryScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.existingSystemic != null) {
+      final e = widget.existingSystemic!;
+      e.cardiovascular.forEach((k, v)   => _data.cardiovascular[k]   = v);
+      e.respiratory.forEach((k, v)      => _data.respiratory[k]      = v);
+      e.cns.forEach((k, v)              => _data.cns[k]              = v);
+      e.gastrointestinal.forEach((k, v) => _data.gastrointestinal[k] = v);
+      e.genitourinary.forEach((k, v)    => _data.genitourinary[k]    = v);
+      e.musculoskeletal.forEach((k, v)  => _data.musculoskeletal[k]  = v);
+      e.gynaecological.forEach((k, v)   => _data.gynaecological[k]   = v);
+      e.endocrine.forEach((k, v)        => _data.endocrine[k]        = v);
+      e.constitutional.forEach((k, v)   => _data.constitutional[k]   = v);
+      e.customSymptoms.forEach((k, v)   => _data.customSymptoms[k]   = List.from(v));
+      _data.customEntries.addAll(e.customEntries);
+    }
     SystemicReviewService.init().then((_) { if (mounted) setState(() {}); });
   }
 
@@ -59,11 +89,6 @@ class _SystemicHistoryScreenState extends State<SystemicHistoryScreen> {
       case 'constitutional':   return _data.constitutional;
       default:                 return {};
     }
-  }
-
-  List<String> _negativeFor(String id) {
-    final map = _mapForSystem(id);
-    return map.entries.where((e) => e.value == false).map((e) => e.key).toList();
   }
 
   @override
@@ -157,9 +182,14 @@ class _SystemicHistoryScreenState extends State<SystemicHistoryScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (_) => VitalsScreen(
-                    patient: widget.patient,
-                    history: widget.history,
-                    systemic: _buildSystemicData(),
+                    patient:              widget.patient,
+                    history:              widget.history,
+                    systemic:             _buildSystemicData(),
+                    existingSessionId:    widget.existingSessionId,
+                    existingVitals:       widget.existingVitals,
+                    existingLabs:         widget.existingLabs,
+                    existingExamination:  widget.existingExamination,
+                    existingSoap:         widget.existingSoap,
                   ),
                 ),
               );
@@ -314,13 +344,13 @@ class _SystemSectionState extends State<_SystemSection> {
         border: Border.all(
           // Constitutional gets a slightly more prominent border
           color: isConstitutional
-              ? AppColors.sectionHeader.withOpacity(0.5)
+              ? AppColors.sectionHeader.withValues(alpha: 0.5)
               : AppColors.divider,
           width: isConstitutional ? 1.5 : 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -366,7 +396,7 @@ class _SystemSectionState extends State<_SystemSection> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.25),
+                              color: Colors.white.withValues(alpha: 0.25),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: const Text(
@@ -385,7 +415,7 @@ class _SystemSectionState extends State<_SystemSection> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.25),
+                              color: Colors.white.withValues(alpha: 0.25),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: const Text(
@@ -655,7 +685,7 @@ class _AddSymptomRowState extends State<_AddSymptomRow> {
                 color: AppColors.constitutional,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: AppColors.sectionHeader.withOpacity(0.4),
+                  color: AppColors.sectionHeader.withValues(alpha: 0.4),
                 ),
               ),
               child: Row(
@@ -712,7 +742,7 @@ class _AddSymptomRowState extends State<_AddSymptomRow> {
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(20),
                 borderSide: BorderSide(
-                    color: AppColors.sectionHeader.withOpacity(0.4)),
+                    color: AppColors.sectionHeader.withValues(alpha: 0.4)),
               ),
             ),
             onSubmitted: (_) => _submit(),

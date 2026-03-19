@@ -6,22 +6,44 @@ import '../models/history_models.dart';
 import '../models/systemic_models.dart';
 import '../models/vitals_models.dart';
 import '../models/lab_models.dart';
+import '../models/examination_models.dart';
+import '../models/soap_models.dart';
 import 'examination_screen.dart';
 
 class LabsScreen extends StatefulWidget {
-  final PatientInfo? patient;
-  final HistoryFormData? history;
+  final PatientInfo?         patient;
+  final HistoryFormData?     history;
   final SystemicHistoryData? systemic;
-  final VitalsData? vitals;
+  final VitalsData?          vitals;
+  final String?              existingSessionId;
+  final LabData?             existingLabs;
+  final ExaminationData?     existingExamination;
+  final SoapNote?            existingSoap;
 
-  const LabsScreen({super.key, this.patient, this.history, this.systemic, this.vitals});
+  const LabsScreen({
+    super.key,
+    this.patient,
+    this.history,
+    this.systemic,
+    this.vitals,
+    this.existingSessionId,
+    this.existingLabs,
+    this.existingExamination,
+    this.existingSoap,
+  });
 
   @override
   State<LabsScreen> createState() => _LabsScreenState();
 }
 
 class _LabsScreenState extends State<LabsScreen> {
-  final LabData _data = LabData();
+  late LabData _data;
+
+  @override
+  void initState() {
+    super.initState();
+    _data = widget.existingLabs ?? LabData();
+  }
 
   // Track which panels are expanded
   final Set<int> _expanded = {0, 1, 2, 3}; // first 4 open by default
@@ -52,12 +74,15 @@ class _LabsScreenState extends State<LabsScreen> {
           context,
           MaterialPageRoute(
             builder: (_) => ExaminationScreen(
-              autoFlags: [],
-              patient:  widget.patient,
-              history:  widget.history,
-              systemic: widget.systemic,
-              vitals:   widget.vitals,
-              labs:     _data,
+              autoFlags:            [],
+              patient:              widget.patient,
+              history:              widget.history,
+              systemic:             widget.systemic,
+              vitals:               widget.vitals,
+              labs:                 _data,
+              existingSessionId:    widget.existingSessionId,
+              existingExamination:  widget.existingExamination,
+              existingSoap:         widget.existingSoap,
             ),
           ),
         );
@@ -856,5 +881,3 @@ class _SaveSummarySheet extends StatelessWidget {
     );
   }
 }
-
-

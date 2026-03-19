@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/patient_info.dart';
+import '../models/history_models.dart';
+import '../models/systemic_models.dart';
+import '../models/vitals_models.dart';
+import '../models/lab_models.dart';
+import '../models/soap_models.dart';
+import '../models/examination_models.dart';
 import '../core/app_colors.dart';
 import 'history_taking_screen.dart';
 
@@ -8,7 +14,25 @@ import 'history_taking_screen.dart';
 class PatientInfoScreen extends StatefulWidget {
   /// Pass an existing PatientInfo to pre-fill for editing. Null = new patient.
   final PatientInfo? existingPatient;
-  const PatientInfoScreen({super.key, this.existingPatient});
+  final String?            existingSessionId;
+  final HistoryFormData?   existingHistory;
+  final SystemicHistoryData? existingSystemic;
+  final VitalsData?        existingVitals;
+  final LabData?           existingLabs;
+  final ExaminationData?   existingExamination;
+  final SoapNote?          existingSoap;
+
+  const PatientInfoScreen({
+    super.key,
+    this.existingPatient,
+    this.existingSessionId,
+    this.existingHistory,
+    this.existingSystemic,
+    this.existingVitals,
+    this.existingLabs,
+    this.existingExamination,
+    this.existingSoap,
+  });
 
   @override
   State<PatientInfoScreen> createState() => _PatientInfoScreenState();
@@ -17,7 +41,6 @@ class PatientInfoScreen extends StatefulWidget {
 class _PatientInfoScreenState extends State<PatientInfoScreen> {
   final _formKey  = GlobalKey<FormState>();
   late final PatientInfo _info;
-  bool _submitted = false;
 
   final _nameCtrl     = TextEditingController();
   final _ageCtrl      = TextEditingController();
@@ -61,7 +84,6 @@ class _PatientInfoScreenState extends State<PatientInfoScreen> {
   }
 
   void _onNext() {
-    setState(() => _submitted = true);
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
 
@@ -101,7 +123,16 @@ class _PatientInfoScreenState extends State<PatientInfoScreen> {
     }
 
     Navigator.push(context, MaterialPageRoute(
-      builder: (_) => HistoryTakingScreen(patientInfo: _info),
+      builder: (_) => HistoryTakingScreen(
+        patientInfo:          _info,
+        existingSessionId:    widget.existingSessionId,
+        existingHistory:      widget.existingHistory,
+        existingSystemic:     widget.existingSystemic,
+        existingVitals:       widget.existingVitals,
+        existingLabs:         widget.existingLabs,
+        existingExamination:  widget.existingExamination,
+        existingSoap:         widget.existingSoap,
+      ),
     ));
   }
 
@@ -343,7 +374,7 @@ class _AppBar extends StatelessWidget {
                 icon: const Icon(Icons.arrow_back, color: AppColors.headerText, size: 22),
                 onPressed: () => Navigator.maybePop(context),
               ),
-              const Icon(Icons.psychology_outlined, color: AppColors.headerText, size: 30),
+              const Icon(Icons.psychology_outlined, color: AppColors.headerText, size: 20),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(isEditMode ? 'Edit Patient' : 'New Patient',
@@ -399,7 +430,7 @@ class _SectionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.divider),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.04),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 8, offset: const Offset(0, 2)),
         ],
       ),

@@ -399,12 +399,13 @@ class SoapNoteGenerator {
 
 // SOAP Note Screen
 class SoapNoteScreen extends StatefulWidget {
-  final PatientInfo patient;
-  final HistoryFormData history;
+  final PatientInfo         patient;
+  final HistoryFormData     history;
   final SystemicHistoryData systemic;
-  final VitalsData vitals;
-  final ExaminationData examination;
-  final LabData labs;
+  final VitalsData          vitals;
+  final ExaminationData     examination;
+  final LabData             labs;
+  final String?             existingSessionId;
 
   const SoapNoteScreen({
     super.key,
@@ -414,6 +415,7 @@ class SoapNoteScreen extends StatefulWidget {
     required this.vitals,
     required this.examination,
     required this.labs,
+    this.existingSessionId,
   });
 
   @override
@@ -510,7 +512,6 @@ class _SoapNoteScreenState extends State<SoapNoteScreen>
   }
 
 
-  // ── Save to Hive ──────────────────────────────────────────────────────────
   bool _saving = false;
   bool _saved  = false;
 
@@ -527,13 +528,14 @@ class _SoapNoteScreenState extends State<SoapNoteScreen>
 
     try {
       await PatientRepository.saveSession(
-        patient:     widget.patient,
-        history:     widget.history,
-        systemic:    widget.systemic,
-        vitals:      widget.vitals,
-        labs:        widget.labs,
-        examination: widget.examination,
-        soap:        soap,
+        patient:           widget.patient,
+        history:           widget.history,
+        systemic:          widget.systemic,
+        vitals:            widget.vitals,
+        labs:              widget.labs,
+        examination:       widget.examination,
+        soap:              soap,
+        existingSessionId: widget.existingSessionId,
       );
       if (!mounted) return;
       setState(() { _saving = false; _saved = true; });
@@ -772,34 +774,79 @@ class _SoapNoteScreenState extends State<SoapNoteScreen>
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       child: SizedBox(
         width: double.infinity,
-        height: 50,
-        child: OutlinedButton(
-          onPressed: () => Navigator.of(context)
-              .popUntil((route) => route.isFirst),
-          style: OutlinedButton.styleFrom(
-            side: const BorderSide(color: AppColors.sectionHeader, width: 1.5),
+        height: 54,
+        child: ElevatedButton(
+          onPressed: _saving ? null : _saveAndGoHome,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.sectionHeader,
+            disabledBackgroundColor: AppColors.constitutional,
+            elevation: 0,
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14)),
           ),
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.home_outlined,
-                  color: AppColors.sectionHeader, size: 18),
-              SizedBox(width: 8),
-              Text(
-                'Back to Home',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.sectionHeader,
+          child: _saving
+              ? const SizedBox(
+                  width: 22, height: 22,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2.5, color: AppColors.headerText))
+              : const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.save_outlined,
+                        color: AppColors.headerText, size: 20),
+                    SizedBox(width: 10),
+                    Text(
+                      'Save & Back to Home',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.headerText,
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Icon(Icons.home_outlined,
+                        color: AppColors.headerText, size: 20),
+                  ],
                 ),
-              ),
-            ],
-          ),
         ),
       ),
     );
+  }
+
+  Future<void> _saveAndGoHome() async {
+    if (_saving) return;
+    setState(() => _saving = true);
+
+    final soap = SoapNote()
+      ..subjective  = _sCtrl.text
+      ..objective   = _oCtrl.text
+      ..assessment  = _aCtrl.text
+      ..plan        = _pCtrl.text
+      ..generatedAt = DateTime.now();
+
+    try {
+      await PatientRepository.saveSession(
+        patient:           widget.patient,
+        history:           widget.history,
+        systemic:          widget.systemic,
+        vitals:            widget.vitals,
+        labs:              widget.labs,
+        examination:       widget.examination,
+        soap:              soap,
+        existingSessionId: widget.existingSessionId,
+      );
+      if (!mounted) return;
+      setState(() { _saving = false; _saved = true; });
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Save failed: $e'),
+        backgroundColor: AppColors.emergencyRed,
+        duration: const Duration(seconds: 3),
+      ));
+    }
   }
 }
 
@@ -959,6 +1006,3 @@ class _SoapSection extends StatelessWidget {
     );
   }
 }
-
-
-

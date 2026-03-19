@@ -6,15 +6,19 @@ import '../models/systemic_models.dart';
 import '../models/vitals_models.dart';
 import '../models/lab_models.dart';
 import '../models/examination_models.dart';
+import '../models/soap_models.dart';
 import 'diagnosis_screen.dart';
 
 class ExaminationScreen extends StatefulWidget {
-  final List<String> autoFlags;
-  final PatientInfo? patient;
-  final HistoryFormData? history;
+  final List<String>         autoFlags;
+  final PatientInfo?         patient;
+  final HistoryFormData?     history;
   final SystemicHistoryData? systemic;
-  final VitalsData? vitals;
-  final LabData? labs;
+  final VitalsData?          vitals;
+  final LabData?             labs;
+  final String?              existingSessionId;
+  final ExaminationData?     existingExamination;
+  final SoapNote?            existingSoap;
 
   const ExaminationScreen({
     super.key,
@@ -24,6 +28,9 @@ class ExaminationScreen extends StatefulWidget {
     this.systemic,
     this.vitals,
     this.labs,
+    this.existingSessionId,
+    this.existingExamination,
+    this.existingSoap,
   });
 
   @override
@@ -37,7 +44,11 @@ class _ExaminationScreenState extends State<ExaminationScreen> {
   @override
   void initState() {
     super.initState();
-    _data = ExaminationData(vitalsFlags: widget.autoFlags);
+    if (widget.existingExamination != null) {
+      _data = widget.existingExamination!;
+    } else {
+      _data = ExaminationData(vitalsFlags: widget.autoFlags);
+    }
     KBService.init().then((_) { if (mounted) setState(() => _kbLoaded = true); });
   }
 
@@ -78,12 +89,13 @@ class _ExaminationScreenState extends State<ExaminationScreen> {
       context,
       MaterialPageRoute(
         builder: (_) => DiagnosisScreen(
-          patient:     widget.patient,
-          history:     widget.history,
-          systemic:    widget.systemic,
-          vitals:      widget.vitals,
-          examination: _data,
-          labs:        widget.labs,
+          patient:           widget.patient,
+          history:           widget.history,
+          systemic:          widget.systemic,
+          vitals:            widget.vitals,
+          examination:       _data,
+          labs:              widget.labs,
+          existingSessionId: widget.existingSessionId,
         ),
       ),
     );
@@ -382,7 +394,7 @@ void _showResultsSheet() {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
@@ -471,7 +483,7 @@ void _showResultsSheet() {
                                 decoration: BoxDecoration(
                                   color: AppColors.constitutional,
                                   shape: BoxShape.circle,
-                                  border: Border.all(color: AppColors.sectionHeader.withOpacity(0.3)),
+                                  border: Border.all(color: AppColors.sectionHeader.withValues(alpha: 0.3)),
                                 ),
                                 child: const Icon(Icons.info_outline, color: AppColors.sectionHeader, size: 16),
                               ),
@@ -488,7 +500,7 @@ void _showResultsSheet() {
                             decoration: BoxDecoration(
                               color: AppColors.constitutional,
                               borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: AppColors.sectionHeader.withOpacity(0.3)),
+                              border: Border.all(color: AppColors.sectionHeader.withValues(alpha: 0.3)),
                             ),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -536,7 +548,7 @@ void _showResultsSheet() {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: AppColors.sectionHeader.withOpacity(0.15),
+                                  color: AppColors.sectionHeader.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(5),
                                 ),
                                 child: const Text('SUB-STEPS',
@@ -653,7 +665,7 @@ void _showResultsSheet() {
   }
 }
 
-// 
+
 // One numbered checkbox row in the sub-steps section
 class _SubStepRow extends StatelessWidget {
   final int number;
@@ -675,13 +687,13 @@ class _SubStepRow extends StatelessWidget {
     if (isSelected) {
       if (weight >= 3) {
         checkBg = AppColors.emergencyRed; checkBorder = AppColors.dangerBorder;
-        rowBg = AppColors.dangerBg.withOpacity(0.4);
+        rowBg = AppColors.dangerBg.withValues(alpha: 0.4);
       } else if (weight == 2) {
         checkBg = AppColors.warnText; checkBorder = AppColors.warnBorder;
-        rowBg = AppColors.warnBg.withOpacity(0.4);
+        rowBg = AppColors.warnBg.withValues(alpha: 0.4);
       } else {
         checkBg = AppColors.sectionHeader; checkBorder = AppColors.sectionHeader;
-        rowBg = AppColors.constitutional.withOpacity(0.5);
+        rowBg = AppColors.constitutional.withValues(alpha: 0.5);
       }
     } else {
       checkBg = AppColors.background; checkBorder = AppColors.divider;
@@ -704,7 +716,7 @@ class _SubStepRow extends StatelessWidget {
                   Container(
                     width: 22, height: 22,
                     decoration: BoxDecoration(
-                      color: isSelected ? AppColors.sectionHeader.withOpacity(0.15) : AppColors.constitutional,
+                      color: isSelected ? AppColors.sectionHeader.withValues(alpha: 0.15) : AppColors.constitutional,
                       shape: BoxShape.circle,
                     ),
                     child: Center(
@@ -831,7 +843,7 @@ class _ResultsSheet extends StatelessWidget {
                   ),
                   Container(
                     width: 50, height: 50,
-                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.5), shape: BoxShape.circle),
+                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.5), shape: BoxShape.circle),
                     child: Center(
                       child: Text('$score',
                         style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: acuityColor)),
@@ -879,7 +891,7 @@ class _ResultsSheet extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: bgColor,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: barColor.withOpacity(0.3)),
+                    border: Border.all(color: barColor.withValues(alpha: 0.3)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -897,7 +909,7 @@ class _ResultsSheet extends StatelessWidget {
                               Text(
                                 certainty >= 70 ? 'Probable' : certainty >= 40 ? 'Possible' : 'Unlikely',
                                 style: TextStyle(fontSize: 9, fontWeight: FontWeight.w600,
-                                    color: barColor.withOpacity(0.7)),
+                                    color: barColor.withValues(alpha: 0.7)),
                               ),
                             ],
                           ),
@@ -1092,7 +1104,7 @@ class _SystemOverviewCard extends StatelessWidget {
           color: AppColors.cardBg, borderRadius: BorderRadius.circular(16),
           border: Border.all(color: flagCount > 0 ? AppColors.dangerBorder : AppColors.divider,
               width: flagCount > 0 ? 1.5 : 1),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
         ),
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -1233,8 +1245,3 @@ class _SaveButton extends StatelessWidget {
     ),
   );
 }
-
-
-
-
-          

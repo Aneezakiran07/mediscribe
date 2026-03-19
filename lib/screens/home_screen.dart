@@ -8,7 +8,6 @@ import 'patient_records_screen.dart';
 import 'settings_screen.dart';
 
 // DATA MODELS
-// ── RecentPatient — lightweight view-model for home screen cards ─────────────
 class RecentPatient {
   final String   id;
   final String   name;
@@ -26,8 +25,6 @@ class RecentPatient {
     this.isOnline = true,
   });
 }
-
-// ── PatientRepository (home-screen view) — reads from Hive ───────────────────
 class PatientRepository {
   static List<RecentPatient> getRecentPatients() {
     return repo.PatientRepository.getAllSessions()
@@ -230,13 +227,6 @@ Widget _buildContent(BuildContext context, List<RecentPatient> patients) {
                 onTapCallback: onViewAllPatients,
               ),
             ),
-          ),
-        ),
-
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
-            child: _TipBanner(),
           ),
         ),
 
@@ -645,63 +635,6 @@ class _PatientChip extends StatelessWidget {
   }
 }
 
-class _TipBanner extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.constitutional,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.divider),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: AppColors.sectionHeader.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(
-              // lightbulb_outline: idea/tip icon — standard Material
-              Icons.lightbulb_outline,
-              color: AppColors.sectionHeader,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Tip of the Day',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.sectionHeader,
-                  ),
-                ),
-                SizedBox(height: 2),
-                Text(
-                  'Always complete history before examination — a thorough HOPI guides your diagnosis.',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: AppColors.subtleGrey,
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 //Bottom nav bar, icon verified from googles icons
 class _BottomNavBar extends StatelessWidget {
   final int activeIndex;
@@ -825,4 +758,3 @@ class _NavItemData {
     this.isAction = false,
   });
 }
-

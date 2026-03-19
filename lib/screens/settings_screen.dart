@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 import '../core/app_colors.dart';
-
 
 
 class SettingsService {
   SettingsService._();
   static final SettingsService instance = SettingsService._();
 
-  //   1. Add: import 'package:shared_preferences/shared_preferences.dart';
-  //   2. Restore the SharedPreferences calls in init() and save() below
+  static const _kName        = 'settings_clinician_name';
+  static const _kDesignation = 'settings_designation';
+  static const _kHospital    = 'settings_hospital';
+  static const _kDarkMode    = 'settings_dark_mode';
 
   String _clinicianName  = '';
   String _designation    = '';
@@ -21,8 +23,14 @@ class SettingsService {
   String get hospitalName  => _hospitalName.isEmpty ? 'MediScribe AI' : _hospitalName;
   bool   get darkMode      => _darkMode;
 
-  /// No-op until shared_preferences is added — values reset on restart
-  Future<void> init() async {}
+  /// Load persisted values — call once in main() before runApp()
+  Future<void> init() async {
+    final prefs = await SharedPreferences.getInstance();
+    _clinicianName = prefs.getString(_kName)        ?? '';
+    _designation   = prefs.getString(_kDesignation) ?? '';
+    _hospitalName  = prefs.getString(_kHospital)    ?? '';
+    _darkMode      = prefs.getBool(_kDarkMode)       ?? false;
+  }
 
   Future<void> save({
     required String clinicianName,
@@ -34,15 +42,13 @@ class SettingsService {
     _designation   = designation;
     _hospitalName  = hospitalName;
     _darkMode      = darkMode;
-    // final prefs = await SharedPreferences.getInstance();
-    // await prefs.setString('settings_clinician_name', clinicianName);
-    // await prefs.setString('settings_designation',    designation);
-    // await prefs.setString('settings_hospital',       hospitalName);
-    // await prefs.setBool('settings_dark_mode',        darkMode);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kName,        clinicianName);
+    await prefs.setString(_kDesignation, designation);
+    await prefs.setString(_kHospital,    hospitalName);
+    await prefs.setBool(_kDarkMode,      darkMode);
   }
 }
-
-
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -95,9 +101,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Material(
       color: AppColors.pageBackground,
-      child: SafeArea(
-        child: Column(
-          children: [
+      child: Column(
+        children: [
             _buildHeader(),
             Expanded(
               child: SingleChildScrollView(
@@ -106,13 +111,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
-                    _PreviewCard(
-                      name:        _nameCtrl.text.trim(),
-                      designation: _designationCtrl.text.trim(),
-                      hospital:    _hospitalCtrl.text.trim(),
-                    ),
-                    const SizedBox(height: 24),
 
                     _sectionLabel('Clinician Details'),
                     const SizedBox(height: 10),
@@ -162,7 +160,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ]),
                     const SizedBox(height: 16),
 
-                    //app info
                     _sectionLabel('About'),
                     const SizedBox(height: 10),
                     _SettingsCard(children: [
@@ -173,11 +170,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                label: 'AI Engine',   value: 'Offline KB + Rule-based CF'),
                       _Divider(),
                       _InfoRow(icon: Icons.school_outlined,
-                               label: 'Built for',   value: 'Clinical Exam Aid'),
+                               label: 'Built for',   value: 'Final Year Project — Clinical Exam Aid'),
                     ]),
+                    const SizedBox(height: 24),
+
                     const SizedBox(height: 32),
 
-                    // save
                     SizedBox(
                       width: double.infinity,
                       height: 52,
@@ -221,8 +219,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -230,39 +227,47 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildHeader() {
     return Container(
       color: AppColors.sectionHeader,
-      padding: const EdgeInsets.fromLTRB(4, 4, 16, 4),
-      child: Row(
-         children: [
-              const Icon(Icons.settings_outlined, color: AppColors.headerText, size: 22),
-              const SizedBox(width: 8),
-          const Expanded(
-            child: Text('Settings',
-                style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.headerText)),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(4, 8, 8, 8),
+          child: Row(
+            children: [
+              const SizedBox(width: 12),
+              const Icon(Icons.settings_outlined,
+                  color: AppColors.headerText, size: 22),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text('Settings',
+                    style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.headerText,
+                        letterSpacing: -0.3)),
+              ),
+              if (_saved)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.check, size: 12, color: AppColors.headerText),
+                      SizedBox(width: 4),
+                      Text('Saved',
+                          style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.headerText)),
+                    ],
+                  ),
+                ),
+            ],
           ),
-          if (_saved)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.check, size: 12, color: AppColors.headerText),
-                  SizedBox(width: 4),
-                  Text('Saved',
-                      style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.headerText)),
-                ],
-              ),
-            ),
-        ],
+        ),
       ),
     );
   }
@@ -278,76 +283,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       );
 }
 
-// Shows how the clinician header will appear on SOAP notes
-
-class _PreviewCard extends StatelessWidget {
-  final String name;
-  final String designation;
-  final String hospital;
-
-  const _PreviewCard({
-    required this.name,
-    required this.designation,
-    required this.hospital,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final displayName    = name.isEmpty        ? 'Dr. Your Name'          : name;
-    final displayDesig   = designation.isEmpty ? 'MBBS'                   : designation;
-    final displayHosp    = hospital.isEmpty    ? 'Your Hospital / Clinic'  : hospital;
-
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.sectionHeader,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-         
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Container(
-                width: 44, height: 44,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.person_outline,
-                    color: AppColors.headerText, size: 22),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(displayName,
-                        style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.headerText)),
-                    Text(displayDesig,
-                        style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.white.withValues(alpha: 0.75))),
-                    Text(displayHosp,
-                        style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.white.withValues(alpha: 0.6))),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _SettingsCard extends StatelessWidget {
   final List<Widget> children;
@@ -372,6 +307,7 @@ class _SettingsCard extends StatelessWidget {
     );
   }
 }
+
 
 class _Field extends StatelessWidget {
   final IconData icon;
@@ -492,6 +428,7 @@ class _Toggle extends StatelessWidget {
   }
 }
 
+
 class _InfoRow extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -530,6 +467,7 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
+
 class _Divider extends StatelessWidget {
   const _Divider();
 
@@ -539,6 +477,3 @@ class _Divider extends StatelessWidget {
         height: 1, thickness: 1, color: AppColors.divider, indent: 50);
   }
 }
-
-
-

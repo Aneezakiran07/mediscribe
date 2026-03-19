@@ -3,17 +3,18 @@ import 'package:flutter/services.dart';
 import '../core/app_colors.dart';
 import '../models/patient_info.dart';
 import '../models/patient_session.dart';
+import '../models/history_models.dart';
+import '../models/systemic_models.dart';
+import '../models/vitals_models.dart';
+import '../models/lab_models.dart';
+import '../models/examination_models.dart';
+import '../models/soap_models.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../services/patient_repository.dart';
 import 'patient_info_screen.dart';
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// PATIENT RECORDS SCREEN
-// Designed to be embedded inside HomeScreen's Scaffold (no Scaffold of its own)
-// so the bottom nav bar persists. HomeScreen passes a FAB via floatingActionButton.
 //
 // Use patientRecordsFAB() to get the FAB widget to pass to HomeScreen.
-// ═══════════════════════════════════════════════════════════════════════════════
 
 enum StatusDot { green, amber, red }
 
@@ -70,7 +71,7 @@ class PatientRecordRepo {
   }
 }
 
-// ── FAB — pass this to HomeScreen's floatingActionButton when on Patients tab ─
+// FAB — pass this to HomeScreen's floatingActionButton when on Patients tab
 FloatingActionButton patientRecordsFAB(BuildContext context) {
   return FloatingActionButton(
     onPressed: () => Navigator.push(context,
@@ -82,8 +83,6 @@ FloatingActionButton patientRecordsFAB(BuildContext context) {
     child: const Icon(Icons.add, size: 26),
   );
 }
-
-// ── SCREEN (no Scaffold — embedded in HomeScreen) ─────────────────────────────
 
 class PatientRecordsScreen extends StatefulWidget {
   const PatientRecordsScreen({super.key});
@@ -123,25 +122,25 @@ class _PatientRecordsScreenState extends State<PatientRecordsScreen> {
       color: AppColors.pageBackground,
       child: Column(
         children: [
-          // ── Teal banner header ────────────────────────────────────────────
           Container(
             color: AppColors.sectionHeader,
             child: SafeArea(
               bottom: false,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                padding: const EdgeInsets.fromLTRB(4, 8, 8, 8),
                 child: Row(
                   children: [
                     const SizedBox(width: 12),
-                    const Icon(Icons.people, color: AppColors.headerText, size: 20),
-                    const SizedBox(width: 8),
+                    const Icon(Icons.people, color: AppColors.headerText, size: 22),
+                    const SizedBox(width: 10),
                     const Expanded(
                       child: Text(
                         'Patient Records',
                         style: TextStyle(
-                          fontSize: 17,
+                          fontSize: 20,
                           fontWeight: FontWeight.w700,
                           color: AppColors.headerText,
+                          letterSpacing: -0.3,
                         ),
                       ),
                     ),
@@ -150,7 +149,6 @@ class _PatientRecordsScreenState extends State<PatientRecordsScreen> {
               ),
             ),
           ),
-          // ── Body ─────────────────────────────────────────────────────────
           Expanded(
             child: SafeArea(
               top: false,
@@ -188,7 +186,6 @@ class _PatientRecordsScreenState extends State<PatientRecordsScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  // ── List — ValueListenableBuilder keeps it live ──────────
                   Expanded(
                     child: ValueListenableBuilder(
                       valueListenable:
@@ -245,7 +242,7 @@ class _PatientRecordsScreenState extends State<PatientRecordsScreen> {
   }
 }
 
-// ── PATIENT CARD ──────────────────────────────────────────────────────────────
+// PATIENT CARD
 
 class _PatientCard extends StatelessWidget {
   final PatientRecord record;
@@ -291,8 +288,18 @@ class _PatientCard extends StatelessWidget {
         record: record,
         onEdit: () {
           Navigator.pop(context);
+          final session = PatientRepository.getSession(record.id);
           Navigator.push(context, MaterialPageRoute(
-            builder: (_) => PatientInfoScreen(existingPatient: _toPatientInfo()),
+            builder: (_) => PatientInfoScreen(
+              existingPatient:      _toPatientInfo(),
+              existingSessionId:    record.id,
+              existingHistory:      session != null ? PatientRepository.restoreHistory(session)     : null,
+              existingSystemic:     session != null ? PatientRepository.restoreSystemic(session)    : null,
+              existingVitals:       session != null ? PatientRepository.restoreVitals(session)      : null,
+              existingLabs:         session != null ? PatientRepository.restoreLabs(session)        : null,
+              existingExamination:  session != null ? PatientRepository.restoreExamination(session) : null,
+              existingSoap:         session != null ? PatientRepository.restoreSoap(session)        : null,
+            ),
           ));
         },
         onCopy: () {
@@ -456,7 +463,6 @@ class _PatientCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                // ── 3-dot menu button ──────────────────────────────────────
                 GestureDetector(
                   onTap: () => _showMenu(context),
                   child: const Padding(
@@ -474,7 +480,6 @@ class _PatientCard extends StatelessWidget {
   }
 }
 
-// ── ACTION SHEET ──────────────────────────────────────────────────────────────
 
 class _PatientActionSheet extends StatelessWidget {
   final PatientRecord record;
@@ -637,8 +642,6 @@ class _ActionTile extends StatelessWidget {
 }
 
 
-// ── INFO ROW ──────────────────────────────────────────────────────────────────
-
 class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
@@ -666,9 +669,7 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
 // PATIENT DETAIL SCREEN — full session view, pushed from card tap
-// ═══════════════════════════════════════════════════════════════════════════════
 
 class PatientDetailScreen extends StatelessWidget {
   final PatientRecord record;
@@ -687,7 +688,6 @@ class PatientDetailScreen extends StatelessWidget {
       backgroundColor: AppColors.pageBackground,
       body: Column(
         children: [
-          // ── Header ─────────────────────────────────────────────────────────
           Container(
             color: AppColors.sectionHeader,
             child: SafeArea(
@@ -724,7 +724,6 @@ class PatientDetailScreen extends StatelessWidget {
               ),
             ),
           ),
-          // ── Body ───────────────────────────────────────────────────────────
           Expanded(
             child: SafeArea(
               top: false,
@@ -753,8 +752,6 @@ class PatientDetailScreen extends StatelessWidget {
               style: TextStyle(color: AppColors.subtleGrey, fontSize: 14)),
         ),
       );
-
-  // ── Patient info rows ─────────────────────────────────────────────────────
   List<_DetailRow> _buildInfoRows(dynamic info) => [
     _DetailRow('Full Name',         info.fullName),
     _DetailRow('Age',               info.age?.toString() ?? '-'),
@@ -769,7 +766,6 @@ class PatientDetailScreen extends StatelessWidget {
         : '-'),
   ];
 
-  // ── History rows ──────────────────────────────────────────────────────────
   List<_DetailRow> _buildHistoryRows(dynamic h) {
     final rows = <_DetailRow>[];
     if (h.complaints.isNotEmpty)
@@ -805,8 +801,6 @@ class PatientDetailScreen extends StatelessWidget {
     }
     return rows;
   }
-
-  // ── Vitals rows ───────────────────────────────────────────────────────────
   List<_DetailRow> _buildVitalsRows(dynamic v) {
     final rows = <_DetailRow>[];
     if (v.systolic != null && v.diastolic != null)
@@ -834,7 +828,6 @@ class PatientDetailScreen extends StatelessWidget {
     return rows.isEmpty ? [const _DetailRow('Vitals', 'None recorded')] : rows;
   }
 
-  // ── Labs rows ─────────────────────────────────────────────────────────────
   List<_DetailRow> _buildLabsRows(dynamic l) {
     final rows = <_DetailRow>[];
     final abnormals = l.abnormalSummary as List<String>;
@@ -855,16 +848,12 @@ class PatientDetailScreen extends StatelessWidget {
     return rows;
   }
 
-  // ── SOAP rows ─────────────────────────────────────────────────────────────
   List<_DetailRow> _buildSoapRows(dynamic soap) => [
     _DetailRow('Subjective',  soap.subjective.isEmpty  ? '-' : soap.subjective),
     _DetailRow('Objective',   soap.objective.isEmpty   ? '-' : soap.objective),
     _DetailRow('Assessment',  soap.assessment.isEmpty  ? '-' : soap.assessment),
     _DetailRow('Plan',        soap.plan.isEmpty        ? '-' : soap.plan),
-  ];
-}
-
-// ── Section card ──────────────────────────────────────────────────────────────
+  ];}
 class _DetailSection extends StatelessWidget {
   final String          title;
   final List<_DetailRow> rows;
@@ -939,3 +928,4 @@ class _DetailRow {
   final String value;
   const _DetailRow(this.label, this.value);
 }
+

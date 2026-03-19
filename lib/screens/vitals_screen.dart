@@ -5,22 +5,46 @@ import '../models/patient_info.dart';
 import '../models/history_models.dart';
 import '../models/systemic_models.dart';
 import '../models/vitals_models.dart';
+import '../models/examination_models.dart';
+import '../models/lab_models.dart';
+import '../models/soap_models.dart';
 import 'labs_screen.dart';
 
 class VitalsScreen extends StatefulWidget {
-  final PatientInfo? patient;
-  final HistoryFormData? history;
+  final PatientInfo?         patient;
+  final HistoryFormData?     history;
   final SystemicHistoryData? systemic;
+  final String?              existingSessionId;
+  final VitalsData?          existingVitals;
+  final LabData?             existingLabs;
+  final ExaminationData?     existingExamination;
+  final SoapNote?            existingSoap;
 
-  const VitalsScreen({super.key, this.patient, this.history, this.systemic});
+  const VitalsScreen({
+    super.key,
+    this.patient,
+    this.history,
+    this.systemic,
+    this.existingSessionId,
+    this.existingVitals,
+    this.existingLabs,
+    this.existingExamination,
+    this.existingSoap,
+  });
 
   @override
   State<VitalsScreen> createState() => _VitalsScreenState();
 }
 
 class _VitalsScreenState extends State<VitalsScreen> {
-  final VitalsData _data = VitalsData();
+  late VitalsData _data;
   bool _addCustomOpen = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _data = widget.existingVitals ?? VitalsData();
+  }
 
   int get _flagCount => VitalsEngine.generateFlags(_data).length;
 
@@ -34,10 +58,14 @@ class _VitalsScreenState extends State<VitalsScreen> {
       context,
       MaterialPageRoute(
         builder: (_) => LabsScreen(
-          patient:  widget.patient,
-          history:  widget.history,
-          systemic: widget.systemic,
-          vitals:   _data,
+          patient:              widget.patient,
+          history:              widget.history,
+          systemic:             widget.systemic,
+          vitals:               _data,
+          existingSessionId:    widget.existingSessionId,
+          existingLabs:         widget.existingLabs,
+          existingExamination:  widget.existingExamination,
+          existingSoap:         widget.existingSoap,
         ),
       ),
     );
@@ -315,7 +343,7 @@ class _VitalCardShell extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -397,7 +425,7 @@ class _StatusStrip extends StatelessWidget {
                 '· ${interp.detail}',
                 style: TextStyle(
                   fontSize: 11,
-                  color: interp.textColor.withOpacity(0.8),
+                  color: interp.textColor.withValues(alpha: 0.8),
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -474,7 +502,7 @@ class _VitalInput extends StatelessWidget {
         hintStyle: TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.w300,
-          color: AppColors.subtleGrey.withOpacity(0.5),
+          color: AppColors.subtleGrey.withValues(alpha: 0.5),
         ),
         suffixText: suffixText,
         suffixStyle: TextStyle(fontSize: 13, color: labelColor),
@@ -594,7 +622,7 @@ class _BPCardState extends State<_BPCard> {
                 style: TextStyle(
                   fontSize: 30,
                   fontWeight: FontWeight.w200,
-                  color: AppColors.subtleGrey.withOpacity(0.6),
+                  color: AppColors.subtleGrey.withValues(alpha: 0.6),
                 ),
               ),
             ),
@@ -765,7 +793,7 @@ class _TempCard extends StatelessWidget {
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
                                   color: isFahrenheit
-                                      ? AppColors.background.withOpacity(0.6)
+                                      ? AppColors.background.withValues(alpha: 0.6)
                                       : AppColors.sectionHeader,
                                 ),
                               ),
@@ -782,7 +810,7 @@ class _TempCard extends StatelessWidget {
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
                                   color: !isFahrenheit
-                                      ? AppColors.background.withOpacity(0.6)
+                                      ? AppColors.background.withValues(alpha: 0.6)
                                       : AppColors.sectionHeader,
                                 ),
                               ),
@@ -1063,7 +1091,7 @@ class _FlagsPanel extends StatelessWidget {
             'These flags will be passed to the next screen.',
             style: TextStyle(
               fontSize: 11,
-              color: AppColors.dangerText.withOpacity(0.7),
+              color: AppColors.dangerText.withValues(alpha: 0.7),
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -1087,7 +1115,7 @@ class _CustomVitalTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.background,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.teal.withOpacity(0.35), width: 1.5),
+        border: Border.all(color: AppColors.teal.withValues(alpha: 0.35), width: 1.5),
       ),
       child: Row(
         children: [
@@ -1285,7 +1313,7 @@ class _AddCustomSectionState extends State<_AddCustomSection> {
       decoration: BoxDecoration(
         color: AppColors.constitutional,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.teal.withOpacity(0.4)),
+        border: Border.all(color: AppColors.teal.withValues(alpha: 0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -2,12 +2,35 @@ import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
 import '../models/patient_info.dart';
 import '../models/history_models.dart';
+import '../models/systemic_models.dart';
+import '../models/examination_models.dart';
+import '../models/vitals_models.dart';
+import '../models/lab_models.dart';
+import '../models/soap_models.dart';
 import '../models/kb_search_models.dart';
 import 'systemic_history_screen.dart';
 
 class HistoryTakingScreen extends StatefulWidget {
-  final PatientInfo? patientInfo;
-  const HistoryTakingScreen({super.key, this.patientInfo});
+  final PatientInfo?       patientInfo;
+  final String?            existingSessionId;
+  final HistoryFormData?   existingHistory;
+  final SystemicHistoryData? existingSystemic;
+  final VitalsData?        existingVitals;
+  final LabData?           existingLabs;
+  final ExaminationData?   existingExamination;
+  final SoapNote?          existingSoap;
+
+  const HistoryTakingScreen({
+    super.key,
+    this.patientInfo,
+    this.existingSessionId,
+    this.existingHistory,
+    this.existingSystemic,
+    this.existingVitals,
+    this.existingLabs,
+    this.existingExamination,
+    this.existingSoap,
+  });
 
   @override
   State<HistoryTakingScreen> createState() => _HistoryTakingScreenState();
@@ -16,7 +39,13 @@ class HistoryTakingScreen extends StatefulWidget {
 class _HistoryTakingScreenState extends State<HistoryTakingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
-  final HistoryFormData _formData = HistoryFormData();
+  late HistoryFormData _formData;
+
+  @override
+  void initState() {
+    super.initState();
+    _formData = widget.existingHistory ?? HistoryFormData();
+  }
 
   static const List<String> _pageTitles = [
     'History Taking',
@@ -35,10 +64,18 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen> {
         context,
         MaterialPageRoute(
           builder: (_) => SystemicHistoryScreen(
-            patientGender: _formData.patientGender,
-            chiefComplaints: _formData.complaints,
-            patient: widget.patientInfo,
-            history: _formData,
+            patientGender:        _formData.patientGender.isNotEmpty
+                ? _formData.patientGender
+                : (widget.patientInfo?.gender ?? ''),
+            chiefComplaints:      _formData.complaints,
+            patient:              widget.patientInfo,
+            history:              _formData,
+            existingSessionId:    widget.existingSessionId,
+            existingSystemic:     widget.existingSystemic,
+            existingVitals:       widget.existingVitals,
+            existingLabs:         widget.existingLabs,
+            existingExamination:  widget.existingExamination,
+            existingSoap:         widget.existingSoap,
           ),
         ),
       );
@@ -167,7 +204,7 @@ class _ProgressBar extends StatelessWidget {
             decoration: BoxDecoration(
               color: i <= currentPage
                   ? AppColors.headerText
-                  : AppColors.headerText.withOpacity(0.3),
+                  : AppColors.headerText.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -316,7 +353,6 @@ class _TagChip extends StatelessWidget {
     );
   }
 }
-
 // KB SEARCH FIELD — the universal "Add custom" widget used across all sections.
 // Shows a search pill → expands to a TextField that queries KBSearchService
 // → shows a dropdown of matched results + "Add as custom" option at bottom.
@@ -378,7 +414,7 @@ class _KBSearchFieldState extends State<_KBSearchField> {
           decoration: BoxDecoration(
             color: AppColors.constitutional,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.sectionHeader.withOpacity(0.4)),
+            border: Border.all(color: AppColors.sectionHeader.withValues(alpha: 0.4)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -421,7 +457,7 @@ class _KBSearchFieldState extends State<_KBSearchField> {
                       borderSide: const BorderSide(color: AppColors.sectionHeader, width: 1.5)),
                   enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide(
-                          color: AppColors.sectionHeader.withOpacity(0.4))),
+                          color: AppColors.sectionHeader.withValues(alpha: 0.4))),
                 ),
                 onChanged: _onQueryChanged,
                 onSubmitted: (_) => _addRaw(),
@@ -448,7 +484,7 @@ class _KBSearchFieldState extends State<_KBSearchField> {
               color: AppColors.cardBg,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: AppColors.divider),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06),
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06),
                   blurRadius: 8, offset: const Offset(0, 3))],
             ),
             child: Column(
@@ -685,7 +721,7 @@ class _Page1State extends State<_Page1ComplaintsHOPI> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
+          //Presenting Complaints
           const _SectionBar(title: 'Presenting Complaints'),
           Padding(
             padding: const EdgeInsets.all(16),
@@ -761,7 +797,7 @@ class _HOPICardState extends State<_HOPICard> {
         color: AppColors.cardBg,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.divider),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 6, offset: const Offset(0, 2))],
       ),
       child: Column(
@@ -851,8 +887,8 @@ class _HOPICardState extends State<_HOPICard> {
     );
   }
 }
-// PAGE 2 — PAST TREATMENT + SOCIO-ECONOMIC + PERSONAL + DRUG HISTORY
 
+// PAGE 2 — PAST TREATMENT + SOCIO-ECONOMIC + PERSONAL + DRUG HISTORY
 class _Page2PastPersonalHistory extends StatefulWidget {
   final HistoryFormData formData;
   final VoidCallback onChanged;
@@ -876,6 +912,8 @@ class _Page2State extends State<_Page2PastPersonalHistory> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+
+          //Past Treatment History 
           const _SectionBar(title: 'Past Treatment History'),
           Container(
             margin: const EdgeInsets.all(16),
@@ -957,7 +995,7 @@ class _Page2State extends State<_Page2PastPersonalHistory> {
             ]),
           ),
 
-          // ── Socio-economic History ─────────────────────────────────────────
+          // Socio-economic History 
           const _SectionBar(title: 'Socio-economic History'),
           Container(
             margin: const EdgeInsets.all(16),
@@ -1002,7 +1040,6 @@ class _Page2State extends State<_Page2PastPersonalHistory> {
             ]),
           ),
 
-          // ── Personal History ───────────────────────────────────────────────
           const _SectionBar(title: 'Personal History'),
           Container(
             margin: const EdgeInsets.all(16),
@@ -1028,7 +1065,6 @@ class _Page2State extends State<_Page2PastPersonalHistory> {
             ]),
           ),
 
-          // ── Drug History ───────────────────────────────────────────────────
           const _SectionBar(title: 'Drug History'),
           Container(
             margin: const EdgeInsets.all(16),
@@ -1111,10 +1147,7 @@ class _Page2State extends State<_Page2PastPersonalHistory> {
     );
   }
 }
-
-// ═══════════════════════════════════════════════════════════════════════════════
 // PAGE 3 — FAMILY HISTORY
-// ═══════════════════════════════════════════════════════════════════════════════
 class _Page3FamilyHistory extends StatefulWidget {
   final HistoryFormData formData;
   final VoidCallback onChanged;
@@ -1155,7 +1188,7 @@ class _Page3State extends State<_Page3FamilyHistory> {
               decoration: BoxDecoration(
                 color: AppColors.constitutional,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppColors.sectionHeader.withOpacity(0.25)),
+                border: Border.all(color: AppColors.sectionHeader.withValues(alpha: 0.25)),
               ),
               child: Column(children: const [
                 Icon(Icons.family_restroom, size: 40, color: AppColors.sectionHeader),
@@ -1234,7 +1267,6 @@ class _Page3State extends State<_Page3FamilyHistory> {
   }
 }
 
-// ── Family Member Card ────────────────────────────────────────────────────────
 class _FamilyMemberCard extends StatefulWidget {
   final FamilyMember member;
   final int index;
@@ -1269,7 +1301,7 @@ class _FamilyMemberCardState extends State<_FamilyMemberCard> {
         color: AppColors.cardBg,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.divider),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8, offset: const Offset(0, 2))],
       ),
       clipBehavior: Clip.hardEdge,
@@ -1283,7 +1315,7 @@ class _FamilyMemberCardState extends State<_FamilyMemberCard> {
             Container(
               width: 32, height: 32,
               decoration: BoxDecoration(
-                color: AppColors.sectionHeader.withOpacity(0.15),
+                color: AppColors.sectionHeader.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: Center(child: Text('${widget.index + 1}',
@@ -1300,7 +1332,7 @@ class _FamilyMemberCardState extends State<_FamilyMemberCard> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: m.isDeceased ? AppColors.subtleGrey.withOpacity(0.2) : AppColors.background,
+                  color: m.isDeceased ? AppColors.subtleGrey.withValues(alpha: 0.2) : AppColors.background,
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(color: AppColors.divider),
                 ),
