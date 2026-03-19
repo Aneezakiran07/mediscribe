@@ -9,6 +9,8 @@ import '../models/examination_models.dart';
 import '../models/lab_models.dart';
 import '../models/soap_models.dart';
 import 'labs_screen.dart';
+import '../services/patient_repository.dart';
+import '../widgets/draft_bottom_bar.dart';
 
 class VitalsScreen extends StatefulWidget {
   final PatientInfo?         patient;
@@ -47,6 +49,18 @@ class _VitalsScreenState extends State<VitalsScreen> {
   }
 
   int get _flagCount => VitalsEngine.generateFlags(_data).length;
+
+  Future<void> _saveDraftAndExit() async {
+    await PatientRepository.saveDraft(
+      patient:           widget.patient ?? PatientInfo(),
+      history:           widget.history,
+      systemic:          widget.systemic,
+      vitals:            _data,
+      existingSessionId: widget.existingSessionId,
+    );
+    if (!mounted) return;
+    Navigator.of(context).popUntil((route) => route.isFirst);
+  }
 
   void _onSave() {
     final flags = VitalsEngine.generateFlags(_data);
@@ -230,7 +244,11 @@ class _VitalsScreenState extends State<VitalsScreen> {
                   const SizedBox(height: 24),
 
                   // Save Vitals button
-                  _SaveButton(flagCount: _flagCount, onSave: _onSave),
+                  DraftBottomBar(
+                    primaryLabel: 'Save & Continue to Labs',
+                    onPrimary:   _onSave,
+                    onSaveDraft: _saveDraftAndExit,
+                  ),
                 ],
               ),
             ),

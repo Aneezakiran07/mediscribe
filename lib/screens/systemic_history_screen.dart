@@ -10,6 +10,8 @@ import '../models/examination_models.dart';
 import '../models/lab_models.dart';
 import '../models/soap_models.dart';
 import 'vitals_screen.dart';
+import '../services/patient_repository.dart';
+import '../widgets/draft_bottom_bar.dart';
 
 class SystemicHistoryScreen extends StatefulWidget {
   final String patientGender;
@@ -176,8 +178,9 @@ class _SystemicHistoryScreenState extends State<SystemicHistoryScreen> {
 
           // Pushes to VitalsScreen
           // To pass data forward, add params to VitalsScreen constructor first
-          _NextButton(
-            onNext: () {
+          DraftBottomBar(
+            primaryLabel: 'Save & Continue to Vitals',
+            onPrimary: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -194,10 +197,26 @@ class _SystemicHistoryScreenState extends State<SystemicHistoryScreen> {
                 ),
               );
             },
+            onSaveDraft: _saveDraftAndExit,
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _saveDraftAndExit() async {
+    if (widget.patient == null) {
+      Navigator.of(context).popUntil((route) => route.isFirst);
+      return;
+    }
+    await PatientRepository.saveDraft(
+      patient:           widget.patient!,
+      history:           widget.history,
+      systemic:          _buildSystemicData(),
+      existingSessionId: widget.existingSessionId,
+    );
+    if (!context.mounted) return;
+    Navigator.of(context).popUntil((route) => route.isFirst);
   }
 }
 

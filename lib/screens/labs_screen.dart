@@ -9,6 +9,8 @@ import '../models/lab_models.dart';
 import '../models/examination_models.dart';
 import '../models/soap_models.dart';
 import 'examination_screen.dart';
+import '../services/patient_repository.dart';
+import '../widgets/draft_bottom_bar.dart';
 
 class LabsScreen extends StatefulWidget {
   final PatientInfo?         patient;
@@ -58,6 +60,19 @@ class _LabsScreenState extends State<LabsScreen> {
       }
     }
     return count;
+  }
+
+  Future<void> _saveDraftAndExit() async {
+    await PatientRepository.saveDraft(
+      patient:           widget.patient ?? PatientInfo(),
+      history:           widget.history,
+      systemic:          widget.systemic,
+      vitals:            widget.vitals,
+      labs:              _data,
+      existingSessionId: widget.existingSessionId,
+    );
+    if (!mounted) return;
+    Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
   void _onSave() {
@@ -137,7 +152,11 @@ class _LabsScreenState extends State<LabsScreen> {
                   const SizedBox(height: 28),
 
                   // Save button
-                  _SaveButton(onPressed: _onSave),
+                  DraftBottomBar(
+                    primaryLabel: 'Save & Continue to Examination',
+                    onPrimary:   _onSave,
+                    onSaveDraft: _saveDraftAndExit,
+                  ),
 
                   const SizedBox(height: 8),
                   Center(

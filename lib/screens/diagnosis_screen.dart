@@ -8,11 +8,15 @@ import '../models/lab_models.dart';
 import '../models/examination_models.dart';
 import 'soap_note_screen.dart';
 
+// 
 // DIAGNOSIS SCREEN
 // Pulls calculateCertaintyFactors() from each examined SystemExamSession,
 // ranks diagnoses by certainty, groups into Probable / Possible / Unlikely,
 // and shows contributing key findings + clinical alerts.
+//
 // Flow: ExaminationScreen → DiagnosisScreen → SoapNoteScreen
+// 
+
 class DiagnosisScreen extends StatefulWidget {
   final PatientInfo?         patient;
   final HistoryFormData?     history;
@@ -59,7 +63,6 @@ class _DiagnosisScreenState extends State<DiagnosisScreen>
   }
 
   Future<void> _initDiagnoses() async {
-    // Ensure KB is loaded
     await KBService.init();
     if (!mounted) return;
 
@@ -68,17 +71,36 @@ class _DiagnosisScreenState extends State<DiagnosisScreen>
 
     for (final config in kExamConfigs) {
       final session = widget.examination.sessions[config.examId];
-      if (session == null || session.answers.isEmpty) continue;
 
       // Collect alerts
-      for (final a in session.alertMessages) {
-        if (!alerts.contains(a)) alerts.add(a);
+      if (session != null) {
+        for (final a in session.alertMessages) {
+          if (!alerts.contains(a)) alerts.add(a);
+        }
       }
 
       final exam = KBService.getExam(config.examId);
       if (exam == null) continue;
 
+      // If session has no answers, show all diagnoses for this exam at 0%
+      // so the doctor sees what could be considered rather than a blank screen
+      if (session == null || session.answers.isEmpty) {
+        diagnoses.add(_SystemDiagnosis(
+          config: config,
+          results: exam.diagnoses.map((dx) => _DiagnosisResult(
+            name:        dx.name,
+            description: dx.description,
+            certainty:   0,
+            id:          dx.id,
+          )).toList(),
+        ));
+        continue;
+      }
+
       final factors = session.calculateCertaintyFactors(exam);
+
+      // factors will now always be non-empty (threshold no longer hard-skips)
+      // but guard anyway
       if (factors.isEmpty) continue;
 
       diagnoses.add(_SystemDiagnosis(
@@ -210,14 +232,15 @@ class _DiagnosisScreenState extends State<DiagnosisScreen>
       child: ListView(
         padding: const EdgeInsets.only(bottom: 24),
         children: [
-          // alert banner
+          // Alert banner 
           if (_allAlerts.isNotEmpty) _AlertBanner(alerts: _allAlerts),
 
-          // summary pill
+          // Summary pill row 
           _SummaryRow(systemDiagnoses: _systemDiagnoses),
 
           const SizedBox(height: 8),
 
+          // Per-system diagnosis cards 
           ...List.generate(_systemDiagnoses.length, (i) {
             final delay = i * 0.15;
             return AnimatedBuilder(
@@ -245,7 +268,8 @@ class _DiagnosisScreenState extends State<DiagnosisScreen>
   }
 }
 
-// data classes
+// DATA CLASSES 
+
 class _DiagnosisResult {
   final String name;
   final String description;
@@ -308,6 +332,8 @@ extension _DxBandStyle on _DxBand {
     }
   }
 }
+
+// APP BAR 
 
 class _DiagnosisAppBar extends StatelessWidget {
   final VoidCallback onBack;
@@ -396,6 +422,7 @@ class _DiagnosisAppBar extends StatelessWidget {
   }
 }
 
+// ALERT BANNER 
 
 class _AlertBanner extends StatefulWidget {
   final List<String> alerts;
@@ -490,7 +517,9 @@ class _AlertBannerState extends State<_AlertBanner> {
     );
   }
 }
-//sumary row
+
+// SUMMARY ROW 
+
 class _SummaryRow extends StatelessWidget {
   final List<_SystemDiagnosis> systemDiagnoses;
   const _SummaryRow({required this.systemDiagnoses});
@@ -578,6 +607,8 @@ class _SummaryPill extends StatelessWidget {
   }
 }
 
+// SYSTEM DIAGNOSIS CARD 
+
 class _SystemDiagnosisCard extends StatefulWidget {
   final _SystemDiagnosis systemDx;
   const _SystemDiagnosisCard({required this.systemDx});
@@ -618,6 +649,7 @@ class _SystemDiagnosisCardState extends State<_SystemDiagnosisCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // System header 
           Container(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
             decoration: BoxDecoration(
@@ -671,8 +703,10 @@ class _SystemDiagnosisCardState extends State<_SystemDiagnosisCard> {
             ),
           ),
 
+          // Diagnosis rows 
           ..._visible.map((result) => _DiagnosisRow(result: result)),
 
+          // Show more toggle 
           if (_hasMore)
             InkWell(
               onTap: () => setState(() => _showAll = !_showAll),
@@ -713,6 +747,9 @@ class _SystemDiagnosisCardState extends State<_SystemDiagnosisCard> {
     );
   }
 }
+
+// DIAGNOSIS ROW 
+
 class _DiagnosisRow extends StatefulWidget {
   final _DiagnosisResult result;
   const _DiagnosisRow({required this.result});
@@ -848,6 +885,8 @@ class _DiagnosisRowState extends State<_DiagnosisRow>
   }
 }
 
+// CERTAINTY BAR 
+
 class _CertaintyBar extends StatelessWidget {
   final int    certainty;
   final Color  barColor;
@@ -892,7 +931,7 @@ class _CertaintyBar extends StatelessWidget {
   }
 }
 
-// PROCEED BUTTON
+// PROCEED BUTTON 
 
 class _ProceedButton extends StatelessWidget {
   final VoidCallback onTap;

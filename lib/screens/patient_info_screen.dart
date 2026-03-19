@@ -9,6 +9,8 @@ import '../models/soap_models.dart';
 import '../models/examination_models.dart';
 import '../core/app_colors.dart';
 import 'history_taking_screen.dart';
+import '../services/patient_repository.dart';
+import '../widgets/draft_bottom_bar.dart';
 
 
 class PatientInfoScreen extends StatefulWidget {
@@ -81,6 +83,20 @@ class _PatientInfoScreenState extends State<PatientInfoScreen> {
     _addressCtrl.dispose();
     _religionCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _saveDraftAndExit() async {
+    // Ensure patientId assigned
+    if (_info.patientId.isEmpty) {
+      _info.patientId = 'MR-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
+    }
+    _formKey.currentState?.save();
+    await PatientRepository.saveDraft(
+      patient:           _info,
+      existingSessionId: widget.existingSessionId,
+    );
+    if (!mounted) return;
+    Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
   void _onNext() {
@@ -336,7 +352,13 @@ class _PatientInfoScreenState extends State<PatientInfoScreen> {
                     ),
 
                     const SizedBox(height: 28),
-                    _NextButton(onPressed: _onNext, isEditMode: widget.existingPatient != null),
+                    DraftBottomBar(
+                      primaryLabel: widget.existingPatient != null
+                          ? 'Save & Continue'
+                          : 'Next — History Taking',
+                      onPrimary:   _onNext,
+                      onSaveDraft: _saveDraftAndExit,
+                    ),
                     const SizedBox(height: 8),
 
                     Center(

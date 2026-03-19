@@ -1,3 +1,9 @@
+// lib/services/patient_repository.dart
+//
+// Single source of truth for all patient data operations.
+// Uses Hive box 'sessions' with PatientSession objects.
+//
+// Usage:
 // // Save after SOAP note is generated:
 // await PatientRepository.saveSession(session);
 //
@@ -448,5 +454,3 @@ class PatientRepository {
     return e;
   }
 }
-
-

@@ -8,6 +8,8 @@ import '../models/lab_models.dart';
 import '../models/examination_models.dart';
 import '../models/soap_models.dart';
 import 'diagnosis_screen.dart';
+import '../services/patient_repository.dart';
+import '../widgets/draft_bottom_bar.dart';
 
 class ExaminationScreen extends StatefulWidget {
   final List<String>         autoFlags;
@@ -84,6 +86,20 @@ class _ExaminationScreenState extends State<ExaminationScreen> {
   int get _totalFlags =>
       kExamConfigs.fold(0, (s, c) => s + _flags(c.examId)) + widget.autoFlags.length;
 
+  Future<void> _saveDraftAndExit() async {
+    await PatientRepository.saveDraft(
+      patient:           widget.patient ?? PatientInfo(),
+      history:           widget.history,
+      systemic:          widget.systemic,
+      vitals:            widget.vitals,
+      labs:              widget.labs,
+      examination:       _data,
+      existingSessionId: widget.existingSessionId,
+    );
+    if (!mounted) return;
+    Navigator.of(context).popUntil((route) => route.isFirst);
+  }
+
   void _onSave() {
     Navigator.push(
       context,
@@ -156,7 +172,11 @@ class _ExaminationScreenState extends State<ExaminationScreen> {
                         }),
 
                         const SizedBox(height: 8),
-                        _SaveButton(flagCount: _totalFlags, onSave: _onSave),
+                        DraftBottomBar(
+                          primaryLabel: 'Save & Continue to Diagnosis',
+                          onPrimary:   _onSave,
+                          onSaveDraft: _saveDraftAndExit,
+                        ),
                       ],
                     ),
                   ),
@@ -166,6 +186,8 @@ class _ExaminationScreenState extends State<ExaminationScreen> {
     );
   }
 }
+
+// GUIDED STEP-BY-STEP EXAM PAGE 
 
 // This is the main innovation: one question at a time, step-by-step,
 // matching the mockup exactly: step counter, progress bar, instruction,
@@ -665,6 +687,7 @@ void _showResultsSheet() {
   }
 }
 
+// SUB-STEP ROW 
 
 // One numbered checkbox row in the sub-steps section
 class _SubStepRow extends StatelessWidget {
@@ -766,6 +789,8 @@ class _SubStepRow extends StatelessWidget {
     );
   }
 }
+
+// RESULTS BOTTOM SHEET 
 
 class _ResultsSheet extends StatelessWidget {
   final KBExamination exam;
@@ -971,6 +996,8 @@ class _ResultsSheet extends StatelessWidget {
   }
 }
 
+// CONTRADICTION BANNER 
+
 // Shown when user tries to select two mutually exclusive findings.
 // Has a dismiss (×) button. The selection is already rolled back when this shows.
 class _ContradictionBanner extends StatelessWidget {
@@ -1014,6 +1041,7 @@ class _ContradictionBanner extends StatelessWidget {
     );
   }
 }
+// SHARED WIDGETS 
 
 class _AlertBanner extends StatelessWidget {
   final String message;

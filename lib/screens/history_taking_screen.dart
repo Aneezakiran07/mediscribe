@@ -9,6 +9,8 @@ import '../models/lab_models.dart';
 import '../models/soap_models.dart';
 import '../models/kb_search_models.dart';
 import 'systemic_history_screen.dart';
+import '../services/patient_repository.dart';
+import '../widgets/draft_bottom_bar.dart';
 
 class HistoryTakingScreen extends StatefulWidget {
   final PatientInfo?       patientInfo;
@@ -52,6 +54,20 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen> {
     'MediScribe AI',
     'MediScribe AI',
   ];
+
+  Future<void> _saveDraftAndExit() async {
+    if (widget.patientInfo == null) {
+      Navigator.of(context).popUntil((route) => route.isFirst);
+      return;
+    }
+    await PatientRepository.saveDraft(
+      patient:           widget.patientInfo!,
+      history:           _formData,
+      existingSessionId: widget.existingSessionId,
+    );
+    if (!mounted) return;
+    Navigator.of(context).popUntil((route) => route.isFirst);
+  }
 
   void _nextPage() {
     if (_currentPage < 2) {
@@ -127,10 +143,12 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen> {
               ],
             ),
           ),
-          _BottomNextButton(
-            currentPage: _currentPage,
-            totalPages: 3,
-            onNext: _nextPage,
+          DraftBottomBar(
+            primaryLabel: _currentPage == 2
+                ? 'Save & Continue to Systemic History'
+                : 'Next',
+            onPrimary:   _nextPage,
+            onSaveDraft: _saveDraftAndExit,
           ),
         ],
       ),
@@ -138,6 +156,9 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen> {
   }
 }
 
+// 
+// SHARED WIDGETS
+// 
 
 class _HistoryAppBar extends StatelessWidget {
   final String title;
@@ -353,9 +374,12 @@ class _TagChip extends StatelessWidget {
     );
   }
 }
+
+// 
 // KB SEARCH FIELD — the universal "Add custom" widget used across all sections.
 // Shows a search pill → expands to a TextField that queries KBSearchService
 // → shows a dropdown of matched results + "Add as custom" option at bottom.
+// 
 class _KBSearchField extends StatefulWidget {
   final String hint;              // placeholder when typing
   final String buttonLabel;       // text on the collapsed pill e.g. "Add symptom"
@@ -682,7 +706,9 @@ class _SmallDropdown extends StatelessWidget {
   }
 }
 
+// 
 // PAGE 1 — PRESENTING COMPLAINTS + HOPI
+// 
 class _Page1ComplaintsHOPI extends StatefulWidget {
   final HistoryFormData formData;
   final VoidCallback onChanged;
@@ -721,7 +747,8 @@ class _Page1State extends State<_Page1ComplaintsHOPI> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          //Presenting Complaints
+
+          // Presenting Complaints 
           const _SectionBar(title: 'Presenting Complaints'),
           Padding(
             padding: const EdgeInsets.all(16),
@@ -750,6 +777,7 @@ class _Page1State extends State<_Page1ComplaintsHOPI> {
             ),
           ),
 
+          // History of Present Illness 
           const _SectionBar(title: 'History of Present Illness'),
           const SizedBox(height: 8),
 
@@ -888,7 +916,9 @@ class _HOPICardState extends State<_HOPICard> {
   }
 }
 
+// 
 // PAGE 2 — PAST TREATMENT + SOCIO-ECONOMIC + PERSONAL + DRUG HISTORY
+// 
 class _Page2PastPersonalHistory extends StatefulWidget {
   final HistoryFormData formData;
   final VoidCallback onChanged;
@@ -913,7 +943,7 @@ class _Page2State extends State<_Page2PastPersonalHistory> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
-          //Past Treatment History 
+          // Past Treatment History 
           const _SectionBar(title: 'Past Treatment History'),
           Container(
             margin: const EdgeInsets.all(16),
@@ -1040,6 +1070,7 @@ class _Page2State extends State<_Page2PastPersonalHistory> {
             ]),
           ),
 
+          // Personal History 
           const _SectionBar(title: 'Personal History'),
           Container(
             margin: const EdgeInsets.all(16),
@@ -1065,6 +1096,7 @@ class _Page2State extends State<_Page2PastPersonalHistory> {
             ]),
           ),
 
+          // Drug History 
           const _SectionBar(title: 'Drug History'),
           Container(
             margin: const EdgeInsets.all(16),
@@ -1147,7 +1179,10 @@ class _Page2State extends State<_Page2PastPersonalHistory> {
     );
   }
 }
+
+// 
 // PAGE 3 — FAMILY HISTORY
+// 
 class _Page3FamilyHistory extends StatefulWidget {
   final HistoryFormData formData;
   final VoidCallback onChanged;
@@ -1267,6 +1302,7 @@ class _Page3State extends State<_Page3FamilyHistory> {
   }
 }
 
+// Family Member Card 
 class _FamilyMemberCard extends StatefulWidget {
   final FamilyMember member;
   final int index;

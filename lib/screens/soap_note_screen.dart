@@ -512,6 +512,7 @@ class _SoapNoteScreenState extends State<SoapNoteScreen>
   }
 
 
+  // Save to Hive 
   bool _saving = false;
   bool _saved  = false;
 
@@ -772,43 +773,63 @@ class _SoapNoteScreenState extends State<SoapNoteScreen>
     return Container(
       color: AppColors.background,
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-      child: SizedBox(
-        width: double.infinity,
-        height: 54,
-        child: ElevatedButton(
-          onPressed: _saving ? null : _saveAndGoHome,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.sectionHeader,
-            disabledBackgroundColor: AppColors.constitutional,
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14)),
-          ),
-          child: _saving
-              ? const SizedBox(
-                  width: 22, height: 22,
-                  child: CircularProgressIndicator(
-                      strokeWidth: 2.5, color: AppColors.headerText))
-              : const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.save_outlined,
-                        color: AppColors.headerText, size: 20),
-                    SizedBox(width: 10),
-                    Text(
-                      'Save & Back to Home',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.headerText,
-                      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: double.infinity,
+            height: 54,
+            child: ElevatedButton(
+              onPressed: _saving ? null : _saveAndGoHome,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.sectionHeader,
+                disabledBackgroundColor: AppColors.constitutional,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
+              ),
+              child: _saving
+                  ? const SizedBox(
+                      width: 22, height: 22,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2.5, color: AppColors.headerText))
+                  : const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.save_outlined,
+                            color: AppColors.headerText, size: 20),
+                        SizedBox(width: 10),
+                        Text(
+                          'Save & Back to Home',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.headerText,
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        Icon(Icons.home_outlined,
+                            color: AppColors.headerText, size: 20),
+                      ],
                     ),
-                    SizedBox(width: 10),
-                    Icon(Icons.home_outlined,
-                        color: AppColors.headerText, size: 20),
-                  ],
-                ),
-        ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          // Discard without saving — small, easy to miss (intentional)
+          TextButton(
+            onPressed: () =>
+                Navigator.of(context).popUntil((route) => route.isFirst),
+            child: const Text(
+              'Discard & Exit without saving',
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.subtleGrey,
+                decoration: TextDecoration.underline,
+                decorationColor: AppColors.subtleGrey,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
