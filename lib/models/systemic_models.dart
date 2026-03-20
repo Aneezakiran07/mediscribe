@@ -125,24 +125,23 @@ class SystemicReviewService {
   static List<SystemDef> get systems => _systems;
 
   static List<SystemDef> _fallback() => [
-    const SystemDef(id: 'cardiovascular',   title: 'Cardiovascular',   emoji: '🫀', alwaysAsk: false,
+    const SystemDef(id: 'cardiovascular',   title: 'Cardiovascular',   emoji: '', alwaysAsk: false,
       symptoms: ['Chest pain', 'Shortness of breath', 'Palpitations', 'Syncope', 'Leg swelling']),
-    const SystemDef(id: 'respiratory',      title: 'Respiratory',      emoji: '🫁',
+    const SystemDef(id: 'respiratory',      title: 'Respiratory',      emoji: '',
       symptoms: ['Cough', 'Sputum / hemoptysis', 'Shortness of breath', 'Wheeze', 'Pleuritic chest pain']),
-    const SystemDef(id: 'cns',              title: 'CNS',              emoji: '🧠',
+    const SystemDef(id: 'cns',              title: 'CNS',              emoji: '',
       symptoms: ['Headache', 'Weakness', 'Numbness / tingling', 'Seizures', 'Loss of consciousness', 'Visual or speech changes']),
-    const SystemDef(id: 'gastrointestinal', title: 'Gastrointestinal', emoji: '🍽️',
+    const SystemDef(id: 'gastrointestinal', title: 'Gastrointestinal', emoji: '',
       symptoms: ['Abdominal pain', 'Nausea / vomiting', 'Change in bowel habit', 'Blood in stool / black stool', 'Weight loss']),
-    const SystemDef(id: 'genitourinary',    title: 'Genitourinary',    emoji: '🚽',
+    const SystemDef(id: 'genitourinary',    title: 'Genitourinary',    emoji: '',
       symptoms: ['Dysuria', 'Frequency / nocturia', 'Hematuria', 'Incontinence']),
-    const SystemDef(id: 'musculoskeletal',  title: 'Musculoskeletal',  emoji: '🦴',
+    const SystemDef(id: 'musculoskeletal',  title: 'Musculoskeletal',  emoji: '',
       symptoms: ['Joint pain', 'Joint swelling', 'Morning stiffness', 'Back pain']),
-    const SystemDef(id: 'gynaecological',   title: 'Gynaecological',   emoji: '🩸', femaleOnly: true,
+    const SystemDef(id: 'gynaecological',   title: 'Gynaecological',   emoji: '', femaleOnly: true,
       symptoms: ['Amenorrhea', 'Dysmenorrhea']),
-    const SystemDef(id: 'endocrine',        title: 'Endocrine',        emoji: '🧴',
+    const SystemDef(id: 'endocrine',        title: 'Endocrine',        emoji: '',
       symptoms: ['Weight change', 'Heat / cold intolerance', 'Polyuria / polydipsia']),
-    const SystemDef(id: 'constitutional',   title: 'Constitutional',   emoji: '🌡️', alwaysAsk: true,
+    const SystemDef(id: 'constitutional',   title: 'Constitutional',   emoji: '', alwaysAsk: true,
       symptoms: ['Fever', 'Weight loss', 'Night sweats', 'Loss of appetite']),
   ];
 }
-

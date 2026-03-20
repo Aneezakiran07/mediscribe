@@ -126,7 +126,7 @@
       {
         "id": "cardiovascular",
         "title": "Cardiovascular",
-        "emoji": "🫀",
+        "emoji": "",
         "female_only": false,
         "always_ask": false,
         "symptoms": [
@@ -142,7 +142,7 @@
       {
         "id": "respiratory",
         "title": "Respiratory",
-        "emoji": "🫁",
+        "emoji": "",
         "female_only": false,
         "always_ask": false,
         "symptoms": [
@@ -157,7 +157,7 @@
       {
         "id": "gastrointestinal",
         "title": "Gastrointestinal",
-        "emoji": "🍽️",
+        "emoji": "",
         "female_only": false,
         "always_ask": false,
         "symptoms": [
@@ -173,7 +173,7 @@
       {
         "id": "genitourinary",
         "title": "Genitourinary",
-        "emoji": "🚽",
+        "emoji": "",
         "female_only": false,
         "always_ask": false,
         "symptoms": [
@@ -189,7 +189,7 @@
       {
         "id": "cns",
         "title": "CNS",
-        "emoji": "🧠",
+        "emoji": "",
         "female_only": false,
         "always_ask": false,
         "symptoms": [
@@ -205,7 +205,7 @@
       {
         "id": "musculoskeletal",
         "title": "Musculoskeletal",
-        "emoji": "🦴",
+        "emoji": "",
         "female_only": false,
         "always_ask": false,
         "symptoms": [
@@ -219,7 +219,7 @@
       {
         "id": "gynaecological",
         "title": "Gynaecological",
-        "emoji": "🩸",
+        "emoji": "",
         "female_only": true,
         "always_ask": false,
         "symptoms": [
@@ -235,7 +235,7 @@
       {
         "id": "endocrine",
         "title": "Endocrine",
-        "emoji": "🧴",
+        "emoji": "",
         "female_only": false,
         "always_ask": false,
         "symptoms": [
@@ -250,7 +250,7 @@
       {
         "id": "constitutional",
         "title": "Constitutional",
-        "emoji": "🌡️",
+        "emoji": "",
         "female_only": false,
         "always_ask": true,
         "symptoms": [

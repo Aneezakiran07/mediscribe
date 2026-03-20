@@ -46,7 +46,6 @@ class _DiagnosisScreenState extends State<DiagnosisScreen>
   late final AnimationController _fadeCtrl;
   late final AnimationController _staggerCtrl;
 
-  // Computed once on init — list of _SystemDiagnosis (one per examined system)
   List<_SystemDiagnosis> _systemDiagnoses = [];
   List<String>           _allAlerts       = [];
   bool                   _kbLoaded        = false;
@@ -82,35 +81,29 @@ class _DiagnosisScreenState extends State<DiagnosisScreen>
       final exam = KBService.getExam(config.examId);
       if (exam == null) continue;
 
-      // If session has no answers, show all diagnoses for this exam at 0%
-      // so the doctor sees what could be considered rather than a blank screen
-      if (session == null || session.answers.isEmpty) {
-        diagnoses.add(_SystemDiagnosis(
-          config: config,
-          results: exam.diagnoses.map((dx) => _DiagnosisResult(
-            name:        dx.name,
-            description: dx.description,
-            certainty:   0,
-            id:          dx.id,
-          )).toList(),
-        ));
-        continue;
-      }
+      // Skip systems with no answers — nothing to show
+      if (session == null || session.answers.isEmpty) continue;
 
       final factors = session.calculateCertaintyFactors(exam);
-
-      // factors will now always be non-empty (threshold no longer hard-skips)
-      // but guard anyway
       if (factors.isEmpty) continue;
+
+      // Only keep diagnoses with certainty > 0
+      final filtered = factors
+          .where((f) => (f['certainty'] as int) > 0)
+          .map((f) => _DiagnosisResult(
+                name:        f['name']        as String,
+                description: f['description'] as String,
+                certainty:   f['certainty']   as int,
+                id:          f['id']          as String,
+              ))
+          .toList();
+
+      // If after filtering nothing remains, skip this system entirely
+      if (filtered.isEmpty) continue;
 
       diagnoses.add(_SystemDiagnosis(
         config:  config,
-        results: factors.map((f) => _DiagnosisResult(
-          name:        f['name']        as String,
-          description: f['description'] as String,
-          certainty:   f['certainty']   as int,
-          id:          f['id']          as String,
-        )).toList(),
+        results: filtered,
       ));
     }
 
@@ -148,8 +141,7 @@ class _DiagnosisScreenState extends State<DiagnosisScreen>
     );
   }
 
-  // Count of all diagnoses (shown regardless of certainty)
-  int get _probableCount => _systemDiagnoses
+  int get _totalDiagnosesCount => _systemDiagnoses
       .expand((s) => s.results)
       .length;
 
@@ -162,7 +154,7 @@ class _DiagnosisScreenState extends State<DiagnosisScreen>
           _DiagnosisAppBar(
             onBack:        () => Navigator.of(context).maybePop(),
             alertCount:    _allAlerts.length,
-            probableCount: _probableCount,
+            probableCount: _totalDiagnosesCount,
           ),
           Expanded(
             child: !_kbLoaded
@@ -200,7 +192,7 @@ class _DiagnosisScreenState extends State<DiagnosisScreen>
           children: [
             Container(
               padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppColors.constitutional,
                 shape: BoxShape.circle,
               ),
@@ -208,14 +200,14 @@ class _DiagnosisScreenState extends State<DiagnosisScreen>
                   size: 40, color: AppColors.sectionHeader),
             ),
             const SizedBox(height: 20),
-            const Text('No Diagnoses Generated',
+            const Text('No Diagnoses Found',
                 style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                     color: AppColors.bodyText)),
             const SizedBox(height: 8),
             const Text(
-              'Complete at least one system examination with findings to generate a differential diagnosis.',
+              'No diagnosis scored above 0% based on current findings. Complete more examination steps to generate a differential.',
               textAlign: TextAlign.center,
               style: TextStyle(
                   fontSize: 13, color: AppColors.subtleGrey, height: 1.5),
@@ -232,15 +224,15 @@ class _DiagnosisScreenState extends State<DiagnosisScreen>
       child: ListView(
         padding: const EdgeInsets.only(bottom: 24),
         children: [
-          // Alert banner 
+          // Alert banner
           if (_allAlerts.isNotEmpty) _AlertBanner(alerts: _allAlerts),
 
-          // Summary pill row 
+          // Summary pill row
           _SummaryRow(systemDiagnoses: _systemDiagnoses),
 
           const SizedBox(height: 8),
 
-          // Per-system diagnosis cards 
+          // Per-system diagnosis cards
           ...List.generate(_systemDiagnoses.length, (i) {
             final delay = i * 0.15;
             return AnimatedBuilder(
@@ -283,7 +275,7 @@ class _DiagnosisResult {
     required this.id,
   });
 
-  // Probable ≥ 70, Possible 40–69, Unlikely < 40
+  // Probable ≥ 70, Possible 40–69, Unlikely < 40 (but > 0)
   _DxBand get band {
     if (certainty >= 70) return _DxBand.probable;
     if (certainty >= 40) return _DxBand.possible;
@@ -292,7 +284,7 @@ class _DiagnosisResult {
 }
 
 class _SystemDiagnosis {
-  final ExamSystemConfig      config;
+  final ExamSystemConfig       config;
   final List<_DiagnosisResult> results;
   const _SystemDiagnosis({required this.config, required this.results});
 }
@@ -407,8 +399,8 @@ class _DiagnosisAppBar extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
               child: Text(
                 probableCount > 0
-                    ? '$probableCount probable diagnos${probableCount == 1 ? 'is' : 'es'} identified'
-                    : 'Review findings below',
+                    ? '$probableCount diagnos${probableCount == 1 ? 'is' : 'es'} identified'
+                    : 'No diagnoses scored above 0% yet',
                 style: TextStyle(
                     fontSize: 13,
                     color: AppColors.headerText.withValues(alpha: 0.75),
@@ -442,7 +434,8 @@ class _AlertBannerState extends State<_AlertBanner> {
       decoration: BoxDecoration(
         color: AppColors.emergencyBg,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.emergencyRed.withValues(alpha: 0.4), width: 1.5),
+        border: Border.all(
+            color: AppColors.emergencyRed.withValues(alpha: 0.4), width: 1.5),
       ),
       child: Column(
         children: [
@@ -526,7 +519,6 @@ class _SummaryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Count across all systems
     int probable = 0, possible = 0, unlikely = 0;
     for (final s in systemDiagnoses) {
       for (final r in s.results) {
@@ -542,16 +534,20 @@ class _SummaryRow extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
       child: Row(
         children: [
-          _SummaryPill(count: probable, label: 'Probable',
+          _SummaryPill(
+              count: probable, label: 'Probable',
               textColor: AppColors.normalText, bgColor: AppColors.normalBg,
               borderColor: AppColors.normalBorder),
           const SizedBox(width: 8),
-          _SummaryPill(count: possible, label: 'Possible',
+          _SummaryPill(
+              count: possible, label: 'Possible',
               textColor: AppColors.warnText, bgColor: AppColors.warnBg,
               borderColor: AppColors.warnBorder),
           const SizedBox(width: 8),
-          _SummaryPill(count: unlikely, label: 'Unlikely',
-              textColor: AppColors.subtleGrey, bgColor: const Color(0xFFF5F5F5),
+          _SummaryPill(
+              count: unlikely, label: 'Unlikely',
+              textColor: AppColors.subtleGrey,
+              bgColor: const Color(0xFFF5F5F5),
               borderColor: const Color(0xFFE0E0E0)),
         ],
       ),
@@ -618,16 +614,11 @@ class _SystemDiagnosisCard extends StatefulWidget {
 }
 
 class _SystemDiagnosisCardState extends State<_SystemDiagnosisCard> {
-  // All results shown — sorted by certainty descending
-  bool _showAll = true;
-
   List<_DiagnosisResult> get _visible {
     final sorted = [...widget.systemDx.results];
     sorted.sort((a, b) => b.certainty.compareTo(a.certainty));
     return sorted;
   }
-
-  bool get _hasMore => false; // Always show all
 
   @override
   Widget build(BuildContext context) {
@@ -649,13 +640,12 @@ class _SystemDiagnosisCardState extends State<_SystemDiagnosisCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // System header 
+          // System header
           Container(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.constitutional,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
             ),
             child: Row(
               children: [
@@ -703,45 +693,8 @@ class _SystemDiagnosisCardState extends State<_SystemDiagnosisCard> {
             ),
           ),
 
-          // Diagnosis rows 
+          // Diagnosis rows — sorted by certainty desc, all > 0
           ..._visible.map((result) => _DiagnosisRow(result: result)),
-
-          // Show more toggle 
-          if (_hasMore)
-            InkWell(
-              onTap: () => setState(() => _showAll = !_showAll),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  border: Border(top: BorderSide(color: AppColors.divider)),
-                  borderRadius: const BorderRadius.vertical(
-                      bottom: Radius.circular(16)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      _showAll
-                          ? 'Show less'
-                          : 'Show ${widget.systemDx.results.length - 3} more',
-                      style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.sectionHeader),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      _showAll
-                          ? Icons.keyboard_arrow_up
-                          : Icons.keyboard_arrow_down,
-                      size: 16,
-                      color: AppColors.sectionHeader,
-                    ),
-                  ],
-                ),
-              ),
-            ),
         ],
       ),
     );
@@ -771,7 +724,6 @@ class _DiagnosisRowState extends State<_DiagnosisRow>
         vsync: this, duration: const Duration(milliseconds: 700));
     _barAnim = CurvedAnimation(parent: _barCtrl, curve: Curves.easeOut);
 
-    // Slight delay so the card reveal animation finishes first
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) _barCtrl.forward();
     });
@@ -891,7 +843,7 @@ class _CertaintyBar extends StatelessWidget {
   final int    certainty;
   final Color  barColor;
   final Color  trackColor;
-  final double progress; // 0.0 → 1.0 animation progress
+  final double progress;
 
   const _CertaintyBar({
     required this.certainty,
@@ -907,7 +859,6 @@ class _CertaintyBar extends StatelessWidget {
       final totalW = constraints.maxWidth;
       return Stack(
         children: [
-          // Track
           Container(
             height: 6,
             width: totalW,
@@ -916,7 +867,6 @@ class _CertaintyBar extends StatelessWidget {
               borderRadius: BorderRadius.circular(3),
             ),
           ),
-          // Fill
           Container(
             height: 6,
             width: totalW * fillFraction,

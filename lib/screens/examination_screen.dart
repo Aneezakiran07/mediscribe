@@ -255,7 +255,7 @@ class _GuidedExamPageState extends State<GuidedExamPage> {
         _showTip = false;
         list.remove(option);
         _contradictionMessage = null;
-        session.runRules(exam);
+        session.clearAndRerunRules(exam);
       });
     } else {
       // Selecting — add first, then check constraints
@@ -301,7 +301,6 @@ class _GuidedExamPageState extends State<GuidedExamPage> {
   }
 void _showResultsSheet() {
   final score = session.computeScore(exam);
-  final certaintyDiagnoses = session.calculateCertaintyFactors(exam);
 
   showModalBottomSheet(
     context: context,
@@ -316,7 +315,6 @@ void _showResultsSheet() {
         exam: exam,
         session: session,
         score: score,
-        certaintyDiagnoses: certaintyDiagnoses,
         scrollController: scrollController,
         onDone: () { Navigator.pop(context); Navigator.pop(context); },
       ),
@@ -797,13 +795,12 @@ class _ResultsSheet extends StatelessWidget {
   final SystemExamSession session;
   final int score;
   final ScrollController? scrollController; 
-  final List<Map<String, dynamic>> certaintyDiagnoses;
   final VoidCallback onDone;
   
 
   const _ResultsSheet({
     required this.exam, required this.session, required this.score,
-    required this.certaintyDiagnoses, required this.onDone,
+    required this.onDone,
     this.scrollController,
   });
 
@@ -888,92 +885,6 @@ class _ResultsSheet extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 8),
                 child: _AlertBanner(message: m),
               )),
-            ],
-
-            // Diagnoses — now using certainty factors from calculateCertaintyFactors()
-            if (certaintyDiagnoses.isNotEmpty) ...[
-              const SizedBox(height: 14),
-              const Text('Probable Diagnoses',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.bodyText)),
-              const SizedBox(height: 8),
-              ...certaintyDiagnoses.map((dx) {
-                final certainty = dx['certainty'] as int;
-                final confidence = certainty / 100.0;
-                // Colour the bar based on certainty band
-                final barColor = certainty >= 70
-                    ? AppColors.sectionHeader
-                    : certainty >= 40
-                        ? AppColors.warnText
-                        : AppColors.subtleGrey;
-                final bgColor = certainty >= 70
-                    ? AppColors.constitutional
-                    : certainty >= 40
-                        ? AppColors.warnBg
-                        : const Color(0xFFF5F5F5);
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: bgColor,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: barColor.withValues(alpha: 0.3)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(child: Text(dx['name'] as String,
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: barColor))),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text('$certainty%',
-                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: barColor)),
-                              Text(
-                                certainty >= 70 ? 'Probable' : certainty >= 40 ? 'Possible' : 'Unlikely',
-                                style: TextStyle(fontSize: 9, fontWeight: FontWeight.w600,
-                                    color: barColor.withValues(alpha: 0.7)),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          value: confidence,
-                          backgroundColor: AppColors.divider,
-                          valueColor: AlwaysStoppedAnimation(barColor),
-                          minHeight: 6,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(dx['description'] as String,
-                        style: const TextStyle(fontSize: 11, color: AppColors.subtleGrey, height: 1.4)),
-                    ],
-                  ),
-                );
-              }),
-            ] else ...[
-              const SizedBox(height: 14),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.normalBg,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.check_circle_outline, color: AppColors.normalText, size: 18),
-                    SizedBox(width: 8),
-                    Expanded(child: Text('No significant diagnosis threshold reached with current findings.',
-                      style: TextStyle(fontSize: 12, color: AppColors.normalText))),
-                  ],
-                ),
-              ),
             ],
 
             const SizedBox(height: 20),
@@ -1273,3 +1184,4 @@ class _SaveButton extends StatelessWidget {
     ),
   );
 }
+

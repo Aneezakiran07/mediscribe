@@ -94,9 +94,9 @@ class SoapNoteGenerator {
 
     // Social history
     final socialParts = <String>[];
-    if (history.smoking.isNotEmpty)        socialParts.add('Smoking: ${history.smoking}');
-    if (history.alcohol.isNotEmpty)        socialParts.add('Alcohol: ${history.alcohol}');
-    if (history.occupation.isNotEmpty)     socialParts.add('Occupation: ${history.occupation}');
+    if (history.smoking.isNotEmpty)          socialParts.add('Smoking: ${history.smoking}');
+    if (history.alcohol.isNotEmpty)          socialParts.add('Alcohol: ${history.alcohol}');
+    if (history.occupation.isNotEmpty)       socialParts.add('Occupation: ${history.occupation}');
     if (history.livingConditions.isNotEmpty) socialParts.add('Living: ${history.livingConditions}');
     if (socialParts.isNotEmpty) {
       buf.writeln('Social History: ${socialParts.join('; ')}');
@@ -215,7 +215,7 @@ class SoapNoteGenerator {
         final v = labs.getValue(p, t);
         if (v != null) {
           final interp = panel.tests[t].interpret(v);
-          final flag = interp.isAbnormal ? ' [${interp.label.toUpperCase()}]' : '';
+          final flag   = interp.isAbnormal ? ' [${interp.label.toUpperCase()}]' : '';
           panelLines.add('  ${panel.tests[t].shortName}: $v ${panel.tests[t].unit}$flag');
         }
       }
@@ -236,10 +236,10 @@ class SoapNoteGenerator {
 
     // Culture results
     final cultures = <String, String>{
-      'Blood Culture':   labs.bloodCultureResult,
-      'Urine Culture':   labs.urineCultureResult,
-      'Sputum Culture':  labs.sputumCultureResult,
-      'Wound Culture':   labs.woundCultureResult,
+      'Blood Culture':  labs.bloodCultureResult,
+      'Urine Culture':  labs.urineCultureResult,
+      'Sputum Culture': labs.sputumCultureResult,
+      'Wound Culture':  labs.woundCultureResult,
     };
     final filledCultures = cultures.entries.where((e) => e.value.trim().isNotEmpty);
     if (filledCultures.isNotEmpty) {
@@ -253,104 +253,70 @@ class SoapNoteGenerator {
     return buf.toString().trimRight();
   }
 
+  // _buildAssessment
+  //
+  // Uses the SAME calculateCertaintyFactors() engine as DiagnosisScreen so the
+  // SOAP note always reflects exactly what the doctor saw on the diagnosis screen.
+  //
+  // Rules:
+  //   • Skip systems with no answers (same as DiagnosisScreen)
+  //   • Filter certainty > 0  (same filter as DiagnosisScreen)
+  //   • Sort highest certainty first (same order as DiagnosisScreen)
+  //   • If nothing passes, say so explicitly rather than leaving Assessment blank
   static String _buildAssessment(ExaminationData examination) {
     final buf = StringBuffer();
-
     buf.writeln('Differential Diagnosis:');
-    buf.writeln('');
+
+    bool anySystemWritten = false;
 
     for (final config in kExamConfigs) {
-      final exam = KBService.getExam(config.examId);
+      final exam    = KBService.getExam(config.examId);
       if (exam == null) continue;
 
-      // Only show systems that were actually examined
       final session = examination.sessions[config.examId];
+
+      // Skip systems that were never opened or have no answers — same gate as
+      // DiagnosisScreen._initDiagnoses()
       if (session == null || session.answers.isEmpty) continue;
-      final allAnswers = session.answers;
 
-      final results = <Map<String, dynamic>>[];
+      // Use the exact same engine as DiagnosisScreen
+      final factors = session.calculateCertaintyFactors(exam);
 
-      for (final dx in exam.diagnoses) {
-        int dxScore = 0;
-        int dxMaxPossible = 1;
+      // Apply the same certainty > 0 filter as DiagnosisScreen
+      final visible = factors
+          .where((f) => (f['certainty'] as int) > 0)
+          .toList();
 
-        if (dx.keyFindings.isNotEmpty) {
-          final Map<String, int> findingWeights = {};
-          for (final q in exam.questions) {
-            for (final kf in dx.keyFindings) {
-              if (q.weights.containsKey(kf)) findingWeights[kf] = q.weights[kf]!;
-            }
-          }
-          for (final selectedList in allAnswers.values) {
-            for (final selected in selectedList) {
-              if (dx.keyFindings.contains(selected)) {
-                dxScore += findingWeights[selected] ?? 1;
-              }
-            }
-          }
-          dxMaxPossible = findingWeights.values.fold(0, (a, b) => a + b);
-          if (dxMaxPossible == 0) dxMaxPossible = dx.keyFindings.length;
-        } else {
-          dxScore   = session?.computeScore(exam) ?? 0;
-          dxMaxPossible = dx.maxScore > 0 ? dx.maxScore : 1;
-        }
+      // If every diagnosis for this system was filtered out, skip the section
+      // so we don't print an empty system header
+      if (visible.isEmpty) continue;
 
-        // Certainty from 0 — no threshold gate, always include
-        int certainty = dxMaxPossible <= 0
-            ? 0
-            : ((dxScore / dxMaxPossible) * 100).clamp(0, 100).round();
-
-        // Apply contradicting findings penalty
-        if (session != null) {
-          int penaltyPoints = 0;
-          for (final q in exam.questions) {
-            final selected = allAnswers[q.storesAs] ?? [];
-            for (final s in selected) {
-              final weight = q.weights[s] ?? 0;
-              if (weight == 0 && dx.keyFindings.isNotEmpty) {
-                final hasKeyFinding = q.weights.keys.any((k) => dx.keyFindings.contains(k));
-                if (hasKeyFinding) penaltyPoints += 8;
-              }
-            }
-          }
-          certainty = (certainty - penaltyPoints.clamp(0, 40)).clamp(0, 95);
-        } else {
-          certainty = certainty.clamp(0, 95);
-        }
-
-        results.add({
-          'name':        dx.name,
-          'description': dx.description,
-          'certainty':   certainty,
-        });
-      }
-
-      // Sort descending by certainty
-      results.sort((a, b) => (b['certainty'] as int).compareTo(a['certainty'] as int));
-
+      anySystemWritten = true;
+      buf.writeln('');
       buf.writeln('${config.title}:');
 
-      for (final dx in results) {
+      for (final dx in visible) {
         final certainty = dx['certainty'] as int;
         final band = certainty >= 70 ? 'Probable'
-            : certainty >= 40 ? 'Possible'
-            : 'Unlikely';
+            : certainty >= 40       ? 'Possible'
+            :                         'Unlikely';
         final bar = _certaintyBar(certainty);
         buf.writeln('  • ${dx['name']}');
         buf.writeln('    $bar $certainty% — $band');
         if ((dx['description'] as String).isNotEmpty) {
-          buf.writeln('    ${dx["description"]}');
+          buf.writeln('    ${dx['description']}');
         }
       }
-      buf.writeln('');
     }
 
-    // If nothing was examined at all
-    final result = buf.toString().trimRight();
-    if (result.trim() == 'Differential Diagnosis:') {
-      return 'Differential Diagnosis:\n\nNo examination data recorded. Complete at least one system examination to generate differential diagnoses.';
+    // Nothing passed the filter at all
+    if (!anySystemWritten) {
+      buf.writeln('');
+      buf.writeln('No diagnosis scored above 0% based on current findings.');
+      buf.writeln('Complete more examination steps to generate a differential diagnosis.');
     }
-    return result;
+
+    return buf.toString().trimRight();
   }
 
   static String _certaintyBar(int certainty) {
@@ -380,7 +346,6 @@ class SoapNoteGenerator {
       buf.writeln('• Urgent workup indicated — see clinical alerts above.');
     }
 
-    // Generic suggested investigations placeholder
     buf.writeln('• ECG, Chest X-ray, and additional imaging as clinically indicated.');
     buf.writeln('• Specialist referral if diagnosis remains uncertain.');
     buf.writeln('');
@@ -433,10 +398,10 @@ class _SoapNoteScreenState extends State<SoapNoteScreen>
   final _aCtrl = TextEditingController();
   final _pCtrl = TextEditingController();
 
-  bool _edited = false;
+  bool _edited  = false;
   bool _kbReady = false;
 
-  static const _tabs = ['S', 'O', 'A', 'P'];
+  static const _tabs      = ['S', 'O', 'A', 'P'];
   static const _tabLabels = ['Subjective', 'Objective', 'Assessment', 'Plan'];
 
   @override
@@ -511,8 +476,7 @@ class _SoapNoteScreenState extends State<SoapNoteScreen>
     );
   }
 
-
-  // Save to Hive 
+  // Save to Hive
   bool _saving = false;
   bool _saved  = false;
 
@@ -583,31 +547,31 @@ class _SoapNoteScreenState extends State<SoapNoteScreen>
                     children: [
                       _SoapSection(
                         sectionLetter: 'S',
-                        sectionLabel: 'Subjective',
-                        description: 'Chief complaints, history, review of systems — what the patient tells you.',
-                        controller: _sCtrl,
-                        onChanged: _onTextChanged,
+                        sectionLabel:  'Subjective',
+                        description:   'Chief complaints, history, review of systems — what the patient tells you.',
+                        controller:    _sCtrl,
+                        onChanged:     _onTextChanged,
                       ),
                       _SoapSection(
                         sectionLetter: 'O',
-                        sectionLabel: 'Objective',
-                        description: 'Vitals, physical examination findings, lab results — measurable data.',
-                        controller: _oCtrl,
-                        onChanged: _onTextChanged,
+                        sectionLabel:  'Objective',
+                        description:   'Vitals, physical examination findings, lab results — measurable data.',
+                        controller:    _oCtrl,
+                        onChanged:     _onTextChanged,
                       ),
                       _SoapSection(
                         sectionLetter: 'A',
-                        sectionLabel: 'Assessment',
-                        description: 'Differential diagnoses with certainty levels from examination engine.',
-                        controller: _aCtrl,
-                        onChanged: _onTextChanged,
+                        sectionLabel:  'Assessment',
+                        description:   'Differential diagnoses with certainty levels from examination engine.',
+                        controller:    _aCtrl,
+                        onChanged:     _onTextChanged,
                       ),
                       _SoapSection(
                         sectionLetter: 'P',
-                        sectionLabel: 'Plan',
-                        description: 'Investigations, treatment, follow-up, and patient education.',
-                        controller: _pCtrl,
-                        onChanged: _onTextChanged,
+                        sectionLabel:  'Plan',
+                        description:   'Investigations, treatment, follow-up, and patient education.',
+                        controller:    _pCtrl,
+                        onChanged:     _onTextChanged,
                       ),
                     ],
                   ),
@@ -655,7 +619,8 @@ class _SoapNoteScreenState extends State<SoapNoteScreen>
                 ),
               IconButton(
                 icon: _saving
-                    ? const SizedBox(width: 20, height: 20,
+                    ? const SizedBox(
+                        width: 20, height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.headerText))
                     : Icon(_saved ? Icons.check_circle_outline : Icons.save_outlined,
                         color: AppColors.headerText, size: 20),
@@ -680,8 +645,8 @@ class _SoapNoteScreenState extends State<SoapNoteScreen>
   }
 
   Widget _buildPatientBanner() {
-    final p = widget.patient;
-    final name = p.fullName.isNotEmpty ? p.fullName : 'Unknown Patient';
+    final p      = widget.patient;
+    final name   = p.fullName.isNotEmpty ? p.fullName : 'Unknown Patient';
     final details = [
       if (p.age != null) '${p.age}y',
       if (p.gender.isNotEmpty) p.gender,
@@ -785,8 +750,7 @@ class _SoapNoteScreenState extends State<SoapNoteScreen>
                 backgroundColor: AppColors.sectionHeader,
                 disabledBackgroundColor: AppColors.constitutional,
                 elevation: 0,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
               child: _saving
                   ? const SizedBox(
@@ -796,8 +760,7 @@ class _SoapNoteScreenState extends State<SoapNoteScreen>
                   : const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.save_outlined,
-                            color: AppColors.headerText, size: 20),
+                        Icon(Icons.save_outlined, color: AppColors.headerText, size: 20),
                         SizedBox(width: 10),
                         Text(
                           'Save & Back to Home',
@@ -808,14 +771,12 @@ class _SoapNoteScreenState extends State<SoapNoteScreen>
                           ),
                         ),
                         SizedBox(width: 10),
-                        Icon(Icons.home_outlined,
-                            color: AppColors.headerText, size: 20),
+                        Icon(Icons.home_outlined, color: AppColors.headerText, size: 20),
                       ],
                     ),
             ),
           ),
           const SizedBox(height: 6),
-          // Discard without saving — small, easy to miss (intentional)
           TextButton(
             onPressed: () =>
                 Navigator.of(context).popUntil((route) => route.isFirst),
@@ -936,7 +897,9 @@ class _SoapSection extends StatelessWidget {
                       Text(
                         description,
                         style: TextStyle(
-                          fontSize: 11, color: AppColors.headerText.withValues(alpha: 0.8), height: 1.3,
+                          fontSize: 11,
+                          color: AppColors.headerText.withValues(alpha: 0.8),
+                          height: 1.3,
                         ),
                       ),
                     ],
@@ -1009,7 +972,9 @@ class _SoapSection extends StatelessWidget {
                     maxLines: null,
                     keyboardType: TextInputType.multiline,
                     style: const TextStyle(
-                      fontSize: 13.5, color: AppColors.bodyText, height: 1.65,
+                      fontSize: 13.5,
+                      color: AppColors.bodyText,
+                      height: 1.65,
                       fontFamily: 'monospace',
                     ),
                     decoration: const InputDecoration(
@@ -1027,3 +992,7 @@ class _SoapSection extends StatelessWidget {
     );
   }
 }
+
+
+
+

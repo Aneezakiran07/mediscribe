@@ -78,11 +78,18 @@ class KBDiagnosis {
   final int          maxScore;
   final String       description;
   final List<String> keyFindings;
+  // FIX: now parsed from JSON — used to gate certainty calculation
+  // If none of these fact stores have any answers, certainty stays 0
+  final List<String> keyFactsRequired;
 
   const KBDiagnosis({
-    required this.id, required this.name,
-    required this.minScoreThreshold, required this.maxScore,
-    required this.description, this.keyFindings = const [],
+    required this.id,
+    required this.name,
+    required this.minScoreThreshold,
+    required this.maxScore,
+    required this.description,
+    this.keyFindings     = const [],
+    this.keyFactsRequired = const [],
   });
 
   factory KBDiagnosis.fromJson(Map<String, dynamic> j) => KBDiagnosis(
@@ -91,7 +98,9 @@ class KBDiagnosis {
     minScoreThreshold: (j['min_score_threshold'] as num).toInt(),
     maxScore:          (j['max_score']           as num).toInt(),
     description:       j['description']          as String,
-    keyFindings:       List<String>.from(j['key_findings'] as List? ?? []),
+    keyFindings:       List<String>.from(j['key_findings']      as List? ?? []),
+    // FIX: parse key_facts_required from JSON
+    keyFactsRequired:  List<String>.from(j['key_facts_required'] as List? ?? []),
   );
 }
 
@@ -166,6 +175,34 @@ class SystemExamSession {
         unlockedFollowUps.add(rule.actionTarget!);
       } else if (rule.actionType == 'flag_alert') {
         if (!alertMessages.contains(rule.actionMessage)) alertMessages.add(rule.actionMessage);
+      }
+    }
+  }
+
+  // Call this on DESELECT instead of runRules().
+  // Clears all derived state (unlocked follow-ups + alerts) then re-evaluates
+  // every rule from scratch against current answers. This ensures that removing
+  // a trigger option also removes the follow-ups and alerts it caused.
+  //
+  // Critically, any follow-up that just became re-locked has its answers wiped
+  // so ghost answers from a dismissed follow-up don't silently influence scoring.
+  void clearAndRerunRules(KBExamination exam) {
+    // Snapshot which follow-ups were unlocked before we clear
+    final previouslyUnlocked = Set<String>.from(unlockedFollowUps);
+
+    unlockedFollowUps.clear();
+    alertMessages.clear();
+    runRules(exam);
+
+    // Diff: follow-ups that were unlocked before but are no longer
+    final nowLocked = previouslyUnlocked.difference(unlockedFollowUps);
+    for (final questionId in nowLocked) {
+      // Find the question by id and wipe its stored answers
+      final question = exam.questions
+          .where((q) => q.id == questionId)
+          .firstOrNull;
+      if (question != null) {
+        answers.remove(question.storesAs);
       }
     }
   }
@@ -341,80 +378,137 @@ class SystemExamSession {
     answers[storesAs]?.remove(option);
   }
 
-  // Diagnosis certainty engine — see examination_screen.dart for detailed comments
+  // ---------------------------------------------------------------------------
+  // DIAGNOSIS CERTAINTY ENGINE
+  //
+  // How it works:
+  //
+  // 1. KEY FACTS GATE
+  //    Each diagnosis declares key_facts_required — the storesAs keys that must
+  //    have at least one answer for this diagnosis to be considered at all.
+  //    If none of those keys have any answers → certainty = 0, skip.
+  //    This prevents a diagnosis from appearing just because the doctor filled
+  //    in an unrelated part of the exam.
+  //
+  // 2. RAW SCORE — key findings only
+  //    We only count answers that appear in dx.keyFindings. Each matched
+  //    finding contributes its weight from the question it belongs to.
+  //    This is more precise than summing the entire session score.
+  //
+  // 3. THRESHOLD GATE
+  //    If rawScore < dx.minScoreThreshold → certainty = 0.
+  //    The diagnosis exists but not enough evidence to surface it.
+  //
+  // 4. CERTAINTY NORMALISATION
+  //    certainty = (rawScore - minScoreThreshold) / (maxScore - minScoreThreshold) * 100
+  //    Clamped to [1, 95]. We never show 0% (filtered out by diagnosis_screen)
+  //    and never show 100% (clinical humility).
+  //
+  // 5. NO PENALTY SYSTEM
+  //    The old penalty logic was deducting 8 points per zero-weight finding and
+  //    was incorrectly tanking scores for unrelated selections. Removed entirely.
+  // ---------------------------------------------------------------------------
   List<Map<String, dynamic>> calculateCertaintyFactors(KBExamination exam) {
-    final allAnswers = answers;
-    final results    = <Map<String, dynamic>>[];
+    final results = <Map<String, dynamic>>[];
+
+    // Build a lookup: option string → weight, from every question in this exam
+    final Map<String, int> globalOptionWeights = {};
+    for (final q in exam.questions) {
+      q.weights.forEach((option, weight) {
+        globalOptionWeights[option] = weight;
+      });
+    }
 
     for (final dx in exam.diagnoses) {
-      int dxScore;
-      int dxMaxPossible;
 
-      if (dx.keyFindings.isNotEmpty) {
-        final Map<String, int> findingWeights = {};
-        for (final q in exam.questions) {
-          for (final kf in dx.keyFindings) {
-            if (q.weights.containsKey(kf)) findingWeights[kf] = q.weights[kf]!;
-          }
+      // -----------------------------------------------------------------------
+      // STEP 1 — Key facts gate
+      // At least one of the required fact stores must have answers.
+      // If key_facts_required is empty we skip this gate (backwards compat).
+      // -----------------------------------------------------------------------
+      if (dx.keyFactsRequired.isNotEmpty) {
+        final hasAnyRelevantAnswer = dx.keyFactsRequired.any(
+          (factKey) => (answers[factKey] ?? []).isNotEmpty,
+        );
+        if (!hasAnyRelevantAnswer) {
+          // No relevant section answered at all — certainty is genuinely 0
+          // diagnosis_screen will filter this out
+          results.add({
+            'name':        dx.name,
+            'description': dx.description,
+            'certainty':   0,
+            'id':          dx.id,
+            'score':       0,
+            'mode':        'ungated',
+          });
+          continue;
         }
-        dxScore = 0;
-        for (final selectedList in allAnswers.values) {
-          for (final selected in selectedList) {
-            if (dx.keyFindings.contains(selected)) dxScore += findingWeights[selected] ?? 1;
-          }
-        }
-        dxMaxPossible = findingWeights.values.fold(0, (a, b) => a + b);
-        if (dxMaxPossible == 0) dxMaxPossible = dx.keyFindings.length;
-      } else {
-        dxScore       = computeScore(exam);
-        dxMaxPossible = dx.maxScore;
       }
 
-      if (dxScore < dx.minScoreThreshold) {
-        // Below threshold — still include but cap certainty at 35% (Unlikely band)
-        // so the doctor can see it rather than it silently disappearing
-        final rawCertainty = dxMaxPossible > 0
-            ? ((dxScore / dxMaxPossible) * 35).round()
-            : 0;
+      // -----------------------------------------------------------------------
+      // STEP 2 — Raw score from key findings only
+      // Walk every selected answer across the whole session; if it is one of
+      // this diagnosis's key findings, add its weight.
+      // -----------------------------------------------------------------------
+      int rawScore = 0;
+      for (final selectedList in answers.values) {
+        for (final selected in selectedList) {
+          if (dx.keyFindings.contains(selected)) {
+            rawScore += globalOptionWeights[selected] ?? 1;
+          }
+        }
+      }
+
+      // Fallback: if keyFindings is empty, use the full session score
+      // (maintains compatibility for any diagnosis without key_findings)
+      if (dx.keyFindings.isEmpty) {
+        rawScore = computeScore(exam);
+      }
+
+      // -----------------------------------------------------------------------
+      // STEP 3 — Threshold gate
+      // Not enough evidence → certainty 0, diagnosis_screen filters it out
+      // -----------------------------------------------------------------------
+      if (rawScore < dx.minScoreThreshold) {
         results.add({
           'name':        dx.name,
           'description': dx.description,
-          'certainty':   rawCertainty.clamp(0, 35),
+          'certainty':   0,
           'id':          dx.id,
-          'score':       dxScore,
+          'score':       rawScore,
           'mode':        'below_threshold',
         });
         continue;
       }
 
-      final range = dxMaxPossible - dx.minScoreThreshold;
-      int certainty = range <= 0
-          ? 100
-          : (((dxScore - dx.minScoreThreshold) / range) * 100).clamp(0, 100).round();
-
-      int penaltyPoints = 0;
-      for (final q in exam.questions) {
-        final selected = allAnswers[q.storesAs] ?? [];
-        for (final s in selected) {
-          final weight = q.weights[s] ?? 0;
-          if (weight == 0 && dx.keyFindings.isNotEmpty) {
-            final hasKeyFinding = q.weights.keys.any((k) => dx.keyFindings.contains(k));
-            if (hasKeyFinding) penaltyPoints += 8;
-          }
-        }
+      // -----------------------------------------------------------------------
+      // STEP 4 — Normalise to a certainty percentage
+      // Scale from minScoreThreshold (= 1%) to maxScore (= 95%)
+      // so that hitting the minimum threshold gives a visible but humble score,
+      // and a perfect score never reaches 100%.
+      // -----------------------------------------------------------------------
+      final range = dx.maxScore - dx.minScoreThreshold;
+      int certainty;
+      if (range <= 0) {
+        // maxScore == minScoreThreshold edge case → just met threshold
+        certainty = 50;
+      } else {
+        certainty = (((rawScore - dx.minScoreThreshold) / range) * 94 + 1)
+            .clamp(1, 95)
+            .round();
       }
-      certainty = (certainty - penaltyPoints.clamp(0, 40)).clamp(0, 95);
 
       results.add({
         'name':        dx.name,
         'description': dx.description,
         'certainty':   certainty,
         'id':          dx.id,
-        'score':       dxScore,
-        'mode':        dx.keyFindings.isNotEmpty ? 'key_findings' : 'total_score',
+        'score':       rawScore,
+        'mode':        'key_findings',
       });
     }
 
+    // Sort highest certainty first
     results.sort((a, b) => (b['certainty'] as int).compareTo(a['certainty'] as int));
     return results;
   }
